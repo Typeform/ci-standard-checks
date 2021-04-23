@@ -23,4 +23,3 @@ jobs:
         with:
           docker-username: ${{ secrets.GITLEAKS_DOCKER_USERNAME }}
           docker-password: ${{ secrets.GITLEAKS_DOCKER_PASSWORD }}
-          milliseconds: 1000
