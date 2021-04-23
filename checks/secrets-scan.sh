@@ -46,9 +46,11 @@ fi
 
 if [ -z "${GITHUB_BASE_REF}" ]; then
     # push event
+    echo "Using commit SHA ${GITHUB_SHA} for push event"
     commit_opts="--commit=${GITHUB_SHA}"
 else
     # pull_request event
+    echo "Using commit range ${GITHUB_BASE_REF}... for pull-request event"
     git --git-dir="$GITHUB_WORKSPACE/.git" log \
         --left-right --cherry-pick --pretty=format:"%H" \
         remotes/origin/$GITHUB_BASE_REF... > $commits_file

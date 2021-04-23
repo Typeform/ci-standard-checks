@@ -15,7 +15,7 @@ async function run(): Promise<void> {
       DOCKER_USERNAME: dockerUsername
     }
 
-    exec.exec('bash', [checkPath], {env})
+    await exec.exec('bash', [checkPath], {env})
   } catch (error) {
     core.setFailed(error.message)
   }
