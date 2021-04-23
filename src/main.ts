@@ -9,13 +9,13 @@ async function run(): Promise<void> {
 
     const checkPath = path.join(__dirname, '..', 'checks', 'secrets-scan.sh')
 
-    exec.exec('bash', [checkPath], {
-      env: {
-        PATH: process.env['PATH'] || '',
-        DOCKER_PASSWORD: dockerPassword,
-        DOCKER_USERNAME: dockerUsername
-      }
-    })
+    const env = {
+      ...process.env,
+      DOCKER_PASSWORD: dockerPassword,
+      DOCKER_USERNAME: dockerUsername
+    }
+
+    exec.exec('bash', [checkPath], {env})
   } catch (error) {
     core.setFailed(error.message)
   }

@@ -45,13 +45,8 @@ function run() {
             const dockerUsername = core.getInput('docker-username');
             const dockerPassword = core.getInput('docker-password');
             const checkPath = path.join(__dirname, '..', 'checks', 'secrets-scan.sh');
-            exec.exec('bash', [checkPath], {
-                env: {
-                    PATH: process.env['PATH'] || '',
-                    DOCKER_PASSWORD: dockerPassword,
-                    DOCKER_USERNAME: dockerUsername
-                }
-            });
+            const env = Object.assign(Object.assign({}, process.env), { DOCKER_PASSWORD: dockerPassword, DOCKER_USERNAME: dockerUsername });
+            exec.exec('bash', [checkPath], { env });
         }
         catch (error) {
             core.setFailed(error.message);
