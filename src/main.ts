@@ -1,23 +1,20 @@
-import * as path from 'path'
+import bashCheck from './checks/bash'
 import * as core from '@actions/core'
-import * as exec from '@actions/exec'
+
+const checks = [
+  bashCheck({
+    name: 'secret-scan',
+    inputs: ['dockerUsername', 'dockerPassword']
+  })
+]
 
 async function run(): Promise<void> {
-  try {
-    const dockerUsername: string = core.getInput('docker-username')
-    const dockerPassword: string = core.getInput('docker-password')
-
-    const checkPath = path.join(__dirname, '..', 'checks', 'secrets-scan.sh')
-
-    const env = {
-      ...process.env,
-      DOCKER_PASSWORD: dockerPassword,
-      DOCKER_USERNAME: dockerUsername
+  for (const check of checks) {
+    try {
+      await check()
+    } catch (error) {
+      core.setFailed(error.message)
     }
-
-    await exec.exec('bash', [checkPath], {env})
-  } catch (error) {
-    core.setFailed(error.message)
   }
 }
 
