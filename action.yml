@@ -2,12 +2,15 @@ name: 'CI Standard Checks'
 description: 'Runs Standard Checks for Typeform'
 author: 'Typeform'
 inputs:
-  docker-username:
+  githubToken:
     required: true
-    description: 'The docker username'
-  docker-password:
+    description: 'The github token to get PR info when checking for Jira Issue key'
+  dockerUsername:
     required: true
-    description: 'The docker password'
+    description: 'The docker username with access to Typeform gitleaks image'
+  dockerPassword:
+    required: true
+    description: 'The docker password with access to Typeform gitleaks image'
 runs:
   using: 'node12'
   main: 'dist/index.js'
