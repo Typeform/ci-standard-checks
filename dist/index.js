@@ -133,7 +133,7 @@ const bash_1 = __importDefault(__webpack_require__(888));
 const core = __importStar(__webpack_require__(186));
 const checks = [
     bash_1.default({
-        name: 'secret-scan',
+        name: 'secrets-scan',
         inputs: ['dockerUsername', 'dockerPassword']
     })
 ];

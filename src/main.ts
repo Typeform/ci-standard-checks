@@ -3,7 +3,7 @@ import * as core from '@actions/core'
 
 const checks = [
   bashCheck({
-    name: 'secret-scan',
+    name: 'secrets-scan',
     inputs: ['dockerUsername', 'dockerPassword']
   })
 ]
