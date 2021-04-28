@@ -19,7 +19,7 @@ test.skip('call jira linked on a PR', async () => {
   }
   mockCore.getInput.mockReturnValueOnce('<github-token-here>')
 
-  const result = await jiraLinked()
+  const result = await jiraLinked.run()
 
   expect(result).toBe(false)
 })

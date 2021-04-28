@@ -25,7 +25,7 @@ test('bash check calls script exec', () => {
     inputs: ['dockerUsername', 'dockerPassword']
   })
 
-  c()
+  c.run()
 
   expect(mockExec.exec.mock.calls.length).toBe(1)
   const call = mockExec.exec.mock.calls[0]

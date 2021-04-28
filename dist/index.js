@@ -44,16 +44,21 @@ const core = __importStar(__webpack_require__(2186));
 const exec = __importStar(__webpack_require__(1514));
 const getScriptsDir_1 = __importDefault(__webpack_require__(5582));
 function bashCheck({ name, inputs }) {
-    return () => __awaiter(this, void 0, void 0, function* () {
-        const envInputs = inputs.reduce((result, input) => {
-            result[input.toUpperCase()] = core.getInput(input);
-            return result;
-        }, {});
-        const env = Object.assign(Object.assign({}, process.env), envInputs);
-        return exec.exec('bash', [path.join(getScriptsDir_1.default(), name, 'run.sh')], {
-            env
-        });
-    });
+    return {
+        name,
+        run() {
+            return __awaiter(this, void 0, void 0, function* () {
+                const envInputs = inputs.reduce((result, input) => {
+                    result[input.toUpperCase()] = core.getInput(input);
+                    return result;
+                }, {});
+                const env = Object.assign(Object.assign({}, process.env), envInputs);
+                return exec.exec('bash', [path.join(getScriptsDir_1.default(), name, 'run.sh')], {
+                    env
+                });
+            });
+        }
+    };
 }
 exports.default = bashCheck;
 
@@ -96,36 +101,39 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__webpack_require__(2186));
 const github = __importStar(__webpack_require__(5438));
-function jiraLinked() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const githubToken = core.getInput('githubToken');
-        const octokit = github.getOctokit(githubToken);
-        const context = github.context;
-        if (context.eventName === 'pull_request') {
-            const pullPayload = context.payload;
-            const pr = yield octokit.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: pullPayload.pull_request.number
-            });
-            // return if PR comes from bot
-            core.info('Scanning PR Title and Branch Name for Jira Key Reference');
-            return hasJiraIssueKey(pr.data.title) || hasJiraIssueKey(pr.data.head.ref);
-        }
-        else if (context.eventName === 'push') {
-            const pushPayload = context.payload;
-            const errors = pushPayload.commits
-                .filter(c => !hasJiraIssueKey(c.message))
-                .map(c => `Commit ${c.id} is missing Jira Issue key`);
-            if (errors.length > 0) {
-                throw new Error(errors.join('\n'));
+const jiraLinked = {
+    name: 'jira-linked',
+    run: function run() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const githubToken = core.getInput('githubToken');
+            const octokit = github.getOctokit(githubToken);
+            const context = github.context;
+            if (context.eventName === 'pull_request') {
+                const pullPayload = context.payload;
+                const pr = yield octokit.pulls.get({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: pullPayload.pull_request.number
+                });
+                // return if PR comes from bot
+                core.info('Scanning PR Title and Branch Name for Jira Key Reference');
+                return hasJiraIssueKey(pr.data.title) || hasJiraIssueKey(pr.data.head.ref);
             }
+            else if (context.eventName === 'push') {
+                const pushPayload = context.payload;
+                const errors = pushPayload.commits
+                    .filter(c => !hasJiraIssueKey(c.message))
+                    .map(c => `Commit ${c.id} is missing Jira Issue key`);
+                if (errors.length > 0) {
+                    throw new Error(errors.join('\n'));
+                }
+                return true;
+            }
+            core.info('Jira linked will only run on "push" and "pull_request" events. Skipping...');
             return true;
-        }
-        core.info('Jira linked will only run on "push" and "pull_request" events. Skipping...');
-        return true;
-    });
-}
+        });
+    }
+};
 exports.default = jiraLinked;
 function hasJiraIssueKey(text) {
     var _a, _b;
@@ -219,8 +227,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const bash_1 = __importDefault(__webpack_require__(2888));
 const core = __importStar(__webpack_require__(2186));
+const bash_1 = __importDefault(__webpack_require__(2888));
 const jiraLinked_1 = __importDefault(__webpack_require__(9496));
 const checks = [
     bash_1.default({
@@ -232,12 +240,14 @@ const checks = [
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         for (const check of checks) {
+            core.startGroup(`check: ${check.name}`);
             try {
-                yield check();
+                yield check.run();
             }
             catch (error) {
                 core.setFailed(error.message);
             }
+            core.endGroup();
         }
     });
 }
