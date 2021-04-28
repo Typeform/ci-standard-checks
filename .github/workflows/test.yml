@@ -23,5 +23,5 @@ jobs:
           fetch-depth: 0
       - uses: ./
         with:
-          docker-username: ${{ secrets.GITLEAKS_DOCKER_USERNAME }}
-          docker-password: ${{ secrets.GITLEAKS_DOCKER_PASSWORD }}
+          dockerUsername: ${{ secrets.GITLEAKS_DOCKER_USERNAME }}
+          dockerPassword: ${{ secrets.GITLEAKS_DOCKER_PASSWORD }}

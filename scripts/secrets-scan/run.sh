@@ -11,13 +11,13 @@ then
 fi
 # Check if user is logged in to quay.io
 
-DOCKER_REGISTRY=quay.io
-docker login -u=${DOCKER_USERNAME} -p=${DOCKER_PASSWORD} ${DOCKER_REGISTRY}
-docker pull ${DOCKER_REGISTRY}/typeform/gitleaks-config
+DOCKERREGISTRY=quay.io
+docker login -u=${DOCKERUSERNAME} -p=${DOCKERPASSWORD} ${DOCKERREGISTRY}
+docker pull ${DOCKERREGISTRY}/typeform/gitleaks-config
 exit_code=$?
 
 if [ ! $exit_code -eq 0 ]; then
-    echo "Unable to pull gitleaks container image. Are you logged in ${DOCKER_REGISTRY}?"
+    echo "Unable to pull gitleaks container image. Are you logged in ${DOCKERREGISTRY}?"
     exit 1
 fi
 
@@ -31,7 +31,7 @@ mkdir -p $tmp_dir
 local_config=".gitleaks.toml"
 final_config="$tmp_dir/gitleaks_config.toml"
 commits_file="$tmp_dir/commit_list.txt"
-gitleaks_config_container="${DOCKER_REGISTRY}/typeform/gitleaks-config"
+gitleaks_config_container="${DOCKERREGISTRY}/typeform/gitleaks-config"
 gitleaks_container="zricethezav/gitleaks"
 gitleaks_version="v7.2.0"
 
