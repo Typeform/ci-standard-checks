@@ -19,18 +19,22 @@ const jiraLinked: Check = {
         pull_number: pullPayload.pull_request.number
       })
 
-      // return if PR comes from bot
       core.info('Scanning PR Title and Branch Name for Jira Key Reference')
+      core.info(`Title: ${pr.data.title}`)
+      core.info(`Branch: ${pr.data.head.ref}`)
+
+      // return if PR comes from bot
       return hasJiraIssueKey(pr.data.title) || hasJiraIssueKey(pr.data.head.ref)
     } else if (context.eventName === 'push') {
       const pushPayload = context.payload as WebhookEventMap['push']
-
       const errors = pushPayload.commits
         .filter(c => !hasJiraIssueKey(c.message))
         .map(c => `Commit ${c.id} is missing Jira Issue key`)
 
       if (errors.length > 0) {
         throw new Error(errors.join('\n'))
+      } else {
+        core.info('OK! All commits in push have a Jira Issue key')
       }
       return true
     }
