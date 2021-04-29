@@ -1,42 +1,17 @@
 import * as core from '@actions/core'
-import * as github from '@actions/github'
 import {WebhookEventMap} from '@octokit/webhooks-types'
+import {getGitHub, GitHub} from '../infrastructure/github'
 import Check from './check'
 
 const jiraLinked: Check = {
   name: 'jira-linked',
-  run: async function run(): Promise<boolean> {
-    const githubToken = core.getInput('githubToken')
+  async run(): Promise<boolean> {
+    const github = getGitHub()
 
-    const octokit = github.getOctokit(githubToken)
-    const context = github.context
-
-    if (context.eventName === 'pull_request') {
-      const pullPayload = context.payload as WebhookEventMap['pull_request']
-      const pr = await octokit.pulls.get({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        pull_number: pullPayload.pull_request.number
-      })
-
-      core.info('Scanning PR Title and Branch Name for Jira Key Reference')
-      core.info(`Title: ${pr.data.title}`)
-      core.info(`Branch: ${pr.data.head.ref}`)
-
-      // return if PR comes from bot
-      return hasJiraIssueKey(pr.data.title) || hasJiraIssueKey(pr.data.head.ref)
-    } else if (context.eventName === 'push') {
-      const pushPayload = context.payload as WebhookEventMap['push']
-      const errors = pushPayload.commits
-        .filter(c => !hasJiraIssueKey(c.message))
-        .map(c => `Commit ${c.id} is missing Jira Issue key`)
-
-      if (errors.length > 0) {
-        throw new Error(errors.join('\n'))
-      } else {
-        core.info('OK! All commits in push have a Jira Issue key')
-      }
-      return true
+    if (github.context.eventName === 'pull_request') {
+      return checkPullRequest(github)
+    } else if (github.context.eventName === 'push') {
+      return checkPush(github)
     }
 
     core.info(
@@ -45,8 +20,33 @@ const jiraLinked: Check = {
     return true
   }
 }
-
 export default jiraLinked
+
+async function checkPullRequest(github: GitHub) {
+  const pullPayload = github.context.payload as WebhookEventMap['pull_request']
+  const pr = await github.getPullRequest(pullPayload.pull_request.number)
+
+  core.info('Scanning PR Title and Branch Name for Jira Key Reference')
+  core.info(`Title: ${pr.data.title}`)
+  core.info(`Branch: ${pr.data.head.ref}`)
+
+  // return if PR comes from bot
+  return hasJiraIssueKey(pr.data.title) || hasJiraIssueKey(pr.data.head.ref)
+}
+
+async function checkPush(github: GitHub) {
+  const pushPayload = github.context.payload as WebhookEventMap['push']
+  const errors = pushPayload.commits
+    .filter(c => !hasJiraIssueKey(c.message))
+    .map(c => `Commit ${c.id} is missing Jira Issue key`)
+
+  if (errors.length > 0) {
+    throw new Error(errors.join('\n'))
+  } else {
+    core.info('OK! All commits in push have a Jira Issue key')
+  }
+  return true
+}
 
 function hasJiraIssueKey(text: string): boolean {
   if (!text) {
