@@ -1,5 +1,5 @@
 import {mocked} from 'ts-jest/utils'
-import jiraLinked, {hasJiraIssueKey} from './jiraLinked'
+import jiraLinked, {hasJiraIssueKey, JIRA_LINKED_BOT_USERS} from './jiraLinked'
 import {github, PullsGetResponse} from '../infrastructure/github'
 
 const mockGithub = mocked(github, true)
@@ -13,6 +13,9 @@ describe('Jira Linked check', () => {
         title: '',
         head: {
           ref: ''
+        },
+        user: {
+          login: ''
         }
       }
     }
@@ -42,9 +45,21 @@ describe('Jira Linked check', () => {
       await expect(jiraLinked.run()).resolves.toBeTruthy()
     })
 
-    it('throws error for PR without Jira Issue key', async () => {
+    it.each(JIRA_LINKED_BOT_USERS)(
+      'returns true for bot users [%s]',
+      async botUser => {
+        pullRequestResponse.data.title = 'No Jira isue here'
+        pullRequestResponse.data.head.ref = 'neither-here'
+        pullRequestResponse.data.user.login = botUser
+
+        await expect(jiraLinked.run()).resolves.toBeTruthy()
+      }
+    )
+
+    it('throws error for PR without Jira Issue key and non bot user', async () => {
       pullRequestResponse.data.title = 'No Jira isue here'
       pullRequestResponse.data.head.ref = 'neither-here'
+      pullRequestResponse.data.user.login = 'regular-user'
 
       await expect(jiraLinked.run()).rejects.toThrow()
     })
@@ -65,6 +80,35 @@ describe('Jira Linked check', () => {
       await expect(jiraLinked.run()).resolves.toBeTruthy()
     })
 
+    it.each(JIRA_LINKED_BOT_USERS)(
+      'returns true for commit with author name in bot users [%s]',
+      async botUser => {
+        mockGithub.context.payload.commits = [
+          {message: 'fix(JIRA-123): some fix commit'},
+          {message: 'feat(no-key): some feat commit', author: {name: botUser}},
+          {message: 'chore(JIRA-123): some chore commit'}
+        ]
+
+        await expect(jiraLinked.run()).resolves.toBeTruthy()
+      }
+    )
+
+    it.each(JIRA_LINKED_BOT_USERS)(
+      'returns true for commit with author login in bot users [%s]',
+      async botUser => {
+        mockGithub.context.payload.commits = [
+          {message: 'fix(JIRA-123): some fix commit'},
+          {
+            message: 'feat(no-key): some feat commit',
+            author: {username: botUser}
+          },
+          {message: 'chore(JIRA-123): some chore commit'}
+        ]
+
+        await expect(jiraLinked.run()).resolves.toBeTruthy()
+      }
+    )
+
     it('throws error when at least one commit does not have Jira Issue keys', async () => {
       mockGithub.context.payload.commits = [
         {message: 'fix(JIRA-123): some fix commit'},
@@ -78,8 +122,12 @@ describe('Jira Linked check', () => {
 })
 
 describe('hasJiraIssueKey', () => {
-  it('returns true with issue key', () => {
-    expect(hasJiraIssueKey('SETI-123')).toBeTruthy()
+  it.each([
+    'SETI-123',
+    'ABC-789',
+    'Some text including JIRA-123 in the middle'
+  ])('returns true with issue key', issueKey => {
+    expect(hasJiraIssueKey(issueKey)).toBeTruthy()
   })
 
   it('it returns false with text without issue key', () => {

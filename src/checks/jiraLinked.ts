@@ -3,6 +3,14 @@ import {WebhookEventMap} from '@octokit/webhooks-types'
 import {github} from '../infrastructure/github'
 import Check from './check'
 
+export const JIRA_LINKED_BOT_USERS = [
+  'Snyk bot',
+  'dependabot[bot]',
+  'dependabot-preview[bot]',
+  'tf-security',
+  'seti-tf'
+]
+
 const jiraLinked: Check = {
   name: 'jira-linked',
   async run(): Promise<boolean> {
@@ -24,11 +32,17 @@ async function checkPullRequest(): Promise<boolean> {
   const pullPayload = github.context.payload as WebhookEventMap['pull_request']
   const pr = await github.getPullRequest(pullPayload.pull_request.number)
 
+  const prUser = pr.data.user?.login || ''
+
+  if (isBot(prUser)) {
+    core.info(`PR is from bot user ${prUser}. Skipping check`)
+    return true
+  }
+
   core.info('Scanning PR Title and Branch Name for Jira Key Reference')
   core.info(`Title: ${pr.data.title}`)
   core.info(`Branch: ${pr.data.head.ref}`)
 
-  // return if PR comes from bot
   const isJiraLinked =
     hasJiraIssueKey(pr.data.title) || hasJiraIssueKey(pr.data.head.ref)
 
@@ -41,15 +55,24 @@ async function checkPullRequest(): Promise<boolean> {
 async function checkPush(): Promise<boolean> {
   const pushPayload = github.context.payload as WebhookEventMap['push']
   const errors = pushPayload.commits
-    .filter(c => !hasJiraIssueKey(c.message))
+    .filter(
+      c =>
+        !hasJiraIssueKey(c.message) &&
+        !isBot(c.author.name) &&
+        !isBot(c.author.username || '')
+    )
     .map(c => `Commit ${c.id} is missing Jira Issue key`)
 
   if (errors.length > 0) {
     throw new Error(errors.join('\n'))
-  } else {
-    core.info('OK! All commits in push have a Jira Issue key')
   }
+
+  core.info('OK! All commits in push have a Jira Issue key')
   return true
+}
+
+function isBot(user: string): boolean {
+  return JIRA_LINKED_BOT_USERS.includes(user)
 }
 
 export function hasJiraIssueKey(text: string): boolean {
@@ -57,7 +80,7 @@ export function hasJiraIssueKey(text: string): boolean {
     return false
   }
 
-  const JIRA_INVALID_ISSUE = '0' // JIRA issues begin with 1, but the Regex doesn't catch it
+  const jiraInvalidIssueNumberPrefix = '0' // JIRA issue numbers can't start with 0, but the Regex doesn't catch it
   // https://confluence.atlassian.com/stashkb/integrating-with-custom-jira-issue-key-313460921.html
   const jiraMatcher = /((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)/g
 
@@ -66,7 +89,7 @@ export function hasJiraIssueKey(text: string): boolean {
 
   const zeroedJiraKeys = Array(10)
     .fill(1)
-    .map((_, i) => `-${JIRA_INVALID_ISSUE.repeat(i + 1)}`)
+    .map((_, i) => `-${jiraInvalidIssueNumberPrefix.repeat(i + 1)}`)
 
   const noZeroKeyIssue =
     matchedText &&

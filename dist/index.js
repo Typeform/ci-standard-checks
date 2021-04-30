@@ -99,9 +99,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.hasJiraIssueKey = void 0;
+exports.hasJiraIssueKey = exports.JIRA_LINKED_BOT_USERS = void 0;
 const core = __importStar(__webpack_require__(2186));
 const github_1 = __webpack_require__(5679);
+exports.JIRA_LINKED_BOT_USERS = [
+    'Snyk bot',
+    'dependabot[bot]',
+    'dependabot-preview[bot]',
+    'tf-security',
+    'seti-tf'
+];
 const jiraLinked = {
     name: 'jira-linked',
     run() {
@@ -119,13 +126,18 @@ const jiraLinked = {
 };
 exports.default = jiraLinked;
 function checkPullRequest() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const pullPayload = github_1.github.context.payload;
         const pr = yield github_1.github.getPullRequest(pullPayload.pull_request.number);
+        const prUser = ((_a = pr.data.user) === null || _a === void 0 ? void 0 : _a.login) || '';
+        if (isBot(prUser)) {
+            core.info(`PR is from bot user ${prUser}. Skipping check`);
+            return true;
+        }
         core.info('Scanning PR Title and Branch Name for Jira Key Reference');
         core.info(`Title: ${pr.data.title}`);
         core.info(`Branch: ${pr.data.head.ref}`);
-        // return if PR comes from bot
         const isJiraLinked = hasJiraIssueKey(pr.data.title) || hasJiraIssueKey(pr.data.head.ref);
         if (!isJiraLinked)
             throw new Error('Jira Issue key not present in PR title or branch name!');
@@ -136,30 +148,33 @@ function checkPush() {
     return __awaiter(this, void 0, void 0, function* () {
         const pushPayload = github_1.github.context.payload;
         const errors = pushPayload.commits
-            .filter(c => !hasJiraIssueKey(c.message))
+            .filter(c => !hasJiraIssueKey(c.message) &&
+            !isBot(c.author.name) &&
+            !isBot(c.author.username || ''))
             .map(c => `Commit ${c.id} is missing Jira Issue key`);
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
-        else {
-            core.info('OK! All commits in push have a Jira Issue key');
-        }
+        core.info('OK! All commits in push have a Jira Issue key');
         return true;
     });
+}
+function isBot(user) {
+    return exports.JIRA_LINKED_BOT_USERS.includes(user);
 }
 function hasJiraIssueKey(text) {
     var _a, _b;
     if (!text) {
         return false;
     }
-    const JIRA_INVALID_ISSUE = '0'; // JIRA issues begin with 1, but the Regex doesn't catch it
+    const jiraInvalidIssueNumberPrefix = '0'; // JIRA issue numbers can't start with 0, but the Regex doesn't catch it
     // https://confluence.atlassian.com/stashkb/integrating-with-custom-jira-issue-key-313460921.html
     const jiraMatcher = /((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)/g;
     const matchedText = (_b = (_a = text.match(jiraMatcher)) === null || _a === void 0 ? void 0 : _a.shift()) !== null && _b !== void 0 ? _b : '';
     const isMatch = !!matchedText;
     const zeroedJiraKeys = Array(10)
         .fill(1)
-        .map((_, i) => `-${JIRA_INVALID_ISSUE.repeat(i + 1)}`);
+        .map((_, i) => `-${jiraInvalidIssueNumberPrefix.repeat(i + 1)}`);
     const noZeroKeyIssue = matchedText &&
         !zeroedJiraKeys.some(issueKey => matchedText.includes(issueKey));
     return !!isMatch && !!noZeroKeyIssue;
