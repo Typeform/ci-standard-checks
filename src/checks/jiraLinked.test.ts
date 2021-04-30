@@ -49,6 +49,32 @@ describe('Jira Linked check', () => {
       await expect(jiraLinked.run()).rejects.toThrow()
     })
   })
+
+  describe('push event', () => {
+    beforeEach(() => {
+      mockGithub.context.eventName = 'push'
+    })
+
+    it('returns true when all commits have Jira Issue keys', async () => {
+      mockGithub.context.payload.commits = [
+        {message: 'fix(JIRA-123): some fix commit'},
+        {message: 'feat(JIRA-123): some feat commit'},
+        {message: 'chore(JIRA-123): some chore commit'}
+      ]
+
+      await expect(jiraLinked.run()).resolves.toBeTruthy()
+    })
+
+    it('throws error when at least one commit does not have Jira Issue keys', async () => {
+      mockGithub.context.payload.commits = [
+        {message: 'fix(JIRA-123): some fix commit'},
+        {message: 'feat(no-key): some feat commit'},
+        {message: 'chore(JIRA-123): some chore commit'}
+      ]
+
+      await expect(jiraLinked.run()).rejects.toThrow()
+    })
+  })
 })
 
 describe('hasJiraIssueKey', () => {
