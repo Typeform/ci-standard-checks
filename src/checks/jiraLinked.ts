@@ -1,17 +1,15 @@
 import * as core from '@actions/core'
 import {WebhookEventMap} from '@octokit/webhooks-types'
-import {getGitHub, GitHub} from '../infrastructure/github'
+import {github} from '../infrastructure/github'
 import Check from './check'
 
 const jiraLinked: Check = {
   name: 'jira-linked',
   async run(): Promise<boolean> {
-    const github = getGitHub()
-
     if (github.context.eventName === 'pull_request') {
-      return checkPullRequest(github)
+      return checkPullRequest()
     } else if (github.context.eventName === 'push') {
-      return checkPush(github)
+      return checkPush()
     }
 
     core.info(
@@ -22,7 +20,7 @@ const jiraLinked: Check = {
 }
 export default jiraLinked
 
-async function checkPullRequest(github: GitHub) {
+async function checkPullRequest(): Promise<boolean> {
   const pullPayload = github.context.payload as WebhookEventMap['pull_request']
   const pr = await github.getPullRequest(pullPayload.pull_request.number)
 
@@ -31,10 +29,16 @@ async function checkPullRequest(github: GitHub) {
   core.info(`Branch: ${pr.data.head.ref}`)
 
   // return if PR comes from bot
-  return hasJiraIssueKey(pr.data.title) || hasJiraIssueKey(pr.data.head.ref)
+  const isJiraLinked =
+    hasJiraIssueKey(pr.data.title) || hasJiraIssueKey(pr.data.head.ref)
+
+  if (!isJiraLinked)
+    throw new Error('Jira Issue key not present in PR title or branch name!')
+
+  return true
 }
 
-async function checkPush(github: GitHub) {
+async function checkPush(): Promise<boolean> {
   const pushPayload = github.context.payload as WebhookEventMap['push']
   const errors = pushPayload.commits
     .filter(c => !hasJiraIssueKey(c.message))
@@ -48,7 +52,7 @@ async function checkPush(github: GitHub) {
   return true
 }
 
-function hasJiraIssueKey(text: string): boolean {
+export function hasJiraIssueKey(text: string): boolean {
   if (!text) {
     return false
   }

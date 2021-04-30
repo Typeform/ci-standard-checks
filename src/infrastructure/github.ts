@@ -1,19 +1,23 @@
 import * as core from '@actions/core'
-import * as github from '@actions/github'
+import * as actionsGithub from '@actions/github'
+import {Endpoints} from '@octokit/types'
 
 import {Context} from '@actions/github/lib/context'
 import {GitHub as ActionsGitHub} from '@actions/github/lib/utils'
 
+export type Octokit = InstanceType<typeof ActionsGitHub>
+export type PullsGetResponse = Endpoints['GET /repos/{owner}/{repo}/pulls/{pull_number}']['response']
+
 export class GitHub {
   context: Context
-  private octokit: InstanceType<typeof ActionsGitHub>
+  private octokit: Octokit
 
-  constructor(context: Context, octokit: InstanceType<typeof ActionsGitHub>) {
+  constructor(context: Context, octokit: Octokit) {
     this.context = context
     this.octokit = octokit
   }
 
-  async getPullRequest(pull_number: number) {
+  async getPullRequest(pull_number: number): Promise<PullsGetResponse> {
     return this.octokit.pulls.get({
       owner: this.context.repo.owner,
       repo: this.context.repo.repo,
@@ -22,9 +26,11 @@ export class GitHub {
   }
 }
 
-export function getGitHub() {
-  return new GitHub(
-    github.context,
-    github.getOctokit(core.getInput('githubToken'))
+function createGitHub(): GitHub {
+  const octokit: Octokit = actionsGithub.getOctokit(
+    core.getInput('githubToken')
   )
+  return new GitHub(github.context, octokit)
 }
+
+export const github: GitHub = createGitHub()

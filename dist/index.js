@@ -99,40 +99,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.hasJiraIssueKey = void 0;
 const core = __importStar(__webpack_require__(2186));
-const github = __importStar(__webpack_require__(5438));
+const github_1 = __webpack_require__(5679);
 const jiraLinked = {
     name: 'jira-linked',
-    run: function run() {
+    run() {
         return __awaiter(this, void 0, void 0, function* () {
-            const githubToken = core.getInput('githubToken');
-            const octokit = github.getOctokit(githubToken);
-            const context = github.context;
-            if (context.eventName === 'pull_request') {
-                const pullPayload = context.payload;
-                const pr = yield octokit.pulls.get({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    pull_number: pullPayload.pull_request.number
-                });
-                core.info('Scanning PR Title and Branch Name for Jira Key Reference');
-                core.info(`Title: ${pr.data.title}`);
-                core.info(`Branch: ${pr.data.head.ref}`);
-                // return if PR comes from bot
-                return hasJiraIssueKey(pr.data.title) || hasJiraIssueKey(pr.data.head.ref);
+            if (github_1.github.context.eventName === 'pull_request') {
+                return checkPullRequest();
             }
-            else if (context.eventName === 'push') {
-                const pushPayload = context.payload;
-                const errors = pushPayload.commits
-                    .filter(c => !hasJiraIssueKey(c.message))
-                    .map(c => `Commit ${c.id} is missing Jira Issue key`);
-                if (errors.length > 0) {
-                    throw new Error(errors.join('\n'));
-                }
-                else {
-                    core.info('OK! All commits in push have a Jira Issue key');
-                }
-                return true;
+            else if (github_1.github.context.eventName === 'push') {
+                return checkPush();
             }
             core.info('Jira linked will only run on "push" and "pull_request" events. Skipping...');
             return true;
@@ -140,6 +118,35 @@ const jiraLinked = {
     }
 };
 exports.default = jiraLinked;
+function checkPullRequest() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pullPayload = github_1.github.context.payload;
+        const pr = yield github_1.github.getPullRequest(pullPayload.pull_request.number);
+        core.info('Scanning PR Title and Branch Name for Jira Key Reference');
+        core.info(`Title: ${pr.data.title}`);
+        core.info(`Branch: ${pr.data.head.ref}`);
+        // return if PR comes from bot
+        const isJiraLinked = hasJiraIssueKey(pr.data.title) || hasJiraIssueKey(pr.data.head.ref);
+        if (!isJiraLinked)
+            throw new Error('Jira Issue key not present in PR title or branch name!');
+        return true;
+    });
+}
+function checkPush() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pushPayload = github_1.github.context.payload;
+        const errors = pushPayload.commits
+            .filter(c => !hasJiraIssueKey(c.message))
+            .map(c => `Commit ${c.id} is missing Jira Issue key`);
+        if (errors.length > 0) {
+            throw new Error(errors.join('\n'));
+        }
+        else {
+            core.info('OK! All commits in push have a Jira Issue key');
+        }
+        return true;
+    });
+}
 function hasJiraIssueKey(text) {
     var _a, _b;
     if (!text) {
@@ -157,6 +164,7 @@ function hasJiraIssueKey(text) {
         !zeroedJiraKeys.some(issueKey => matchedText.includes(issueKey));
     return !!isMatch && !!noZeroKeyIssue;
 }
+exports.hasJiraIssueKey = hasJiraIssueKey;
 
 
 /***/ }),
@@ -191,6 +199,68 @@ function getScriptsDir() {
     return path.join(__dirname, '..', 'scripts');
 }
 exports.default = getScriptsDir;
+
+
+/***/ }),
+
+/***/ 5679:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.github = exports.GitHub = void 0;
+const core = __importStar(__webpack_require__(2186));
+const actionsGithub = __importStar(__webpack_require__(5438));
+class GitHub {
+    constructor(context, octokit) {
+        this.context = context;
+        this.octokit = octokit;
+    }
+    getPullRequest(pull_number) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.octokit.pulls.get({
+                owner: this.context.repo.owner,
+                repo: this.context.repo.repo,
+                pull_number
+            });
+        });
+    }
+}
+exports.GitHub = GitHub;
+function createGitHub() {
+    const octokit = actionsGithub.getOctokit(core.getInput('githubToken'));
+    return new GitHub(exports.github.context, octokit);
+}
+exports.github = createGitHub();
 
 
 /***/ }),

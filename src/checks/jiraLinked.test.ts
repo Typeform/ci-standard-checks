@@ -1,25 +1,66 @@
 import {mocked} from 'ts-jest/utils'
-import * as core from '@actions/core'
-import * as github from '@actions/github'
+import jiraLinked, {hasJiraIssueKey} from './jiraLinked'
+import {github, PullsGetResponse} from '../infrastructure/github'
 
-import jiraLinked from '../../src/checks/jiraLinked'
-
-jest.mock('@actions/exec')
-jest.mock('@actions/core')
-
-const mockCore = mocked(core, true)
 const mockGithub = mocked(github, true)
 
-test.skip('call jira linked on a PR', async () => {
-  process.env['GITHUB_REPOSITORY'] = 'Typeform/ci-standard-checks'
+jest.mock('../infrastructure/github')
 
-  mockGithub.context.eventName = 'pull_request'
-  mockGithub.context.payload.pull_request = {
-    number: 5
-  }
-  mockCore.getInput.mockReturnValueOnce('<github-token-here>')
+describe('Jira Linked check', () => {
+  describe('pul_request event', () => {
+    const pullRequestResponse = {
+      data: {
+        title: '',
+        head: {
+          ref: ''
+        }
+      }
+    }
 
-  const result = await jiraLinked.run()
+    beforeEach(() => {
+      mockGithub.context.eventName = 'pull_request'
+      mockGithub.context.payload.pull_request = {
+        number: 5
+      }
 
-  expect(result).toBe(false)
+      mockGithub.getPullRequest.mockResolvedValue(
+        pullRequestResponse as PullsGetResponse
+      )
+    })
+
+    it('returns true for PR with Jira Issue key in title', async () => {
+      pullRequestResponse.data.title = 'JIRA-123: This title has a key'
+      pullRequestResponse.data.head.ref = 'no-issue-name-here'
+
+      await expect(jiraLinked.run()).resolves.toBeTruthy()
+    })
+
+    it('returns true for PR with Jira Issue key in branch name', async () => {
+      pullRequestResponse.data.title = 'No Jira issue here'
+      pullRequestResponse.data.head.ref = 'JIRA-123-there-is-an-issue-here'
+
+      await expect(jiraLinked.run()).resolves.toBeTruthy()
+    })
+
+    it('throws error for PR without Jira Issue key', async () => {
+      pullRequestResponse.data.title = 'No Jira isue here'
+      pullRequestResponse.data.head.ref = 'neither-here'
+
+      await expect(jiraLinked.run()).rejects.toThrow()
+    })
+  })
+})
+
+describe('hasJiraIssueKey', () => {
+  it('returns true with issue key', () => {
+    expect(hasJiraIssueKey('SETI-123')).toBeTruthy()
+  })
+
+  it('it returns false with text without issue key', () => {
+    expect(hasJiraIssueKey('No Jira issue here')).toBeFalsy()
+  })
+
+  it('it returns false with branch name without issue key', () => {
+    expect(hasJiraIssueKey('neither-here')).toBeFalsy()
+  })
 })
