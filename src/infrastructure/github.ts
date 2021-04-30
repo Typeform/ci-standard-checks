@@ -30,7 +30,7 @@ function createGitHub(): GitHub {
   const octokit: Octokit = actionsGithub.getOctokit(
     core.getInput('githubToken')
   )
-  return new GitHub(github.context, octokit)
+  return new GitHub(actionsGithub.context, octokit)
 }
 
 export const github: GitHub = createGitHub()

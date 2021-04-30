@@ -258,7 +258,7 @@ class GitHub {
 exports.GitHub = GitHub;
 function createGitHub() {
     const octokit = actionsGithub.getOctokit(core.getInput('githubToken'));
-    return new GitHub(exports.github.context, octokit);
+    return new GitHub(actionsGithub.context, octokit);
 }
 exports.github = createGitHub();
 
