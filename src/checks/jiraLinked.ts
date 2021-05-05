@@ -1,15 +1,10 @@
 import * as core from '@actions/core'
 import { WebhookEventMap } from '@octokit/webhooks-types'
-import { github } from '../infrastructure/github'
-import Check from './check'
 
-export const JIRA_LINKED_BOT_USERS = [
-  'Snyk bot',
-  'dependabot[bot]',
-  'dependabot-preview[bot]',
-  'tf-security',
-  'seti-tf',
-]
+import { github } from '../infrastructure/github'
+import { isBot } from '../triggeredByBot'
+
+import Check from './check'
 
 const jiraLinked: Check = {
   name: 'jira-linked',
@@ -69,10 +64,6 @@ async function checkPush(): Promise<boolean> {
 
   core.info('OK! All commits in push have a Jira Issue key')
   return true
-}
-
-function isBot(user: string): boolean {
-  return JIRA_LINKED_BOT_USERS.includes(user)
 }
 
 export function hasJiraIssueKey(text: string): boolean {

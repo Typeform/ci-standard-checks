@@ -1,8 +1,9 @@
 import * as core from '@actions/core'
 
+import Check from './checks/check'
 import bashCheck from './checks/bash'
 import jiraLinked from './checks/jiraLinked'
-import Check from './checks/check'
+import { triggeredByBot } from './triggeredByBot'
 
 const checks: Check[] = [
   bashCheck({
@@ -16,7 +17,11 @@ async function run(): Promise<void> {
   for (const check of checks) {
     core.startGroup(`check: ${check.name}`)
     try {
-      await check.run()
+      if (await triggeredByBot()) {
+        core.info('Action triggered by bot, skipping checks')
+      } else {
+        await check.run()
+      }
     } catch (error) {
       core.setFailed(error.message)
     }

@@ -54,10 +54,10 @@ function bashCheck({ name, inputs }) {
                 }, {});
                 const env = Object.assign(Object.assign({}, process.env), envInputs);
                 return exec.exec('bash', [path.join(getScriptsDir_1.default(), name, 'run.sh')], {
-                    env
+                    env,
                 });
             });
-        }
+        },
     };
 }
 exports.default = bashCheck;
@@ -99,16 +99,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.hasJiraIssueKey = exports.JIRA_LINKED_BOT_USERS = void 0;
+exports.hasJiraIssueKey = void 0;
 const core = __importStar(__webpack_require__(2186));
 const github_1 = __webpack_require__(5679);
-exports.JIRA_LINKED_BOT_USERS = [
-    'Snyk bot',
-    'dependabot[bot]',
-    'dependabot-preview[bot]',
-    'tf-security',
-    'seti-tf'
-];
+const triggeredByBot_1 = __webpack_require__(3850);
 const jiraLinked = {
     name: 'jira-linked',
     run() {
@@ -122,7 +116,7 @@ const jiraLinked = {
             core.info('Jira linked will only run on "push" and "pull_request" events. Skipping...');
             return true;
         });
-    }
+    },
 };
 exports.default = jiraLinked;
 function checkPullRequest() {
@@ -131,7 +125,7 @@ function checkPullRequest() {
         const pullPayload = github_1.github.context.payload;
         const pr = yield github_1.github.getPullRequest(pullPayload.pull_request.number);
         const prUser = ((_a = pr.data.user) === null || _a === void 0 ? void 0 : _a.login) || '';
-        if (isBot(prUser)) {
+        if (triggeredByBot_1.isBot(prUser)) {
             core.info(`PR is from bot user ${prUser}. Skipping check`);
             return true;
         }
@@ -148,19 +142,16 @@ function checkPush() {
     return __awaiter(this, void 0, void 0, function* () {
         const pushPayload = github_1.github.context.payload;
         const errors = pushPayload.commits
-            .filter(c => !hasJiraIssueKey(c.message) &&
-            !isBot(c.author.name) &&
-            !isBot(c.author.username || ''))
-            .map(c => `Commit ${c.id} is missing Jira Issue key`);
+            .filter((c) => !hasJiraIssueKey(c.message) &&
+            !triggeredByBot_1.isBot(c.author.name) &&
+            !triggeredByBot_1.isBot(c.author.username || ''))
+            .map((c) => `Commit ${c.id} is missing Jira Issue key`);
         if (errors.length > 0) {
             throw new Error(errors.join('\n'));
         }
         core.info('OK! All commits in push have a Jira Issue key');
         return true;
     });
-}
-function isBot(user) {
-    return exports.JIRA_LINKED_BOT_USERS.includes(user);
 }
 function hasJiraIssueKey(text) {
     var _a, _b;
@@ -176,7 +167,7 @@ function hasJiraIssueKey(text) {
         .fill(1)
         .map((_, i) => `-${jiraInvalidIssueNumberPrefix.repeat(i + 1)}`);
     const noZeroKeyIssue = matchedText &&
-        !zeroedJiraKeys.some(issueKey => matchedText.includes(issueKey));
+        !zeroedJiraKeys.some((issueKey) => matchedText.includes(issueKey));
     return !!isMatch && !!noZeroKeyIssue;
 }
 exports.hasJiraIssueKey = hasJiraIssueKey;
@@ -265,7 +256,7 @@ class GitHub {
             return this.octokit.pulls.get({
                 owner: this.context.repo.owner,
                 repo: this.context.repo.repo,
-                pull_number
+                pull_number,
             });
         });
     }
@@ -320,19 +311,25 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__webpack_require__(2186));
 const bash_1 = __importDefault(__webpack_require__(2888));
 const jiraLinked_1 = __importDefault(__webpack_require__(9496));
+const triggeredByBot_1 = __webpack_require__(3850);
 const checks = [
     bash_1.default({
         name: 'secrets-scan',
-        inputs: ['dockerUsername', 'dockerPassword']
+        inputs: ['dockerUsername', 'dockerPassword'],
     }),
-    jiraLinked_1.default
+    jiraLinked_1.default,
 ];
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         for (const check of checks) {
             core.startGroup(`check: ${check.name}`);
             try {
-                yield check.run();
+                if (yield triggeredByBot_1.triggeredByBot()) {
+                    core.info('Action triggered by bot, skipping checks');
+                }
+                else {
+                    yield check.run();
+                }
             }
             catch (error) {
                 core.setFailed(error.message);
@@ -342,6 +339,67 @@ function run() {
     });
 }
 run();
+
+
+/***/ }),
+
+/***/ 3850:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isBot = exports.triggeredByBot = exports.BOT_USERS = void 0;
+const github_1 = __webpack_require__(5679);
+exports.BOT_USERS = [
+    'Snyk bot',
+    'dependabot[bot]',
+    'dependabot-preview[bot]',
+    'tf-security',
+    'seti-tf',
+];
+function triggeredByBot() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (github_1.github.context.eventName === 'pull_request') {
+            return checkPullRequest();
+        }
+        else if (github_1.github.context.eventName === 'push') {
+            return checkPush();
+        }
+        return false;
+    });
+}
+exports.triggeredByBot = triggeredByBot;
+function checkPullRequest() {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        const pullPayload = github_1.github.context.payload;
+        const pr = yield github_1.github.getPullRequest(pullPayload.pull_request.number);
+        const prUser = ((_a = pr.data.user) === null || _a === void 0 ? void 0 : _a.login) || '';
+        return isBot(prUser);
+    });
+}
+function checkPush() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pushPayload = github_1.github.context.payload;
+        return pushPayload.commits
+            .map((c) => isBot(c.author.name) || isBot(c.author.username || ''))
+            .reduce((a, b) => a && b, true);
+    });
+}
+function isBot(user) {
+    return exports.BOT_USERS.includes(user);
+}
+exports.isBot = isBot;
 
 
 /***/ }),
