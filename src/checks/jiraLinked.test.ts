@@ -1,9 +1,9 @@
 import { mocked } from 'ts-jest/utils'
-import jiraLinked, {
-  hasJiraIssueKey,
-  JIRA_LINKED_BOT_USERS,
-} from './jiraLinked'
+
 import { github, PullsGetResponse } from '../infrastructure/github'
+import { BOT_USERS } from '../triggeredByBot'
+
+import jiraLinked, { hasJiraIssueKey } from './jiraLinked'
 
 const mockGithub = mocked(github, true)
 
@@ -48,16 +48,13 @@ describe('Jira Linked check', () => {
       await expect(jiraLinked.run()).resolves.toBeTruthy()
     })
 
-    it.each(JIRA_LINKED_BOT_USERS)(
-      'returns true for bot users [%s]',
-      async (botUser) => {
-        pullRequestResponse.data.title = 'No Jira isue here'
-        pullRequestResponse.data.head.ref = 'neither-here'
-        pullRequestResponse.data.user.login = botUser
+    it.each(BOT_USERS)('returns true for bot users [%s]', async (botUser) => {
+      pullRequestResponse.data.title = 'No Jira isue here'
+      pullRequestResponse.data.head.ref = 'neither-here'
+      pullRequestResponse.data.user.login = botUser
 
-        await expect(jiraLinked.run()).resolves.toBeTruthy()
-      }
-    )
+      await expect(jiraLinked.run()).resolves.toBeTruthy()
+    })
 
     it('throws error for PR without Jira Issue key and non bot user', async () => {
       pullRequestResponse.data.title = 'No Jira isue here'
@@ -83,7 +80,7 @@ describe('Jira Linked check', () => {
       await expect(jiraLinked.run()).resolves.toBeTruthy()
     })
 
-    it.each(JIRA_LINKED_BOT_USERS)(
+    it.each(BOT_USERS)(
       'returns true for commit with author name in bot users [%s]',
       async (botUser) => {
         mockGithub.context.payload.commits = [
@@ -99,7 +96,7 @@ describe('Jira Linked check', () => {
       }
     )
 
-    it.each(JIRA_LINKED_BOT_USERS)(
+    it.each(BOT_USERS)(
       'returns true for commit with author login in bot users [%s]',
       async (botUser) => {
         mockGithub.context.payload.commits = [

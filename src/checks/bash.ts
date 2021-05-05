@@ -1,8 +1,10 @@
 import * as path from 'path'
+
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 
 import getScriptsDir from '../getScriptsDir'
+
 import Check from './check'
 
 interface BashCheckParams {

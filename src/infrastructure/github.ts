@@ -1,7 +1,6 @@
 import * as core from '@actions/core'
 import * as actionsGithub from '@actions/github'
 import { Endpoints } from '@octokit/types'
-
 import { Context } from '@actions/github/lib/context'
 import { GitHub as ActionsGitHub } from '@actions/github/lib/utils'
 
