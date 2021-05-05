@@ -1,6 +1,9 @@
-import {mocked} from 'ts-jest/utils'
-import jiraLinked, {hasJiraIssueKey, JIRA_LINKED_BOT_USERS} from './jiraLinked'
-import {github, PullsGetResponse} from '../infrastructure/github'
+import { mocked } from 'ts-jest/utils'
+import jiraLinked, {
+  hasJiraIssueKey,
+  JIRA_LINKED_BOT_USERS,
+} from './jiraLinked'
+import { github, PullsGetResponse } from '../infrastructure/github'
 
 const mockGithub = mocked(github, true)
 
@@ -12,18 +15,18 @@ describe('Jira Linked check', () => {
       data: {
         title: '',
         head: {
-          ref: ''
+          ref: '',
         },
         user: {
-          login: ''
-        }
-      }
+          login: '',
+        },
+      },
     }
 
     beforeEach(() => {
       mockGithub.context.eventName = 'pull_request'
       mockGithub.context.payload.pull_request = {
-        number: 5
+        number: 5,
       }
 
       mockGithub.getPullRequest.mockResolvedValue(
@@ -47,7 +50,7 @@ describe('Jira Linked check', () => {
 
     it.each(JIRA_LINKED_BOT_USERS)(
       'returns true for bot users [%s]',
-      async botUser => {
+      async (botUser) => {
         pullRequestResponse.data.title = 'No Jira isue here'
         pullRequestResponse.data.head.ref = 'neither-here'
         pullRequestResponse.data.user.login = botUser
@@ -72,9 +75,9 @@ describe('Jira Linked check', () => {
 
     it('returns true when all commits have Jira Issue keys', async () => {
       mockGithub.context.payload.commits = [
-        {message: 'fix(JIRA-123): some fix commit'},
-        {message: 'feat(JIRA-123): some feat commit'},
-        {message: 'chore(JIRA-123): some chore commit'}
+        { message: 'fix(JIRA-123): some fix commit' },
+        { message: 'feat(JIRA-123): some feat commit' },
+        { message: 'chore(JIRA-123): some chore commit' },
       ]
 
       await expect(jiraLinked.run()).resolves.toBeTruthy()
@@ -82,11 +85,14 @@ describe('Jira Linked check', () => {
 
     it.each(JIRA_LINKED_BOT_USERS)(
       'returns true for commit with author name in bot users [%s]',
-      async botUser => {
+      async (botUser) => {
         mockGithub.context.payload.commits = [
-          {message: 'fix(JIRA-123): some fix commit'},
-          {message: 'feat(no-key): some feat commit', author: {name: botUser}},
-          {message: 'chore(JIRA-123): some chore commit'}
+          { message: 'fix(JIRA-123): some fix commit' },
+          {
+            message: 'feat(no-key): some feat commit',
+            author: { name: botUser },
+          },
+          { message: 'chore(JIRA-123): some chore commit' },
         ]
 
         await expect(jiraLinked.run()).resolves.toBeTruthy()
@@ -95,14 +101,14 @@ describe('Jira Linked check', () => {
 
     it.each(JIRA_LINKED_BOT_USERS)(
       'returns true for commit with author login in bot users [%s]',
-      async botUser => {
+      async (botUser) => {
         mockGithub.context.payload.commits = [
-          {message: 'fix(JIRA-123): some fix commit'},
+          { message: 'fix(JIRA-123): some fix commit' },
           {
             message: 'feat(no-key): some feat commit',
-            author: {username: botUser}
+            author: { username: botUser },
           },
-          {message: 'chore(JIRA-123): some chore commit'}
+          { message: 'chore(JIRA-123): some chore commit' },
         ]
 
         await expect(jiraLinked.run()).resolves.toBeTruthy()
@@ -111,9 +117,9 @@ describe('Jira Linked check', () => {
 
     it('throws error when at least one commit does not have Jira Issue keys', async () => {
       mockGithub.context.payload.commits = [
-        {message: 'fix(JIRA-123): some fix commit'},
-        {message: 'feat(no-key): some feat commit'},
-        {message: 'chore(JIRA-123): some chore commit'}
+        { message: 'fix(JIRA-123): some fix commit' },
+        { message: 'feat(no-key): some feat commit' },
+        { message: 'chore(JIRA-123): some chore commit' },
       ]
 
       await expect(jiraLinked.run()).rejects.toThrow()
@@ -125,8 +131,8 @@ describe('hasJiraIssueKey', () => {
   it.each([
     'SETI-123',
     'ABC-789',
-    'Some text including JIRA-123 in the middle'
-  ])('returns true with issue key', issueKey => {
+    'Some text including JIRA-123 in the middle',
+  ])('returns true with issue key', (issueKey) => {
     expect(hasJiraIssueKey(issueKey)).toBeTruthy()
   })
 

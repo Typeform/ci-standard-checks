@@ -1,4 +1,4 @@
-import {mocked} from 'ts-jest/utils'
+import { mocked } from 'ts-jest/utils'
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 
@@ -22,7 +22,7 @@ test('bash check calls script exec', () => {
 
   const c = bashCheck({
     name: 'secret-scan',
-    inputs: ['dockerUsername', 'dockerPassword']
+    inputs: ['dockerUsername', 'dockerPassword'],
   })
 
   c.run()

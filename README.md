@@ -11,16 +11,16 @@ easier time rolling out new checks to teams. Win-win!
 
 Right now, included checks are:
 
-* jira-linked: never forget a Jira Issue key in your commits or PRs
+- jira-linked: never forget a Jira Issue key in your commits or PRs
   again!
-* secret-scan: make sure you're never ever ever commiting a secret to
-  your repo. *Shhh, it's a secret* :shushing_face:
+- secret-scan: make sure you're never ever ever commiting a secret to
+  your repo. _Shhh, it's a secret_ :shushing_face:
 
 ## How to use it
 
 Add this action to your workflow by adding something like:
 
-``` yaml
+```yaml
 jobs:
   ci_standard_checks: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
@@ -33,14 +33,13 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN  }}
           dockerUsername: ${{ secrets.GITLEAKS_DOCKER_USERNAME }}
           dockerPassword: ${{ secrets.GITLEAKS_DOCKER_PASSWORD }}
-
 ```
 
 ## Adding new Checks
 
 We use GitHub actions toolkit. See the [toolkit
 documentation](https://github.com/actions/toolkit/blob/master/README.md#packages)
-for the various packages. 
+for the various packages.
 
 We have a wrapper for `@actions/github` in
 `.src/infrasctructure/github` that's meant to hold handy helper
@@ -57,9 +56,10 @@ Bash.
 ### Typescript Checks
 
 Typescript checks implement the `Check` interface. This is very simple
-interface which defines and object with two fields: 
-* `name` - the name of the check
-* `run` - an async function that runs the code of your check
+interface which defines and object with two fields:
+
+- `name` - the name of the check
+- `run` - an async function that runs the code of your check
 
 To make your check pass, return a value. To make it fail, throw an
 `Error`. The error message will be caught and printed to the action
@@ -70,10 +70,10 @@ output.
 Bash checks are created using the function `bashCheck` from
 `./src/checks/bash.ts` like, for example:
 
-``` typescript
+```typescript
 bashCheck({
   name: 'my-check-name',
-  inputs: ['myInput1', 'myInput2']
+  inputs: ['myInput1', 'myInput2'],
 })
 ```
 
@@ -81,7 +81,7 @@ This will create a check called `my-check-name`. To provide it some
 code to run, create a `my-check-name` folder inside the `./scripts`
 folder and add a `run.sh` script to it. This will be your main
 entrypoint, but feel free to add anything else that your script might
-need in that folder or break your script into more scripts. 
+need in that folder or break your script into more scripts.
 
 Inputs listed in the check definition will be read using
 `core.getInput` from `@actions/core` and passed down to your script
@@ -100,17 +100,20 @@ conventional commits.
 
 > First, you'll need to have a reasonably modern version of `node` handy. This won't work with versions older than 9, for instance.
 
-Install the dependencies  
+Install the dependencies
+
 ```bash
 $ yarn
 ```
 
 Build the typescript and package it for distribution
+
 ```bash
 $ yarn run build && yarn run package
 ```
 
-Run the tests :heavy_check_mark:  
+Run the tests :heavy_check_mark:
+
 ```bash
 $ yarn test
 
@@ -124,9 +127,10 @@ $ yarn test
 
 ### Publish to a distribution branch
 
-Actions are run from GitHub repos so we will checkin the packed dist folder. 
+Actions are run from GitHub repos so we will checkin the packed dist folder.
 
 Then run [ncc](https://github.com/zeit/ncc) and push the results:
+
 ```bash
 $ yarn run package
 $ git add dist
@@ -136,7 +140,7 @@ $ git push origin releases/v1
 
 Note: We recommend using the `--license` option for ncc, which will create a license file for all of the production node modules used in your project.
 
-Your action is now published! :rocket: 
+Your action is now published! :rocket:
 
 See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
 

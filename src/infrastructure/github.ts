@@ -1,9 +1,9 @@
 import * as core from '@actions/core'
 import * as actionsGithub from '@actions/github'
-import {Endpoints} from '@octokit/types'
+import { Endpoints } from '@octokit/types'
 
-import {Context} from '@actions/github/lib/context'
-import {GitHub as ActionsGitHub} from '@actions/github/lib/utils'
+import { Context } from '@actions/github/lib/context'
+import { GitHub as ActionsGitHub } from '@actions/github/lib/utils'
 
 export type Octokit = InstanceType<typeof ActionsGitHub>
 export type PullsGetResponse = Endpoints['GET /repos/{owner}/{repo}/pulls/{pull_number}']['response']
@@ -21,7 +21,7 @@ export class GitHub {
     return this.octokit.pulls.get({
       owner: this.context.repo.owner,
       repo: this.context.repo.repo,
-      pull_number
+      pull_number,
     })
   }
 }

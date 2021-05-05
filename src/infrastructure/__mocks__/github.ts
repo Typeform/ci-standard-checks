@@ -3,9 +3,9 @@ export const github = {
     eventName: '',
     payload: {
       pull_request: {
-        number: 5
-      }
-    }
+        number: 5,
+      },
+    },
   },
-  getPullRequest: jest.fn()
+  getPullRequest: jest.fn(),
 }

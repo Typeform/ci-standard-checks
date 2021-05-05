@@ -7,9 +7,9 @@ import Check from './checks/check'
 const checks: Check[] = [
   bashCheck({
     name: 'secrets-scan',
-    inputs: ['dockerUsername', 'dockerPassword']
+    inputs: ['dockerUsername', 'dockerPassword'],
   }),
-  jiraLinked
+  jiraLinked,
 ]
 
 async function run(): Promise<void> {

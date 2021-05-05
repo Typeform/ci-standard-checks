@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
-import {WebhookEventMap} from '@octokit/webhooks-types'
-import {github} from '../infrastructure/github'
+import { WebhookEventMap } from '@octokit/webhooks-types'
+import { github } from '../infrastructure/github'
 import Check from './check'
 
 export const JIRA_LINKED_BOT_USERS = [
@@ -8,7 +8,7 @@ export const JIRA_LINKED_BOT_USERS = [
   'dependabot[bot]',
   'dependabot-preview[bot]',
   'tf-security',
-  'seti-tf'
+  'seti-tf',
 ]
 
 const jiraLinked: Check = {
@@ -24,7 +24,7 @@ const jiraLinked: Check = {
       'Jira linked will only run on "push" and "pull_request" events. Skipping...'
     )
     return true
-  }
+  },
 }
 export default jiraLinked
 
@@ -56,12 +56,12 @@ async function checkPush(): Promise<boolean> {
   const pushPayload = github.context.payload as WebhookEventMap['push']
   const errors = pushPayload.commits
     .filter(
-      c =>
+      (c) =>
         !hasJiraIssueKey(c.message) &&
         !isBot(c.author.name) &&
         !isBot(c.author.username || '')
     )
-    .map(c => `Commit ${c.id} is missing Jira Issue key`)
+    .map((c) => `Commit ${c.id} is missing Jira Issue key`)
 
   if (errors.length > 0) {
     throw new Error(errors.join('\n'))
@@ -93,7 +93,7 @@ export function hasJiraIssueKey(text: string): boolean {
 
   const noZeroKeyIssue =
     matchedText &&
-    !zeroedJiraKeys.some(issueKey => matchedText.includes(issueKey))
+    !zeroedJiraKeys.some((issueKey) => matchedText.includes(issueKey))
 
   return !!isMatch && !!noZeroKeyIssue
 }
