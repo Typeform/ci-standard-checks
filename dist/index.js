@@ -324,7 +324,7 @@ function run() {
         for (const check of checks) {
             core.startGroup(`check: ${check.name}`);
             try {
-                if (triggeredByBot_1.triggeredByBot()) {
+                if (yield triggeredByBot_1.triggeredByBot()) {
                     core.info('Action triggered by bot, skipping checks');
                 }
                 else {

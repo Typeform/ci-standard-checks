@@ -17,7 +17,7 @@ async function run(): Promise<void> {
   for (const check of checks) {
     core.startGroup(`check: ${check.name}`)
     try {
-      if (triggeredByBot()) {
+      if (await triggeredByBot()) {
         core.info('Action triggered by bot, skipping checks')
       } else {
         await check.run()
