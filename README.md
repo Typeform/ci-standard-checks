@@ -18,22 +18,12 @@ Right now, included checks are:
 
 ## How to use it
 
-Add this action to your workflow by adding something like:
+Add this action to your workflow by using the [CI Standard
+Checks](https://github.com/Typeform/.github/blob/4ef297489a0a9795126e681a1211b650fa12e143/workflow-templates/ci-standard-checks.yml)
+workflow. You can also find it in the workflow templates for your
+repo, and it looks like this:
 
-```yaml
-jobs:
-  ci_standard_checks: # make sure the action works on a clean machine without building
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - uses: Typeform/ci-standard-checks@v1
-        with:
-          githubToken: ${{ secrets.GITHUB_TOKEN  }}
-          dockerUsername: ${{ secrets.GITLEAKS_DOCKER_USERNAME }}
-          dockerPassword: ${{ secrets.GITLEAKS_DOCKER_PASSWORD }}
-```
+![Workflow Template](./docs/workflow-template.png)
 
 ## Adding new Checks
 
@@ -92,9 +82,17 @@ your workflow file.
 
 ## Development Workflow and Releasing
 
-This is mostly from the action template we used and it's bound to
-change in the near future. We plan on automating releases based on
-conventional commits.
+We use
+[semantic-release](https://github.com/semantic-release/semantic-release)
+to release new versions of the action. 
+
+The basics:
+* `feat(JIRA-123)` commits will trigger a *minor* version release
+* `fix(JIRA-123)` commits will trigger a *patch* version release
+
+*Major* versions are triggered by `BREAKING CHANGE` of `feat!` commits
+that should be avoided in general. SETI will plan and coordinate the
+cut of new major releases when the time comes.
 
 ### Code in Main
 
@@ -116,46 +114,42 @@ Run the tests :heavy_check_mark:
 
 ```bash
 $ yarn test
-
- PASS  ./index.test.js
-  ✓ throws invalid number (3ms)
-  ✓ wait 500 ms (504ms)
-  ✓ test runs (95ms)
-
 ...
 ```
 
-### Publish to a distribution branch
+### Generate new distribution
 
 Actions are run from GitHub repos so we will checkin the packed dist folder.
 
-Then run [ncc](https://github.com/zeit/ncc) and push the results:
+Run the following and add the results to your commit:
 
 ```bash
-$ yarn run package
-$ git add dist
-$ git commit -a -m "prod dependencies"
-$ git push origin releases/v1
+$ yarn all
+$ git add .
+$ git commit -a -m "feat(JIRA-123): New fancy stuff"
+$ git push origin JIRA-123-my-branch
 ```
 
-Note: We recommend using the `--license` option for ncc, which will create a license file for all of the production node modules used in your project.
+and make a Pull Request. When it's reviewed and merged, Your action
+will be published and a new release will happen automatically! :rocket:
 
-Your action is now published! :rocket:
+## Validate
 
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
+There's a [test.yml](.github/workflows/test.yml) workflow in the repo
+referencing `./` to test the acion itself. This will be run to
+validate every PR. :white_check_mark:
 
-### Validate
+See the [actions
+tab](https://github.com/Typeform/ci-standard-checks/actions) for runs
+of this action! :rocket:
 
-You can now validate the action by referencing `./` in a workflow in your repo (see [test.yml](.github/workflows/test.yml))
+## Versioning
 
-```yaml
-uses: ./
-with:
-  milliseconds: 1000
-```
+We're following semver with semantic-release and also following the
+major version tag convention for GitHub Actions. The tag should be
+updated automatically as part of the release process.
 
-See the [actions tab](https://github.com/Typeform/ci-standard-checks/actions) for runs of this action! :rocket:
+See the [GitHub Action versioning
+documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
+for more info about the convention.
 
-### Usage:
-
-After testing you can [create a v1 tag](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md) to reference the stable and latest V1 action
