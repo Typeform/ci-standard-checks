@@ -37,8 +37,9 @@ methods for accesing data from GitHub that the action might care about
 (e.g. info about the PR that triggered the action). They also provide
 an extra abstraction layer that is easier to mock in your tests than
 pure Octokit. If you need more info from GitHub in your check,
-consider adding new helper methods to this class instead of using
-`@actions/github` directly.
+consider adding new [helper
+methods](./src/infrastructure/github.ts#L19) to this class instead of
+using `@actions/github` directly.
 
 Right now, we support two ways of adding new checks. Typescript and
 Bash.
