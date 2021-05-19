@@ -39,6 +39,8 @@ jobs:
       - name: Semantic Release
         id: semantic
         uses: codfish/semantic-release-action@4e9fa8ec064813465dfeccac8ae70f1348fb5dec
+        with:
+         repository_url: https://Typeform/ci-standard-checks.git
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Update major version tag
