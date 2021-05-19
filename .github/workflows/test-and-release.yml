@@ -46,6 +46,8 @@ jobs:
       - name: Update major version tag
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
+          git config --global user.email "seti@typeform.com"
+          git config --global user.name "SETI Bot"
           git tag -fa v1 -m "Update ${TAG} tag"
           git push origin ${TAG} --force
         env:
