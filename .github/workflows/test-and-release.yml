@@ -50,3 +50,4 @@ jobs:
           git push origin ${TAG} --force
         env:
           TAG: v$RELEASE_MAJOR
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
