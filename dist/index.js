@@ -141,8 +141,9 @@ function checkPush() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const pushPayload = github_1.github.context.payload;
-        const pullsAssociatedWithCommit = yield github_1.github.getPullRequestsAssociatedWithCommit();
-        if (pullsAssociatedWithCommit.data.length === 1 && ((_a = pullsAssociatedWithCommit.data[0]) === null || _a === void 0 ? void 0 : _a.state) === "merged") {
+        const prs = yield github_1.github.getPullRequestsAssociatedWithCommit();
+        if (prs.data.length === 1 &&
+            ((_a = prs.data[0]) === null || _a === void 0 ? void 0 : _a.state) === 'merged') {
             core.info('A merged Pull Request associated with commit has been found. Skipping...');
             return true;
         }
@@ -272,10 +273,8 @@ class GitHub {
                 repo: this.context.repo.repo,
                 commit_sha: this.context.sha,
                 mediaType: {
-                    previews: [
-                        'groot'
-                    ]
-                }
+                    previews: ['groot'],
+                },
             });
         });
     }

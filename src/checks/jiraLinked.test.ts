@@ -2,7 +2,7 @@ import { mocked } from 'ts-jest/utils'
 
 import {
   github,
-  PullsGetAssociatedWithCommitResponse,
+  GetPullRequestsAssociatedWithCommitResponse,
   PullsGetResponse,
 } from '../infrastructure/github'
 import { BOT_USERS } from '../triggeredByBot'
@@ -70,13 +70,13 @@ describe('Jira Linked check', () => {
   })
 
   describe('push event', () => {
-    const noPullsGetAssociatedWithCommitResponse = {
+    const noGetPullRequestsAssociatedWithCommitResponse = {
       data: {},
     }
     beforeEach(() => {
       mockGithub.context.eventName = 'push'
       mockGithub.getPullRequestsAssociatedWithCommit.mockResolvedValue(
-        noPullsGetAssociatedWithCommitResponse as PullsGetAssociatedWithCommitResponse
+        noGetPullRequestsAssociatedWithCommitResponse as GetPullRequestsAssociatedWithCommitResponse
       )
     })
 
@@ -137,11 +137,11 @@ describe('Jira Linked check', () => {
         { message: 'feat(no-key): some feat commit' },
         { message: 'chore(JIRA-123): some chore commit' },
       ]
-      const pullsGetAssociatedWithCommitResponse = {
+      const getPullRequestsAssociatedWithCommitResponse = {
         data: [{ state: 'merged' }],
       }
       mockGithub.getPullRequestsAssociatedWithCommit.mockResolvedValueOnce(
-        pullsGetAssociatedWithCommitResponse as PullsGetAssociatedWithCommitResponse
+        getPullRequestsAssociatedWithCommitResponse as GetPullRequestsAssociatedWithCommitResponse
       )
 
       await expect(jiraLinked.run()).resolves.toBeTruthy()
@@ -156,7 +156,7 @@ describe('Jira Linked check', () => {
         data: [{ state: 'open' }],
       }
       mockGithub.getPullRequestsAssociatedWithCommit.mockResolvedValueOnce(
-        pullsGetAssociatedWithCommitResponse as PullsGetAssociatedWithCommitResponse
+        pullsGetAssociatedWithCommitResponse as GetPullRequestsAssociatedWithCommitResponse
       )
 
       await expect(jiraLinked.run()).rejects.toThrow()
