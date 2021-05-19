@@ -138,8 +138,14 @@ function checkPullRequest() {
     });
 }
 function checkPush() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const pushPayload = github_1.github.context.payload;
+        const pullsAssociatedWithCommit = yield github_1.github.getPullRequestsAssociatedWithCommit();
+        if (pullsAssociatedWithCommit.data.length === 1 && ((_a = pullsAssociatedWithCommit.data[0]) === null || _a === void 0 ? void 0 : _a.state) === "merged") {
+            core.info('A merged Pull Request associated with commit has been found. Skipping...');
+            return true;
+        }
         const errors = pushPayload.commits
             .filter((c) => !hasJiraIssueKey(c.message) &&
             !triggeredByBot_1.isBot(c.author.name) &&
@@ -256,6 +262,20 @@ class GitHub {
                 owner: this.context.repo.owner,
                 repo: this.context.repo.repo,
                 pull_number,
+            });
+        });
+    }
+    getPullRequestsAssociatedWithCommit() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.octokit.repos.listPullRequestsAssociatedWithCommit({
+                owner: this.context.repo.owner,
+                repo: this.context.repo.repo,
+                commit_sha: this.context.sha,
+                mediaType: {
+                    previews: [
+                        'groot'
+                    ]
+                }
             });
         });
     }
