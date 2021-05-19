@@ -22,7 +22,7 @@ async function checkPullRequest(): Promise<boolean> {
   const pullPayload = github.context.payload as WebhookEventMap['pull_request']
   const pr = await github.getPullRequest(pullPayload.pull_request.number)
 
-  const prUser = pr.data.user?.login || ''
+  const prUser = pr.user?.login || ''
 
   return isBot(prUser)
 }

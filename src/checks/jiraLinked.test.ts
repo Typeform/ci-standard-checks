@@ -16,14 +16,12 @@ jest.mock('../infrastructure/github')
 describe('Jira Linked check', () => {
   describe('pull_request event', () => {
     const pullRequestResponse = {
-      data: {
-        title: '',
-        head: {
-          ref: '',
-        },
-        user: {
-          login: '',
-        },
+      title: '',
+      head: {
+        ref: '',
+      },
+      user: {
+        login: '',
       },
     }
 
@@ -39,40 +37,39 @@ describe('Jira Linked check', () => {
     })
 
     it('returns true for PR with Jira Issue key in title', async () => {
-      pullRequestResponse.data.title = 'JIRA-123: This title has a key'
-      pullRequestResponse.data.head.ref = 'no-issue-name-here'
+      pullRequestResponse.title = 'JIRA-123: This title has a key'
+      pullRequestResponse.head.ref = 'no-issue-name-here'
 
       await expect(jiraLinked.run()).resolves.toBeTruthy()
     })
 
     it('returns true for PR with Jira Issue key in branch name', async () => {
-      pullRequestResponse.data.title = 'No Jira issue here'
-      pullRequestResponse.data.head.ref = 'JIRA-123-there-is-an-issue-here'
+      pullRequestResponse.title = 'No Jira issue here'
+      pullRequestResponse.head.ref = 'JIRA-123-there-is-an-issue-here'
 
       await expect(jiraLinked.run()).resolves.toBeTruthy()
     })
 
     it.each(BOT_USERS)('returns true for bot users [%s]', async (botUser) => {
-      pullRequestResponse.data.title = 'No Jira isue here'
-      pullRequestResponse.data.head.ref = 'neither-here'
-      pullRequestResponse.data.user.login = botUser
+      pullRequestResponse.title = 'No Jira isue here'
+      pullRequestResponse.head.ref = 'neither-here'
+      pullRequestResponse.user.login = botUser
 
       await expect(jiraLinked.run()).resolves.toBeTruthy()
     })
 
     it('throws error for PR without Jira Issue key and non bot user', async () => {
-      pullRequestResponse.data.title = 'No Jira isue here'
-      pullRequestResponse.data.head.ref = 'neither-here'
-      pullRequestResponse.data.user.login = 'regular-user'
+      pullRequestResponse.title = 'No Jira isue here'
+      pullRequestResponse.head.ref = 'neither-here'
+      pullRequestResponse.user.login = 'regular-user'
 
       await expect(jiraLinked.run()).rejects.toThrow()
     })
   })
 
   describe('push event', () => {
-    const noGetPullRequestsAssociatedWithCommitResponse = {
-      data: {},
-    }
+    const noGetPullRequestsAssociatedWithCommitResponse = {}
+
     beforeEach(() => {
       mockGithub.context.eventName = 'push'
       mockGithub.getPullRequestsAssociatedWithCommit.mockResolvedValue(
@@ -137,9 +134,7 @@ describe('Jira Linked check', () => {
         { message: 'feat(no-key): some feat commit' },
         { message: 'chore(JIRA-123): some chore commit' },
       ]
-      const getPullRequestsAssociatedWithCommitResponse = {
-        data: [{ state: 'merged' }],
-      }
+      const getPullRequestsAssociatedWithCommitResponse = [{ state: 'merged' }]
       mockGithub.getPullRequestsAssociatedWithCommit.mockResolvedValueOnce(
         getPullRequestsAssociatedWithCommitResponse as GetPullRequestsAssociatedWithCommitResponse
       )
@@ -152,9 +147,8 @@ describe('Jira Linked check', () => {
         { message: 'feat(no-key): some feat commit' },
         { message: 'chore(JIRA-123): some chore commit' },
       ]
-      const pullsGetAssociatedWithCommitResponse = {
-        data: [{ state: 'open' }],
-      }
+      const pullsGetAssociatedWithCommitResponse = [{ state: 'open' }]
+
       mockGithub.getPullRequestsAssociatedWithCommit.mockResolvedValueOnce(
         pullsGetAssociatedWithCommitResponse as GetPullRequestsAssociatedWithCommitResponse
       )
