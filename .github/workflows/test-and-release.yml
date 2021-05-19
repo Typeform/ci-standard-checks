@@ -34,6 +34,8 @@ jobs:
     needs: [build, test]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Semantic Release
         id: semantic
         uses: codfish/semantic-release-action@4e9fa8ec064813465dfeccac8ae70f1348fb5dec
