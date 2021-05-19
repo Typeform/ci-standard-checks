@@ -2,7 +2,7 @@ import { mocked } from 'ts-jest/utils'
 
 import {
   github,
-  GetPullRequestsAssociatedWithCommitResponse,
+  PullRequestsAssociatedWithCommitResponse,
   PullsGetResponse,
 } from '../infrastructure/github'
 import { BOT_USERS } from '../triggeredByBot'
@@ -68,12 +68,12 @@ describe('Jira Linked check', () => {
   })
 
   describe('push event', () => {
-    const noGetPullRequestsAssociatedWithCommitResponse = {}
+    const noPullRequestsAssociatedWithCommitResponse = {}
 
     beforeEach(() => {
       mockGithub.context.eventName = 'push'
       mockGithub.getPullRequestsAssociatedWithCommit.mockResolvedValue(
-        noGetPullRequestsAssociatedWithCommitResponse as GetPullRequestsAssociatedWithCommitResponse
+        noPullRequestsAssociatedWithCommitResponse as PullRequestsAssociatedWithCommitResponse
       )
     })
 
@@ -134,9 +134,9 @@ describe('Jira Linked check', () => {
         { message: 'feat(no-key): some feat commit' },
         { message: 'chore(JIRA-123): some chore commit' },
       ]
-      const getPullRequestsAssociatedWithCommitResponse = [{ state: 'merged' }]
+      const pullRequestsAssociatedWithCommitResponse = [{ state: 'merged' }]
       mockGithub.getPullRequestsAssociatedWithCommit.mockResolvedValueOnce(
-        getPullRequestsAssociatedWithCommitResponse as GetPullRequestsAssociatedWithCommitResponse
+        pullRequestsAssociatedWithCommitResponse as PullRequestsAssociatedWithCommitResponse
       )
 
       await expect(jiraLinked.run()).resolves.toBeTruthy()
@@ -147,10 +147,9 @@ describe('Jira Linked check', () => {
         { message: 'feat(no-key): some feat commit' },
         { message: 'chore(JIRA-123): some chore commit' },
       ]
-      const pullsGetAssociatedWithCommitResponse = [{ state: 'open' }]
-
+      const pullRequestsAssociatedWithCommitResponse = [{ state: 'open' }]
       mockGithub.getPullRequestsAssociatedWithCommit.mockResolvedValueOnce(
-        pullsGetAssociatedWithCommitResponse as GetPullRequestsAssociatedWithCommitResponse
+        pullRequestsAssociatedWithCommitResponse as PullRequestsAssociatedWithCommitResponse
       )
 
       await expect(jiraLinked.run()).rejects.toThrow()

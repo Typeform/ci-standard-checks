@@ -7,7 +7,7 @@ import { GitHub as ActionsGitHub } from '@actions/github/lib/utils'
 export type Octokit = InstanceType<typeof ActionsGitHub>
 export type PullsGetResponse =
   Endpoints['GET /repos/{owner}/{repo}/pulls/{pull_number}']['response']['data']
-export type GetPullRequestsAssociatedWithCommitResponse =
+export type PullRequestsAssociatedWithCommitResponse =
   Endpoints['GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls']['response']['data']
 
 export class GitHub {
@@ -28,7 +28,7 @@ export class GitHub {
     return response.data
   }
 
-  async getPullRequestsAssociatedWithCommit(): Promise<GetPullRequestsAssociatedWithCommitResponse> {
+  async getPullRequestsAssociatedWithCommit(): Promise<PullRequestsAssociatedWithCommitResponse> {
     const response =
       await this.octokit.repos.listPullRequestsAssociatedWithCommit({
         owner: this.context.repo.owner,
