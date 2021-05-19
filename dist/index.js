@@ -123,23 +123,29 @@ function checkPullRequest() {
     return __awaiter(this, void 0, void 0, function* () {
         const pullPayload = github_1.github.context.payload;
         const pr = yield github_1.github.getPullRequest(pullPayload.pull_request.number);
-        const prUser = ((_a = pr.data.user) === null || _a === void 0 ? void 0 : _a.login) || '';
+        const prUser = ((_a = pr.user) === null || _a === void 0 ? void 0 : _a.login) || '';
         if (triggeredByBot_1.isBot(prUser)) {
             core.info(`PR is from bot user ${prUser}. Skipping check`);
             return true;
         }
         core.info('Scanning PR Title and Branch Name for Jira Key Reference');
-        core.info(`Title: ${pr.data.title}`);
-        core.info(`Branch: ${pr.data.head.ref}`);
-        const isJiraLinked = hasJiraIssueKey(pr.data.title) || hasJiraIssueKey(pr.data.head.ref);
+        core.info(`Title: ${pr.title}`);
+        core.info(`Branch: ${pr.head.ref}`);
+        const isJiraLinked = hasJiraIssueKey(pr.title) || hasJiraIssueKey(pr.head.ref);
         if (!isJiraLinked)
             throw new Error('Jira Issue key not present in PR title or branch name!');
         return true;
     });
 }
 function checkPush() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const pushPayload = github_1.github.context.payload;
+        const prs = yield github_1.github.getPullRequestsAssociatedWithCommit();
+        if (prs.length === 1 && ((_a = prs[0]) === null || _a === void 0 ? void 0 : _a.state) === 'merged') {
+            core.info('A merged Pull Request associated with commit has been found. Skipping...');
+            return true;
+        }
         const errors = pushPayload.commits
             .filter((c) => !hasJiraIssueKey(c.message) &&
             !triggeredByBot_1.isBot(c.author.name) &&
@@ -252,11 +258,25 @@ class GitHub {
     }
     getPullRequest(pull_number) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.octokit.pulls.get({
+            const response = yield this.octokit.pulls.get({
                 owner: this.context.repo.owner,
                 repo: this.context.repo.repo,
                 pull_number,
             });
+            return response.data;
+        });
+    }
+    getPullRequestsAssociatedWithCommit() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = yield this.octokit.repos.listPullRequestsAssociatedWithCommit({
+                owner: this.context.repo.owner,
+                repo: this.context.repo.repo,
+                commit_sha: this.context.sha,
+                mediaType: {
+                    previews: ['groot'],
+                },
+            });
+            return response.data;
         });
     }
 }
@@ -383,7 +403,7 @@ function checkPullRequest() {
     return __awaiter(this, void 0, void 0, function* () {
         const pullPayload = github_1.github.context.payload;
         const pr = yield github_1.github.getPullRequest(pullPayload.pull_request.number);
-        const prUser = ((_a = pr.data.user) === null || _a === void 0 ? void 0 : _a.login) || '';
+        const prUser = ((_a = pr.user) === null || _a === void 0 ? void 0 : _a.login) || '';
         return isBot(prUser);
     });
 }

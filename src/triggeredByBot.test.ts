@@ -9,14 +9,12 @@ jest.mock('./infrastructure/github')
 describe('triggeredByBot', () => {
   describe('pul_request event', () => {
     const pullRequestResponse = {
-      data: {
-        title: '',
-        head: {
-          ref: '',
-        },
-        user: {
-          login: '',
-        },
+      title: '',
+      head: {
+        ref: '',
+      },
+      user: {
+        login: '',
       },
     }
 
@@ -32,7 +30,7 @@ describe('triggeredByBot', () => {
     })
 
     it.each(BOT_USERS)('returns true for bot users [%s]', async (botUser) => {
-      pullRequestResponse.data.user.login = botUser
+      pullRequestResponse.user.login = botUser
 
       await expect(triggeredByBot()).resolves.toBeTruthy()
     })

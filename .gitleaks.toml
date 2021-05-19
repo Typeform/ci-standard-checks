@@ -1,2 +1,3 @@
 [allowlist]
   files = ["README.md"]
+  regexes = ['''ullRequestsAssociatedWithCommit''']

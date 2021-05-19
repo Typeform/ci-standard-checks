@@ -8,4 +8,5 @@ export const github = {
     },
   },
   getPullRequest: jest.fn(),
+  getPullRequestsAssociatedWithCommit: jest.fn(),
 }

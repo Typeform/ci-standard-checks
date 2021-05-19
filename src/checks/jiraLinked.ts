@@ -27,7 +27,7 @@ async function checkPullRequest(): Promise<boolean> {
   const pullPayload = github.context.payload as WebhookEventMap['pull_request']
   const pr = await github.getPullRequest(pullPayload.pull_request.number)
 
-  const prUser = pr.data.user?.login || ''
+  const prUser = pr.user?.login || ''
 
   if (isBot(prUser)) {
     core.info(`PR is from bot user ${prUser}. Skipping check`)
@@ -35,11 +35,10 @@ async function checkPullRequest(): Promise<boolean> {
   }
 
   core.info('Scanning PR Title and Branch Name for Jira Key Reference')
-  core.info(`Title: ${pr.data.title}`)
-  core.info(`Branch: ${pr.data.head.ref}`)
+  core.info(`Title: ${pr.title}`)
+  core.info(`Branch: ${pr.head.ref}`)
 
-  const isJiraLinked =
-    hasJiraIssueKey(pr.data.title) || hasJiraIssueKey(pr.data.head.ref)
+  const isJiraLinked = hasJiraIssueKey(pr.title) || hasJiraIssueKey(pr.head.ref)
 
   if (!isJiraLinked)
     throw new Error('Jira Issue key not present in PR title or branch name!')
@@ -49,6 +48,13 @@ async function checkPullRequest(): Promise<boolean> {
 
 async function checkPush(): Promise<boolean> {
   const pushPayload = github.context.payload as WebhookEventMap['push']
+  const prs = await github.getPullRequestsAssociatedWithCommit()
+  if (prs.length === 1 && prs[0]?.state === 'merged') {
+    core.info(
+      'A merged Pull Request associated with commit has been found. Skipping...'
+    )
+    return true
+  }
   const errors = pushPayload.commits
     .filter(
       (c) =>
