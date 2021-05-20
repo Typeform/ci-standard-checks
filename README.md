@@ -144,11 +144,13 @@ See the [actions
 tab](https://github.com/Typeform/ci-standard-checks/actions) for runs
 of this action! :rocket:
 
-## Versioning
+## Versioning & Releasing
 
 We're following semver with semantic-release and also following the
-major version tag convention for GitHub Actions. The tag should be
-updated automatically as part of the release process.
+major version tag convention for GitHub Actions. The `beta` tag should be
+updated automatically as part of the beta release process.
+
+To release to the major version, you can manually trigger the `release` workflow from the actions section of this repo.
 
 See the [GitHub Action versioning
 documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
