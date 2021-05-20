@@ -1,4 +1,4 @@
-name: 'test-and-release'
+name: 'test-and-release-beta'
 on: # rebuild any PRs and main branch changes
   pull_request:
   push:
@@ -30,7 +30,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN  }}
           dockerUsername: ${{ secrets.GITLEAKS_DOCKER_USERNAME }}
           dockerPassword: ${{ secrets.GITLEAKS_DOCKER_PASSWORD }}
-  release:
+  release: # this releases in beta
     needs: [build, test]
     runs-on: ubuntu-latest
     steps:
@@ -48,8 +48,8 @@ jobs:
         run: |
           git config --global user.email "seti@typeform.com"
           git config --global user.name "SETI Bot"
-          git tag -fa v1 -m "Update v${TAG} tag"
-          git push origin v${TAG} --force
+          git tag -fa v1 -m "Update v${TAG}-beta tag"
+          git push origin v${TAG}-beta --force
         env:
           TAG: ${{ steps.semantic.outputs.release-major }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
