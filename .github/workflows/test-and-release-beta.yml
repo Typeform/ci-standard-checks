@@ -1,4 +1,4 @@
-name: 'test-and-release'
+name: 'test-and-release-beta'
 on: # rebuild any PRs and main branch changes
   pull_request:
   push:
@@ -30,7 +30,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN  }}
           dockerUsername: ${{ secrets.GITLEAKS_DOCKER_USERNAME }}
           dockerPassword: ${{ secrets.GITLEAKS_DOCKER_PASSWORD }}
-  release:
+  release: # this releases in beta
     needs: [build, test]
     runs-on: ubuntu-latest
     steps:
