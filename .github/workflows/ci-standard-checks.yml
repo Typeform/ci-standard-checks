@@ -2,12 +2,11 @@ name: CI Standard Checks
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     types: [opened, edited, synchronize, reopened]
     branches:
-      - main 
-  
+      - master
 
 jobs:
   ci-standard-checks:
@@ -20,7 +19,7 @@ jobs:
           fetch-depth: 0
 
       - name: CI Standard Checks
-        uses: Typeform/ci-standard-checks@v1-beta
+        uses: Typeform/ci-standard-checks@v1
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           dockerUsername: ${{ secrets.GITLEAKS_DOCKER_USERNAME }}
