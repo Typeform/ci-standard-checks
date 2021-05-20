@@ -134,14 +134,45 @@ describe('Jira Linked check', () => {
         { message: 'feat(no-key): some feat commit' },
         { message: 'chore(JIRA-123): some chore commit' },
       ]
-      const pullRequestsAssociatedWithCommitResponse = [{ state: 'merged' }]
+      const pullRequestsAssociatedWithCommitResponse = [
+        { state: 'closed', merged_at: '2021-05-20T10:00:10Z' },
+      ]
       mockGithub.getPullRequestsAssociatedWithCommit.mockResolvedValueOnce(
         pullRequestsAssociatedWithCommitResponse as PullRequestsAssociatedWithCommitResponse
       )
 
       await expect(jiraLinked.run()).resolves.toBeTruthy()
     })
-    it('returns false if the commit is associated with a non-merged PR and does not have Jira Issue keys', async () => {
+    it('returns false if the commit is associated with a closed PR which was not merged that does not have Jira Issue keys', async () => {
+      mockGithub.context.payload.commits = [
+        { message: 'fix(JIRA-123): some fix commit' },
+        { message: 'feat(no-key): some feat commit' },
+        { message: 'chore(JIRA-123): some chore commit' },
+      ]
+      const pullRequestsAssociatedWithCommitResponse = [{ state: 'closed' }]
+      mockGithub.getPullRequestsAssociatedWithCommit.mockResolvedValueOnce(
+        pullRequestsAssociatedWithCommitResponse as PullRequestsAssociatedWithCommitResponse
+      )
+
+      await expect(jiraLinked.run()).rejects.toThrow()
+    })
+
+    it('returns false if the commit is associated with a closed PR which has an empty merged date that does not have Jira Issue keys', async () => {
+      mockGithub.context.payload.commits = [
+        { message: 'fix(JIRA-123): some fix commit' },
+        { message: 'feat(no-key): some feat commit' },
+        { message: 'chore(JIRA-123): some chore commit' },
+      ]
+      const pullRequestsAssociatedWithCommitResponse = [
+        { state: 'closed', merged_at: '' },
+      ]
+      mockGithub.getPullRequestsAssociatedWithCommit.mockResolvedValueOnce(
+        pullRequestsAssociatedWithCommitResponse as PullRequestsAssociatedWithCommitResponse
+      )
+
+      await expect(jiraLinked.run()).rejects.toThrow()
+    })
+    it('returns false if the commit is associated with a non-merged PR that does not have Jira Issue keys', async () => {
       mockGithub.context.payload.commits = [
         { message: 'fix(JIRA-123): some fix commit' },
         { message: 'feat(no-key): some feat commit' },
