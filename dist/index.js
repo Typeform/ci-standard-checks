@@ -138,11 +138,11 @@ function checkPullRequest() {
     });
 }
 function checkPush() {
-    var _a;
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         const pushPayload = github_1.github.context.payload;
         const prs = yield github_1.github.getPullRequestsAssociatedWithCommit();
-        if (prs.length === 1 && ((_a = prs[0]) === null || _a === void 0 ? void 0 : _a.state) === 'merged') {
+        if (prs.length === 1 && ((_a = prs[0]) === null || _a === void 0 ? void 0 : _a.state) === 'closed' && ((_b = prs[0]) === null || _b === void 0 ? void 0 : _b.merged_at)) {
             core.info('A merged Pull Request associated with commit has been found. Skipping...');
             return true;
         }

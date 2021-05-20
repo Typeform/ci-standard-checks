@@ -49,7 +49,7 @@ async function checkPullRequest(): Promise<boolean> {
 async function checkPush(): Promise<boolean> {
   const pushPayload = github.context.payload as WebhookEventMap['push']
   const prs = await github.getPullRequestsAssociatedWithCommit()
-  if (prs.length === 1 && prs[0]?.state === 'merged') {
+  if (prs.length === 1 && prs[0]?.state === 'closed' && prs[0]?.merged_at) {
     core.info(
       'A merged Pull Request associated with commit has been found. Skipping...'
     )
