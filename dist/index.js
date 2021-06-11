@@ -334,7 +334,7 @@ const triggeredByBot_1 = __nccwpck_require__(3850);
 const checks = [
     bash_1.default({
         name: 'secrets-scan',
-        inputs: ['dockerUsername', 'dockerPassword'],
+        inputs: ['githubToken', 'dockerUsername', 'dockerPassword'],
     }),
     jiraLinked_1.default,
 ];

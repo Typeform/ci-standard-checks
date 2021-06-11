@@ -50,10 +50,12 @@ if [ -z "${GITHUB_BASE_REF}" ]; then
     commit_opts="--commit=${GITHUB_SHA}"
 else
     # pull_request event
-    echo "Using commit range ${GITHUB_BASE_REF}... for pull-request event"
-    git --git-dir="$GITHUB_WORKSPACE/.git" log \
-        --left-right --cherry-pick --pretty=format:"%H" \
-        remotes/origin/$GITHUB_BASE_REF... > $commits_file
+    pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+    PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/commits"
+    echo "Retrieving PR#$pull_number commits info from ${PR_URL}"
+    curl -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/commit_list.json
+    cat $tmp_dir/commit_list.json | jq 'map(.sha)' | jq '.[]' | sed -r 's/"//g' > $commits_file
+    echo "$(cat $commits_file | wc -l | sed -r 's/ //g') commits found in PR#$pull_number"
 
     commit_opts="--commits-file=${commits_file}"
 fi
