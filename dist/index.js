@@ -461,19 +461,19 @@ function run() {
             return;
         }
         for (const check of checks) {
-            core.startGroup(`check: ${check.name}`);
             try {
                 if (conditions_1.checkSkipped(check)) {
                     core.info(`Check '${check.name}' skipped in the workflow`);
                 }
                 else {
+                    core.startGroup(`check: ${check.name}`);
                     yield check.run();
+                    core.endGroup();
                 }
             }
             catch (error) {
                 core.setFailed(error.message);
             }
-            core.endGroup();
         }
     });
 }

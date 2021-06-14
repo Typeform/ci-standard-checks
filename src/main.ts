@@ -20,17 +20,17 @@ async function run(): Promise<void> {
   }
 
   for (const check of checks) {
-    core.startGroup(`check: ${check.name}`)
     try {
       if (checkSkipped(check)) {
         core.info(`Check '${check.name}' skipped in the workflow`)
       } else {
+        core.startGroup(`check: ${check.name}`)
         await check.run()
+        core.endGroup()
       }
     } catch (error) {
       core.setFailed(error.message)
     }
-    core.endGroup()
   }
 }
 

@@ -13,7 +13,7 @@ easier time rolling out new checks to teams. Win-win!
 
 - *jira-linked*: never forget a Jira Issue key in your commits or PRs
   again!
-- *secret-scan*: make sure you're never ever ever commiting a secret to
+- *secrets-scan*: make sure you're never ever ever commiting a secret to
   your repo. _Shhh, it's a secret_ :shushing_face:
 
 ## How to use it
