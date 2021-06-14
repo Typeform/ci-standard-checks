@@ -9,11 +9,11 @@ Typeform organisation in a single central place, so that teams have an
 easier time adopting them in their CI and platform teams have an
 easier time rolling out new checks to teams. Win-win!
 
-Right now, included checks are:
+## Included Checks
 
-- jira-linked: never forget a Jira Issue key in your commits or PRs
+- *jira-linked*: never forget a Jira Issue key in your commits or PRs
   again!
-- secret-scan: make sure you're never ever ever commiting a secret to
+- *secret-scan*: make sure you're never ever ever commiting a secret to
   your repo. _Shhh, it's a secret_ :shushing_face:
 
 ## How to use it
@@ -24,6 +24,23 @@ workflow. You can also find it in the workflow templates for your
 repo, and it looks like this:
 
 ![Workflow Template](./docs/workflow-template.png)
+
+### Skipping Checks
+
+It might be that some of the checks don't make sense for your
+particular case. In that case, you can provide `skipChecks` as an
+input with the names of the checks you want to skip separated by
+commas:
+
+``` yaml
+...
+with:
+    skipChecks: 'jira-linked,secret-scan'
+...
+```
+
+Refer to the [list of checks](#included-checks) for the proper names
+to use.
 
 ## Adding new Checks
 
