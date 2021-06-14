@@ -1,10 +1,12 @@
 import { mocked } from 'ts-jest/utils'
-import { github, PullsGetResponse } from './infrastructure/github'
+
+import { github, PullsGetResponse } from '../infrastructure/github'
+
 import { BOT_USERS, triggeredByBot } from './triggeredByBot'
 
 const mockGithub = mocked(github, true)
 
-jest.mock('./infrastructure/github')
+jest.mock('../infrastructure/github')
 
 describe('triggeredByBot', () => {
   describe('pul_request event', () => {

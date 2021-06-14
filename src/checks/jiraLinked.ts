@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import { WebhookEventMap } from '@octokit/webhooks-types'
 
 import { github } from '../infrastructure/github'
-import { isBot } from '../triggeredByBot'
+import { isBot } from '../conditions/triggeredByBot'
 
 import Check from './check'
 

@@ -5,7 +5,7 @@ import {
   PullRequestsAssociatedWithCommitResponse,
   PullsGetResponse,
 } from '../infrastructure/github'
-import { BOT_USERS } from '../triggeredByBot'
+import { BOT_USERS } from '../conditions/triggeredByBot'
 
 import jiraLinked, { hasJiraIssueKey } from './jiraLinked'
 
