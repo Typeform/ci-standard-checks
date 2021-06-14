@@ -1,5 +1,6 @@
 import { WebhookEventMap } from '@octokit/webhooks-types'
-import { github } from './infrastructure/github'
+
+import { github } from '../infrastructure/github'
 
 export const BOT_USERS = [
   'Snyk bot',
