@@ -210,7 +210,7 @@ exports.checkSkipped = void 0;
 const core = __importStar(__webpack_require__(2186));
 function checkSkipped(check) {
     const skippedChecks = core
-        .getInput('skippedChecks')
+        .getInput('skipChecks')
         .split(',')
         .map((s) => s.trim());
     return skippedChecks.includes(check.name);
@@ -456,13 +456,14 @@ const checks = [
 ];
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        if (yield conditions_1.triggeredByBot()) {
+            core.info('Action triggered by bot, skipping all checks');
+            return;
+        }
         for (const check of checks) {
             core.startGroup(`check: ${check.name}`);
             try {
-                if (yield conditions_1.triggeredByBot()) {
-                    core.info('Action triggered by bot, skipping all checks');
-                }
-                else if (conditions_1.checkSkipped(check)) {
+                if (conditions_1.checkSkipped(check)) {
                     core.info(`Check '${check.name}' skipped in the workflow`);
                 }
                 else {

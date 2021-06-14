@@ -14,12 +14,15 @@ const checks: Check[] = [
 ]
 
 async function run(): Promise<void> {
+  if (await triggeredByBot()) {
+    core.info('Action triggered by bot, skipping all checks')
+    return
+  }
+
   for (const check of checks) {
     core.startGroup(`check: ${check.name}`)
     try {
-      if (await triggeredByBot()) {
-        core.info('Action triggered by bot, skipping all checks')
-      } else if (checkSkipped(check)) {
+      if (checkSkipped(check)) {
         core.info(`Check '${check.name}' skipped in the workflow`)
       } else {
         await check.run()
