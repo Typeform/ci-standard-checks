@@ -20,7 +20,7 @@ export class GitHub {
   }
 
   async getPullRequest(pull_number: number): Promise<PullsGetResponse> {
-    const response = await this.octokit.pulls.get({
+    const response = await this.octokit.rest.pulls.get({
       owner: this.context.repo.owner,
       repo: this.context.repo.repo,
       pull_number,
@@ -30,7 +30,7 @@ export class GitHub {
 
   async getPullRequestsAssociatedWithCommit(): Promise<PullRequestsAssociatedWithCommitResponse> {
     const response =
-      await this.octokit.repos.listPullRequestsAssociatedWithCommit({
+      await this.octokit.rest.repos.listPullRequestsAssociatedWithCommit({
         owner: this.context.repo.owner,
         repo: this.context.repo.repo,
         commit_sha: this.context.sha,
