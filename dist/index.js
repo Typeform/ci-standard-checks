@@ -101,7 +101,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.hasJiraIssueKey = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github_1 = __nccwpck_require__(5679);
-const triggeredByBot_1 = __nccwpck_require__(3850);
+const triggeredByBot_1 = __nccwpck_require__(6754);
 const jiraLinked = {
     name: 'jira-linked',
     run() {
@@ -176,6 +176,121 @@ function hasJiraIssueKey(text) {
     return !!isMatch && !!noZeroKeyIssue;
 }
 exports.hasJiraIssueKey = hasJiraIssueKey;
+
+
+/***/ }),
+
+/***/ 9741:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.checkSkipped = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+function checkSkipped(check) {
+    const skippedChecks = core
+        .getInput('skipChecks')
+        .split(',')
+        .map((s) => s.trim());
+    return skippedChecks.includes(check.name);
+}
+exports.checkSkipped = checkSkipped;
+
+
+/***/ }),
+
+/***/ 383:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.checkSkipped = exports.triggeredByBot = void 0;
+const triggeredByBot_1 = __nccwpck_require__(6754);
+Object.defineProperty(exports, "triggeredByBot", ({ enumerable: true, get: function () { return triggeredByBot_1.triggeredByBot; } }));
+const checkSkipped_1 = __nccwpck_require__(9741);
+Object.defineProperty(exports, "checkSkipped", ({ enumerable: true, get: function () { return checkSkipped_1.checkSkipped; } }));
+
+
+/***/ }),
+
+/***/ 6754:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isBot = exports.triggeredByBot = exports.BOT_USERS = void 0;
+const github_1 = __nccwpck_require__(5679);
+exports.BOT_USERS = [
+    'Snyk bot',
+    'dependabot[bot]',
+    'dependabot-preview[bot]',
+    'tf-security',
+    'seti-tf',
+];
+function triggeredByBot() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (github_1.github.context.eventName === 'pull_request') {
+            return checkPullRequest();
+        }
+        else if (github_1.github.context.eventName === 'push') {
+            return checkPush();
+        }
+        return false;
+    });
+}
+exports.triggeredByBot = triggeredByBot;
+function checkPullRequest() {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        const pullPayload = github_1.github.context.payload;
+        const pr = yield github_1.github.getPullRequest(pullPayload.pull_request.number);
+        const prUser = ((_a = pr.user) === null || _a === void 0 ? void 0 : _a.login) || '';
+        return isBot(prUser);
+    });
+}
+function checkPush() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pushPayload = github_1.github.context.payload;
+        return pushPayload.commits
+            .map((c) => isBot(c.author.name) || isBot(c.author.username || ''))
+            .reduce((a, b) => a && b, true);
+    });
+}
+function isBot(user) {
+    return exports.BOT_USERS.includes(user);
+}
+exports.isBot = isBot;
 
 
 /***/ }),
@@ -258,7 +373,7 @@ class GitHub {
     }
     getPullRequest(pull_number) {
         return __awaiter(this, void 0, void 0, function* () {
-            const response = yield this.octokit.pulls.get({
+            const response = yield this.octokit.rest.pulls.get({
                 owner: this.context.repo.owner,
                 repo: this.context.repo.repo,
                 pull_number,
@@ -268,7 +383,7 @@ class GitHub {
     }
     getPullRequestsAssociatedWithCommit() {
         return __awaiter(this, void 0, void 0, function* () {
-            const response = yield this.octokit.repos.listPullRequestsAssociatedWithCommit({
+            const response = yield this.octokit.rest.repos.listPullRequestsAssociatedWithCommit({
                 owner: this.context.repo.owner,
                 repo: this.context.repo.repo,
                 commit_sha: this.context.sha,
@@ -330,7 +445,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const bash_1 = __importDefault(__nccwpck_require__(2888));
 const jiraLinked_1 = __importDefault(__nccwpck_require__(9496));
-const triggeredByBot_1 = __nccwpck_require__(3850);
+const conditions_1 = __nccwpck_require__(383);
 const checks = [
     bash_1.default({
         name: 'secrets-scan',
@@ -340,85 +455,28 @@ const checks = [
 ];
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        if (yield conditions_1.triggeredByBot()) {
+            core.info('Action triggered by bot, skipping all checks');
+            return;
+        }
         for (const check of checks) {
-            core.startGroup(`check: ${check.name}`);
             try {
-                if (yield triggeredByBot_1.triggeredByBot()) {
-                    core.info('Action triggered by bot, skipping checks');
+                if (conditions_1.checkSkipped(check)) {
+                    core.info(`Check '${check.name}' skipped in the workflow`);
                 }
                 else {
+                    core.startGroup(`check: ${check.name}`);
                     yield check.run();
+                    core.endGroup();
                 }
             }
             catch (error) {
                 core.setFailed(error.message);
             }
-            core.endGroup();
         }
     });
 }
 run();
-
-
-/***/ }),
-
-/***/ 3850:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isBot = exports.triggeredByBot = exports.BOT_USERS = void 0;
-const github_1 = __nccwpck_require__(5679);
-exports.BOT_USERS = [
-    'Snyk bot',
-    'dependabot[bot]',
-    'dependabot-preview[bot]',
-    'tf-security',
-    'seti-tf',
-];
-function triggeredByBot() {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (github_1.github.context.eventName === 'pull_request') {
-            return checkPullRequest();
-        }
-        else if (github_1.github.context.eventName === 'push') {
-            return checkPush();
-        }
-        return false;
-    });
-}
-exports.triggeredByBot = triggeredByBot;
-function checkPullRequest() {
-    var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        const pullPayload = github_1.github.context.payload;
-        const pr = yield github_1.github.getPullRequest(pullPayload.pull_request.number);
-        const prUser = ((_a = pr.user) === null || _a === void 0 ? void 0 : _a.login) || '';
-        return isBot(prUser);
-    });
-}
-function checkPush() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const pushPayload = github_1.github.context.payload;
-        return pushPayload.commits
-            .map((c) => isBot(c.author.name) || isBot(c.author.username || ''))
-            .reduce((a, b) => a && b, true);
-    });
-}
-function isBot(user) {
-    return exports.BOT_USERS.includes(user);
-}
-exports.isBot = isBot;
 
 
 /***/ }),

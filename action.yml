@@ -2,6 +2,10 @@ name: 'CI Standard Checks'
 description: 'Runs Standard Checks for Typeform'
 author: 'Typeform'
 inputs:
+  skipChecks:
+    required: true
+    default: ''
+    description: 'Checks to be skipped'
   githubToken:
     required: true
     description: 'The github token to get PR info when checking for Jira Issue key'
