@@ -373,7 +373,7 @@ class GitHub {
     }
     getPullRequest(pull_number) {
         return __awaiter(this, void 0, void 0, function* () {
-            const response = yield this.octokit.pulls.get({
+            const response = yield this.octokit.rest.pulls.get({
                 owner: this.context.repo.owner,
                 repo: this.context.repo.repo,
                 pull_number,
@@ -383,7 +383,7 @@ class GitHub {
     }
     getPullRequestsAssociatedWithCommit() {
         return __awaiter(this, void 0, void 0, function* () {
-            const response = yield this.octokit.repos.listPullRequestsAssociatedWithCommit({
+            const response = yield this.octokit.rest.repos.listPullRequestsAssociatedWithCommit({
                 owner: this.context.repo.owner,
                 repo: this.context.repo.repo,
                 commit_sha: this.context.sha,
@@ -1629,6 +1629,7 @@ class Context {
      * Hydrate the context from the environment
      */
     constructor() {
+        var _a, _b, _c;
         this.payload = {};
         if (process.env.GITHUB_EVENT_PATH) {
             if (fs_1.existsSync(process.env.GITHUB_EVENT_PATH)) {
@@ -1648,6 +1649,9 @@ class Context {
         this.job = process.env.GITHUB_JOB;
         this.runNumber = parseInt(process.env.GITHUB_RUN_NUMBER, 10);
         this.runId = parseInt(process.env.GITHUB_RUN_ID, 10);
+        this.apiUrl = (_a = process.env.GITHUB_API_URL) !== null && _a !== void 0 ? _a : `https://api.github.com`;
+        this.serverUrl = (_b = process.env.GITHUB_SERVER_URL) !== null && _b !== void 0 ? _b : `https://github.com`;
+        this.graphqlUrl = (_c = process.env.GITHUB_GRAPHQL_URL) !== null && _c !== void 0 ? _c : `https://api.github.com/graphql`;
     }
     get issue() {
         const payload = this.payload;
@@ -1692,7 +1696,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -1735,7 +1739,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -1785,7 +1789,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -3071,8 +3075,9 @@ function _objectWithoutProperties(source, excluded) {
   return target;
 }
 
-const VERSION = "3.4.0";
+const VERSION = "3.5.1";
 
+const _excluded = ["authStrategy"];
 class Octokit {
   constructor(options = {}) {
     const hook = new beforeAfterHook.Collection();
@@ -3134,7 +3139,7 @@ class Octokit {
       const {
         authStrategy
       } = options,
-            otherOptions = _objectWithoutProperties(options, ["authStrategy"]);
+            otherOptions = _objectWithoutProperties(options, _excluded);
 
       const auth = authStrategy(Object.assign({
         request: this.request,
@@ -3212,7 +3217,7 @@ exports.Octokit = Octokit;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var isPlainObject = __nccwpck_require__(558);
+var isPlainObject = __nccwpck_require__(3287);
 var universalUserAgent = __nccwpck_require__(5030);
 
 function lowercaseKeys(object) {
@@ -3602,52 +3607,6 @@ exports.endpoint = endpoint;
 
 /***/ }),
 
-/***/ 558:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
-
-function isPlainObject(o) {
-  var ctor,prot;
-
-  if (isObject(o) === false) return false;
-
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
-
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
-
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  }
-
-  // Most likely a plain Object
-  return true;
-}
-
-exports.isPlainObject = isPlainObject;
-
-
-/***/ }),
-
 /***/ 8467:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -3656,7 +3615,7 @@ exports.isPlainObject = isPlainObject;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var request = __nccwpck_require__(6234);
+var request = __nccwpck_require__(3758);
 var universalUserAgent = __nccwpck_require__(5030);
 
 const VERSION = "4.6.1";
@@ -3772,6 +3731,164 @@ exports.withCustomRequest = withCustomRequest;
 
 /***/ }),
 
+/***/ 3758:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+
+var endpoint = __nccwpck_require__(9440);
+var universalUserAgent = __nccwpck_require__(5030);
+var isPlainObject = __nccwpck_require__(3287);
+var nodeFetch = _interopDefault(__nccwpck_require__(467));
+var requestError = __nccwpck_require__(537);
+
+const VERSION = "5.4.15";
+
+function getBufferResponse(response) {
+  return response.arrayBuffer();
+}
+
+function fetchWrapper(requestOptions) {
+  if (isPlainObject.isPlainObject(requestOptions.body) || Array.isArray(requestOptions.body)) {
+    requestOptions.body = JSON.stringify(requestOptions.body);
+  }
+
+  let headers = {};
+  let status;
+  let url;
+  const fetch = requestOptions.request && requestOptions.request.fetch || nodeFetch;
+  return fetch(requestOptions.url, Object.assign({
+    method: requestOptions.method,
+    body: requestOptions.body,
+    headers: requestOptions.headers,
+    redirect: requestOptions.redirect
+  }, // `requestOptions.request.agent` type is incompatible
+  // see https://github.com/octokit/types.ts/pull/264
+  requestOptions.request)).then(response => {
+    url = response.url;
+    status = response.status;
+
+    for (const keyAndValue of response.headers) {
+      headers[keyAndValue[0]] = keyAndValue[1];
+    }
+
+    if (status === 204 || status === 205) {
+      return;
+    } // GitHub API returns 200 for HEAD requests
+
+
+    if (requestOptions.method === "HEAD") {
+      if (status < 400) {
+        return;
+      }
+
+      throw new requestError.RequestError(response.statusText, status, {
+        headers,
+        request: requestOptions
+      });
+    }
+
+    if (status === 304) {
+      throw new requestError.RequestError("Not modified", status, {
+        headers,
+        request: requestOptions
+      });
+    }
+
+    if (status >= 400) {
+      return response.text().then(message => {
+        const error = new requestError.RequestError(message, status, {
+          headers,
+          request: requestOptions
+        });
+
+        try {
+          let responseBody = JSON.parse(error.message);
+          Object.assign(error, responseBody);
+          let errors = responseBody.errors; // Assumption `errors` would always be in Array format
+
+          error.message = error.message + ": " + errors.map(JSON.stringify).join(", ");
+        } catch (e) {// ignore, see octokit/rest.js#684
+        }
+
+        throw error;
+      });
+    }
+
+    const contentType = response.headers.get("content-type");
+
+    if (/application\/json/.test(contentType)) {
+      return response.json();
+    }
+
+    if (!contentType || /^text\/|charset=utf-8$/.test(contentType)) {
+      return response.text();
+    }
+
+    return getBufferResponse(response);
+  }).then(data => {
+    return {
+      status,
+      url,
+      headers,
+      data
+    };
+  }).catch(error => {
+    if (error instanceof requestError.RequestError) {
+      throw error;
+    }
+
+    throw new requestError.RequestError(error.message, 500, {
+      headers,
+      request: requestOptions
+    });
+  });
+}
+
+function withDefaults(oldEndpoint, newDefaults) {
+  const endpoint = oldEndpoint.defaults(newDefaults);
+
+  const newApi = function (route, parameters) {
+    const endpointOptions = endpoint.merge(route, parameters);
+
+    if (!endpointOptions.request || !endpointOptions.request.hook) {
+      return fetchWrapper(endpoint.parse(endpointOptions));
+    }
+
+    const request = (route, parameters) => {
+      return fetchWrapper(endpoint.parse(endpoint.merge(route, parameters)));
+    };
+
+    Object.assign(request, {
+      endpoint,
+      defaults: withDefaults.bind(null, endpoint)
+    });
+    return endpointOptions.request.hook(request, endpointOptions);
+  };
+
+  return Object.assign(newApi, {
+    endpoint,
+    defaults: withDefaults.bind(null, endpoint)
+  });
+}
+
+const request = withDefaults(endpoint.endpoint, {
+  headers: {
+    "user-agent": `octokit-request.js/${VERSION} ${universalUserAgent.getUserAgent()}`
+  }
+});
+
+exports.request = request;
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
 /***/ 4193:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -3780,7 +3897,60 @@ exports.withCustomRequest = withCustomRequest;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-const VERSION = "2.13.3";
+const VERSION = "2.13.5";
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+
+    if (enumerableOnly) {
+      symbols = symbols.filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+      });
+    }
+
+    keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+
+  return target;
+}
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
 
 /**
  * Some “list” response that can be paginated have a different response structure
@@ -3799,6 +3969,13 @@ const VERSION = "2.13.3";
  * otherwise match: https://developer.github.com/v3/repos/statuses/#get-the-combined-status-for-a-specific-ref
  */
 function normalizePaginatedListResponse(response) {
+  // endpoints can respond with 204 if repository is empty
+  if (!response.data) {
+    return _objectSpread2(_objectSpread2({}, response), {}, {
+      data: []
+    });
+  }
+
   const responseNeedsNormalization = "total_count" in response.data && !("url" in response.data);
   if (!responseNeedsNormalization) return response; // keep the additional properties intact as there is currently no other way
   // to retrieve the same information.
@@ -3837,19 +4014,32 @@ function iterator(octokit, route, parameters) {
         if (!url) return {
           done: true
         };
-        const response = await requestMethod({
-          method,
-          url,
-          headers
-        });
-        const normalizedResponse = normalizePaginatedListResponse(response); // `response.headers.link` format:
-        // '<https://api.github.com/users/aseemk/followers?page=2>; rel="next", <https://api.github.com/users/aseemk/followers?page=2>; rel="last"'
-        // sets `url` to undefined if "next" URL is not present or `link` header is not set
 
-        url = ((normalizedResponse.headers.link || "").match(/<([^>]+)>;\s*rel="next"/) || [])[1];
-        return {
-          value: normalizedResponse
-        };
+        try {
+          const response = await requestMethod({
+            method,
+            url,
+            headers
+          });
+          const normalizedResponse = normalizePaginatedListResponse(response); // `response.headers.link` format:
+          // '<https://api.github.com/users/aseemk/followers?page=2>; rel="next", <https://api.github.com/users/aseemk/followers?page=2>; rel="last"'
+          // sets `url` to undefined if "next" URL is not present or `link` header is not set
+
+          url = ((normalizedResponse.headers.link || "").match(/<([^>]+)>;\s*rel="next"/) || [])[1];
+          return {
+            value: normalizedResponse
+          };
+        } catch (error) {
+          if (error.status !== 409) throw error;
+          url = "";
+          return {
+            value: {
+              status: 200,
+              headers: {},
+              data: []
+            }
+          };
+        }
       }
 
     })
@@ -3932,29 +4122,18 @@ exports.paginatingEndpoints = paginatingEndpoints;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-function _defineProperty(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-}
-
 function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
 
   if (Object.getOwnPropertySymbols) {
     var symbols = Object.getOwnPropertySymbols(object);
-    if (enumerableOnly) symbols = symbols.filter(function (sym) {
-      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-    });
+
+    if (enumerableOnly) {
+      symbols = symbols.filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+      });
+    }
+
     keys.push.apply(keys, symbols);
   }
 
@@ -3981,9 +4160,25 @@ function _objectSpread2(target) {
   return target;
 }
 
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
 const Endpoints = {
   actions: {
     addSelectedRepoToOrgSecret: ["PUT /orgs/{org}/actions/secrets/{secret_name}/repositories/{repository_id}"],
+    approveWorkflowRun: ["POST /repos/{owner}/{repo}/actions/runs/{run_id}/approve"],
     cancelWorkflowRun: ["POST /repos/{owner}/{repo}/actions/runs/{run_id}/cancel"],
     createOrUpdateEnvironmentSecret: ["PUT /repositories/{repository_id}/environments/{environment_name}/secrets/{secret_name}"],
     createOrUpdateOrgSecret: ["PUT /orgs/{org}/actions/secrets/{secret_name}"],
@@ -4097,6 +4292,11 @@ const Endpoints = {
         previews: ["corsair"]
       }
     }],
+    createContentAttachmentForRepo: ["POST /repos/{owner}/{repo}/content_references/{content_reference_id}/attachments", {
+      mediaType: {
+        previews: ["corsair"]
+      }
+    }],
     createFromManifest: ["POST /app-manifests/{code}/conversions"],
     createInstallationAccessToken: ["POST /app/installations/{installation_id}/access_tokens"],
     deleteAuthorization: ["DELETE /applications/{client_id}/grant"],
@@ -4159,8 +4359,11 @@ const Endpoints = {
     }],
     getAnalysis: ["GET /repos/{owner}/{repo}/code-scanning/analyses/{analysis_id}"],
     getSarif: ["GET /repos/{owner}/{repo}/code-scanning/sarifs/{sarif_id}"],
+    listAlertInstances: ["GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances"],
     listAlertsForRepo: ["GET /repos/{owner}/{repo}/code-scanning/alerts"],
-    listAlertsInstances: ["GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances"],
+    listAlertsInstances: ["GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances", {}, {
+      renamed: ["codeScanning", "listAlertInstances"]
+    }],
     listRecentAnalyses: ["GET /repos/{owner}/{repo}/code-scanning/analyses"],
     updateAlert: ["PATCH /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}"],
     uploadSarif: ["POST /repos/{owner}/{repo}/code-scanning/sarifs"]
@@ -4642,6 +4845,11 @@ const Endpoints = {
         previews: ["squirrel-girl"]
       }
     }],
+    createForRelease: ["POST /repos/{owner}/{repo}/releases/{release_id}/reactions", {
+      mediaType: {
+        previews: ["squirrel-girl"]
+      }
+    }],
     createForTeamDiscussionCommentInOrg: ["POST /orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions", {
       mediaType: {
         previews: ["squirrel-girl"]
@@ -4742,6 +4950,7 @@ const Endpoints = {
       }
     }],
     compareCommits: ["GET /repos/{owner}/{repo}/compare/{base}...{head}"],
+    compareCommitsWithBasehead: ["GET /repos/{owner}/{repo}/compare/{basehead}"],
     createCommitComment: ["POST /repos/{owner}/{repo}/commits/{commit_sha}/comments"],
     createCommitSignatureProtection: ["POST /repos/{owner}/{repo}/branches/{branch}/protection/required_signatures", {
       mediaType: {
@@ -4856,6 +5065,7 @@ const Endpoints = {
     getLatestRelease: ["GET /repos/{owner}/{repo}/releases/latest"],
     getPages: ["GET /repos/{owner}/{repo}/pages"],
     getPagesBuild: ["GET /repos/{owner}/{repo}/pages/builds/{build_id}"],
+    getPagesHealthCheck: ["GET /repos/{owner}/{repo}/pages/health"],
     getParticipationStats: ["GET /repos/{owner}/{repo}/stats/participation"],
     getPullRequestReviewProtection: ["GET /repos/{owner}/{repo}/branches/{branch}/protection/required_pull_request_reviews"],
     getPunchCardStats: ["GET /repos/{owner}/{repo}/stats/punch_card"],
@@ -5064,7 +5274,7 @@ const Endpoints = {
   }
 };
 
-const VERSION = "4.15.1";
+const VERSION = "5.3.1";
 
 function endpointsToMethods(octokit, endpointsMap) {
   const newMethods = {};
@@ -5149,12 +5359,20 @@ function decorate(octokit, scope, methodName, defaults, decorations) {
 
 function restEndpointMethods(octokit) {
   const api = endpointsToMethods(octokit, Endpoints);
+  return {
+    rest: api
+  };
+}
+restEndpointMethods.VERSION = VERSION;
+function legacyRestEndpointMethods(octokit) {
+  const api = endpointsToMethods(octokit, Endpoints);
   return _objectSpread2(_objectSpread2({}, api), {}, {
     rest: api
   });
 }
-restEndpointMethods.VERSION = VERSION;
+legacyRestEndpointMethods.VERSION = VERSION;
 
+exports.legacyRestEndpointMethods = legacyRestEndpointMethods;
 exports.restEndpointMethods = restEndpointMethods;
 //# sourceMappingURL=index.js.map
 
@@ -5236,17 +5454,19 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var endpoint = __nccwpck_require__(9440);
 var universalUserAgent = __nccwpck_require__(5030);
-var isPlainObject = __nccwpck_require__(9062);
+var isPlainObject = __nccwpck_require__(3287);
 var nodeFetch = _interopDefault(__nccwpck_require__(467));
-var requestError = __nccwpck_require__(537);
+var requestError = __nccwpck_require__(13);
 
-const VERSION = "5.4.15";
+const VERSION = "5.6.0";
 
 function getBufferResponse(response) {
   return response.arrayBuffer();
 }
 
 function fetchWrapper(requestOptions) {
+  const log = requestOptions.request && requestOptions.request.log ? requestOptions.request.log : console;
+
   if (isPlainObject.isPlainObject(requestOptions.body) || Array.isArray(requestOptions.body)) {
     requestOptions.body = JSON.stringify(requestOptions.body);
   }
@@ -5262,12 +5482,18 @@ function fetchWrapper(requestOptions) {
     redirect: requestOptions.redirect
   }, // `requestOptions.request.agent` type is incompatible
   // see https://github.com/octokit/types.ts/pull/264
-  requestOptions.request)).then(response => {
+  requestOptions.request)).then(async response => {
     url = response.url;
     status = response.status;
 
     for (const keyAndValue of response.headers) {
       headers[keyAndValue[0]] = keyAndValue[1];
+    }
+
+    if ("deprecation" in headers) {
+      const matches = headers.link && headers.link.match(/<([^>]+)>; rel="deprecation"/);
+      const deprecationLink = matches && matches.pop();
+      log.warn(`[@octokit/request] "${requestOptions.method} ${requestOptions.url}" is deprecated. It is scheduled to be removed on ${headers.sunset}${deprecationLink ? `. See ${deprecationLink}` : ""}`);
     }
 
     if (status === 204 || status === 205) {
@@ -5281,49 +5507,43 @@ function fetchWrapper(requestOptions) {
       }
 
       throw new requestError.RequestError(response.statusText, status, {
-        headers,
+        response: {
+          url,
+          status,
+          headers,
+          data: undefined
+        },
         request: requestOptions
       });
     }
 
     if (status === 304) {
       throw new requestError.RequestError("Not modified", status, {
-        headers,
+        response: {
+          url,
+          status,
+          headers,
+          data: await getResponseData(response)
+        },
         request: requestOptions
       });
     }
 
     if (status >= 400) {
-      return response.text().then(message => {
-        const error = new requestError.RequestError(message, status, {
+      const data = await getResponseData(response);
+      const error = new requestError.RequestError(toErrorMessage(data), status, {
+        response: {
+          url,
+          status,
           headers,
-          request: requestOptions
-        });
-
-        try {
-          let responseBody = JSON.parse(error.message);
-          Object.assign(error, responseBody);
-          let errors = responseBody.errors; // Assumption `errors` would always be in Array format
-
-          error.message = error.message + ": " + errors.map(JSON.stringify).join(", ");
-        } catch (e) {// ignore, see octokit/rest.js#684
-        }
-
-        throw error;
+          data
+        },
+        request: requestOptions
       });
+      throw error;
     }
 
-    const contentType = response.headers.get("content-type");
-
-    if (/application\/json/.test(contentType)) {
-      return response.json();
-    }
-
-    if (!contentType || /^text\/|charset=utf-8$/.test(contentType)) {
-      return response.text();
-    }
-
-    return getBufferResponse(response);
+    return getResponseData(response);
   }).then(data => {
     return {
       status,
@@ -5332,15 +5552,40 @@ function fetchWrapper(requestOptions) {
       data
     };
   }).catch(error => {
-    if (error instanceof requestError.RequestError) {
-      throw error;
-    }
-
+    if (error instanceof requestError.RequestError) throw error;
     throw new requestError.RequestError(error.message, 500, {
-      headers,
       request: requestOptions
     });
   });
+}
+
+async function getResponseData(response) {
+  const contentType = response.headers.get("content-type");
+
+  if (/application\/json/.test(contentType)) {
+    return response.json();
+  }
+
+  if (!contentType || /^text\/|charset=utf-8$/.test(contentType)) {
+    return response.text();
+  }
+
+  return getBufferResponse(response);
+}
+
+function toErrorMessage(data) {
+  if (typeof data === "string") return data; // istanbul ignore else - just in case
+
+  if ("message" in data) {
+    if (Array.isArray(data.errors)) {
+      return `${data.message}: ${data.errors.map(JSON.stringify).join(", ")}`;
+    }
+
+    return data.message;
+  } // istanbul ignore next - just in case
+
+
+  return `Unknown error: ${JSON.stringify(data)}`;
 }
 
 function withDefaults(oldEndpoint, newDefaults) {
@@ -5382,48 +5627,84 @@ exports.request = request;
 
 /***/ }),
 
-/***/ 9062:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ 13:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+
+var deprecation = __nccwpck_require__(8932);
+var once = _interopDefault(__nccwpck_require__(1223));
+
+const logOnceCode = once(deprecation => console.warn(deprecation));
+const logOnceHeaders = once(deprecation => console.warn(deprecation));
+/**
+ * Error with extra properties to help with debugging
  */
 
-function isObject(o) {
-  return Object.prototype.toString.call(o) === '[object Object]';
-}
+class RequestError extends Error {
+  constructor(message, statusCode, options) {
+    super(message); // Maintains proper stack trace (only available on V8)
 
-function isPlainObject(o) {
-  var ctor,prot;
+    /* istanbul ignore next */
 
-  if (isObject(o) === false) return false;
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
 
-  // If has modified constructor
-  ctor = o.constructor;
-  if (ctor === undefined) return true;
+    this.name = "HttpError";
+    this.status = statusCode;
+    let headers;
 
-  // If has modified prototype
-  prot = ctor.prototype;
-  if (isObject(prot) === false) return false;
+    if ("headers" in options && typeof options.headers !== "undefined") {
+      headers = options.headers;
+    }
 
-  // If constructor does not have an Object-specific method
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
+    if ("response" in options) {
+      this.response = options.response;
+      headers = options.response.headers;
+    } // redact request credentials without mutating original request options
+
+
+    const requestCopy = Object.assign({}, options.request);
+
+    if (options.request.headers.authorization) {
+      requestCopy.headers = Object.assign({}, options.request.headers, {
+        authorization: options.request.headers.authorization.replace(/ .*$/, " [REDACTED]")
+      });
+    }
+
+    requestCopy.url = requestCopy.url // client_id & client_secret can be passed as URL query parameters to increase rate limit
+    // see https://developer.github.com/v3/#increasing-the-unauthenticated-rate-limit-for-oauth-applications
+    .replace(/\bclient_secret=\w+/g, "client_secret=[REDACTED]") // OAuth tokens can be passed as URL query parameters, although it is not recommended
+    // see https://developer.github.com/v3/#oauth2-token-sent-in-a-header
+    .replace(/\baccess_token=\w+/g, "access_token=[REDACTED]");
+    this.request = requestCopy; // deprecations
+
+    Object.defineProperty(this, "code", {
+      get() {
+        logOnceCode(new deprecation.Deprecation("[@octokit/request-error] `error.code` is deprecated, use `error.status`."));
+        return statusCode;
+      }
+
+    });
+    Object.defineProperty(this, "headers", {
+      get() {
+        logOnceHeaders(new deprecation.Deprecation("[@octokit/request-error] `error.headers` is deprecated, use `error.response.headers`."));
+        return headers || {};
+      }
+
+    });
   }
 
-  // Most likely a plain Object
-  return true;
 }
 
-exports.isPlainObject = isPlainObject;
+exports.RequestError = RequestError;
+//# sourceMappingURL=index.js.map
 
 
 /***/ }),
@@ -8664,6 +8945,52 @@ module.exports = function(stream_module) {
         IconvLiteDecoderStream: IconvLiteDecoderStream,
     };
 };
+
+
+/***/ }),
+
+/***/ 3287:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+/*!
+ * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
+ *
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+function isObject(o) {
+  return Object.prototype.toString.call(o) === '[object Object]';
+}
+
+function isPlainObject(o) {
+  var ctor,prot;
+
+  if (isObject(o) === false) return false;
+
+  // If has modified constructor
+  ctor = o.constructor;
+  if (ctor === undefined) return true;
+
+  // If has modified prototype
+  prot = ctor.prototype;
+  if (isObject(prot) === false) return false;
+
+  // If constructor does not have an Object-specific method
+  if (prot.hasOwnProperty('isPrototypeOf') === false) {
+    return false;
+  }
+
+  // Most likely a plain Object
+  return true;
+}
+
+exports.isPlainObject = isPlainObject;
 
 
 /***/ }),
