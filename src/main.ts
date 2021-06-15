@@ -8,7 +8,7 @@ import { triggeredByBot, checkSkipped } from './conditions'
 const checks: Check[] = [
   bashCheck({
     name: 'secrets-scan',
-    inputs: ['dockerUsername', 'dockerPassword'],
+    inputs: ['githubToken', 'dockerUsername', 'dockerPassword'],
   }),
   jiraLinked,
 ]
