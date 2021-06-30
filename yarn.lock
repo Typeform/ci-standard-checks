@@ -1027,10 +1027,10 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
   integrity sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==
 
-"@typeform/eslint-config@^3.0.3":
-  version "3.0.3"
-  resolved "https://npm.pkg.github.com/download/@typeform/eslint-config/3.0.3/7d5d6c8d9b79794427184a7804544ddf8758ef5d529d79366c873f7658b6f969#69be040e163032ebd139971ebaf3a459288834ee"
-  integrity sha512-OxIRoOpXb2whIzIcaj5p3ERfZcD+Daw7APSOY+vk0e2XIsdampGDAYHaNNo88ubK+coMj0pjgBhRi0wcnLl/gg==
+"@typeform/eslint-config@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@typeform/eslint-config/-/eslint-config-3.0.2.tgz#8f2aac0d34f475c610495d4b1d53b5df300c8643"
+  integrity sha512-pRgo0AWzuw0QVP0nHcbBt4bHm5u3XGzTf+/oh6eZs0tD935RouzUQKxh5qu0T+UcXG0eLIFOCbVH1o7ddghqjQ==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^4.9.0"
     "@typescript-eslint/parser" "^4.9.0"
@@ -1250,10 +1250,10 @@
     "@typescript-eslint/types" "4.22.1"
     eslint-visitor-keys "^2.0.0"
 
-"@vercel/ncc@^0.28.5":
-  version "0.28.5"
-  resolved "https://registry.yarnpkg.com/@vercel/ncc/-/ncc-0.28.5.tgz#6d735379f81b70b708a9c3d2196507b2a841824f"
-  integrity sha512-ZSwD4EDCon2EsnPZ2/Qcigx4N2DiuBLV/rDnF04giEPFuDeBeUDdnSTyYYfX8KNic/prrJuS1vUEmAOHmj+fRg==
+"@vercel/ncc@^0.28.6":
+  version "0.28.6"
+  resolved "https://registry.yarnpkg.com/@vercel/ncc/-/ncc-0.28.6.tgz#073c0ce8e0269210c0a9f180fb0bf949eecc20e0"
+  integrity sha512-t4BoSSuyK8BZaUE0gV18V6bkFs4st7baumtFGa50dv1tMu2GDBEBF8sUZaKBdKiL6DzJ2D2+XVCwYWWDcQOYdQ==
 
 JSONStream@^1.0.4:
   version "1.3.5"
