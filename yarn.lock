@@ -1027,10 +1027,10 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
   integrity sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==
 
-"@typeform/eslint-config@^3.0.3":
-  version "3.0.3"
-  resolved "https://npm.pkg.github.com/download/@typeform/eslint-config/3.0.3/7d5d6c8d9b79794427184a7804544ddf8758ef5d529d79366c873f7658b6f969#69be040e163032ebd139971ebaf3a459288834ee"
-  integrity sha512-OxIRoOpXb2whIzIcaj5p3ERfZcD+Daw7APSOY+vk0e2XIsdampGDAYHaNNo88ubK+coMj0pjgBhRi0wcnLl/gg==
+"@typeform/eslint-config@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@typeform/eslint-config/-/eslint-config-3.0.2.tgz#8f2aac0d34f475c610495d4b1d53b5df300c8643"
+  integrity sha512-pRgo0AWzuw0QVP0nHcbBt4bHm5u3XGzTf+/oh6eZs0tD935RouzUQKxh5qu0T+UcXG0eLIFOCbVH1o7ddghqjQ==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^4.9.0"
     "@typescript-eslint/parser" "^4.9.0"
@@ -6602,10 +6602,10 @@ typedarray-to-buffer@^3.1.5:
   dependencies:
     is-typedarray "^1.0.0"
 
-typescript@^4.3.2:
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.3.2.tgz#399ab18aac45802d6f2498de5054fcbbe716a805"
-  integrity sha512-zZ4hShnmnoVnAHpVHWpTcxdv7dWP60S2FsydQLV8V5PbS3FifjWFFRiHSWpDJahly88PRyV5teTSLoq4eG7mKw==
+typescript@^4.3.5:
+  version "4.3.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.3.5.tgz#4d1c37cc16e893973c45a06886b7113234f119f4"
+  integrity sha512-DqQgihaQ9cUrskJo9kIyW/+g0Vxsk8cDtZ52a3NGh0YNTfpUSArXSohyUGnvbPazEPLu398C0UxmKSOrPumUzA==
 
 uglify-js@^3.1.4:
   version "3.13.6"
