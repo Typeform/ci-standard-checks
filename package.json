@@ -41,23 +41,23 @@
     "@actions/exec": "^1.1.0",
     "@actions/github": "^5.0.0",
     "@octokit/types": "^6.18.1",
-    "@octokit/webhooks": "^9.6.1"
+    "@octokit/webhooks": "^9.8.4"
   },
   "devDependencies": {
     "@typeform/eslint-config": "^3.0.2",
     "@types/jest": "^26.0.23",
     "@types/node": "^15.12.2",
-    "@vercel/ncc": "^0.28.5",
+    "@vercel/ncc": "^0.28.6",
     "eslint": "^7.28.0",
     "husky": ">=6",
     "jest": "^27.0.4",
-    "jest-circus": "^27.0.4",
+    "jest-circus": "^27.0.6",
     "js-yaml": "^4.1.0",
     "lint-staged": ">=11",
     "prettier": "2.3.2",
-    "semantic-release": "^17.4.3",
+    "semantic-release": "^17.4.4",
     "ts-jest": "^27.0.3",
-    "typescript": "^4.3.2"
+    "typescript": "^4.3.5"
   },
   "prettier": "@typeform/eslint-config/prettier",
   "lint-staged": {
