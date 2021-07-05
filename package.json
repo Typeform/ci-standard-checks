@@ -40,7 +40,7 @@
     "@actions/core": "^1.4.0",
     "@actions/exec": "^1.1.0",
     "@actions/github": "^5.0.0",
-    "@octokit/types": "^6.14.2",
+    "@octokit/types": "^6.18.1",
     "@octokit/webhooks": "^9.6.1"
   },
   "devDependencies": {
@@ -51,7 +51,7 @@
     "eslint": "^7.28.0",
     "husky": ">=6",
     "jest": "^27.0.4",
-    "jest-circus": "^27.0.4",
+    "jest-circus": "^27.0.6",
     "js-yaml": "^4.1.0",
     "lint-staged": ">=11",
     "prettier": "2.3.1",
