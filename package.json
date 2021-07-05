@@ -51,7 +51,7 @@
     "eslint": "^7.28.0",
     "husky": ">=6",
     "jest": "^27.0.4",
-    "jest-circus": "^27.0.4",
+    "jest-circus": "^27.0.6",
     "js-yaml": "^4.1.0",
     "lint-staged": ">=11",
     "prettier": "2.3.1",
