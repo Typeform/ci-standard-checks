@@ -898,16 +898,7 @@
     "@octokit/types" "^6.16.2"
     deprecation "^2.3.1"
 
-"@octokit/request-error@^2.0.0", "@octokit/request-error@^2.0.2", "@octokit/request-error@^2.0.5":
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/@octokit/request-error/-/request-error-2.0.5.tgz#72cc91edc870281ad583a42619256b380c600143"
-  integrity sha512-T/2wcCFyM7SkXzNoyVNWjyVlUwBvW3igM3Btr/eKYiPmucXTtkxt2RBsf6gn3LTzaLSLTQtNmvg+dGsOxQrjZg==
-  dependencies:
-    "@octokit/types" "^6.0.3"
-    deprecation "^2.0.0"
-    once "^1.4.0"
-
-"@octokit/request-error@^2.1.0":
+"@octokit/request-error@^2.0.0", "@octokit/request-error@^2.0.2", "@octokit/request-error@^2.0.5", "@octokit/request-error@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@octokit/request-error/-/request-error-2.1.0.tgz#9e150357831bfc788d13a4fd4b1913d60c74d677"
   integrity sha512-1VIvgXxs9WHSjicsRwq8PlR2LR2x6DwsJAaFgzdi0JfJoGSO8mYI/cHJQ+9FbN21aa+DrgNLnwObmyeSC8Rmpg==
@@ -957,24 +948,24 @@
   dependencies:
     "@octokit/openapi-types" "^8.2.1"
 
-"@octokit/webhooks-methods@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks-methods/-/webhooks-methods-1.0.0.tgz#274799138725c89a3466e3af2026afe755f28c4b"
-  integrity sha512-pVceMQcj9SZ5p2RkemL0TuuPdGULNQj9F3Pq1cNM1xH+Kst1VNt0dj3PEGZRZV473njrDnYdi/OG4wWY9TLbbA==
+"@octokit/webhooks-methods@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks-methods/-/webhooks-methods-2.0.0.tgz#1108b9ea661ca6c81e4a8bfa63a09eb27d5bc2db"
+  integrity sha512-35cfQ4YWlnZnmZKmIxlGPUPLtbkF8lr/A/1Sk1eC0ddLMwQN06dOuLc+dI3YLQS+T+MoNt3DIQ0NynwgKPilig==
 
-"@octokit/webhooks-types@3.75.0":
-  version "3.75.0"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks-types/-/webhooks-types-3.75.0.tgz#6301226143c9d0a96972b6c27b17d929a98ca5d3"
-  integrity sha512-vQkYwpCNX816UJiMssnEr4jWlVXmmd6kOpcmNdEQ6646Lh6kYeNBP6C2tVOAoCcs7/xK2sGf8qOJ5rT3QGL62w==
+"@octokit/webhooks-types@4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks-types/-/webhooks-types-4.0.2.tgz#72cf5dcfcd88db7bab51793b8e8f74d8102bebb7"
+  integrity sha512-zeTNjX3GNaNw9lSlqjMwP55AluhCScW0OQ/4IkU6SmqT72k1UmFRTVK71l0LBoTGS6dJwj2PYGlx5YRG/9WKuw==
 
-"@octokit/webhooks@^9.6.1":
-  version "9.6.1"
-  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-9.6.1.tgz#a7686edcf0c0a08257dd4590344e8c7a73fb6866"
-  integrity sha512-RIVpKDmNaCMgiSnCzDmw/GTOyLvpDHfNVxJvQWRG8EsPhTF1fXsaxHkyR1unX8v5xPr/cRjoIstEPSiXyd31Aw==
+"@octokit/webhooks@^9.8.4":
+  version "9.8.4"
+  resolved "https://registry.yarnpkg.com/@octokit/webhooks/-/webhooks-9.8.4.tgz#cd0fcd4532b6e9a1347f51f6dddf2af5c117a7eb"
+  integrity sha512-P/FGFBYuy6YqSFKVMjvTKdHK0LhXZtUxpVPpBuBFn9YSpOYc1SZqS1d9UPK1VK06Z9UpRxc/RW7xH0b1vyFk8g==
   dependencies:
     "@octokit/request-error" "^2.0.2"
-    "@octokit/webhooks-methods" "^1.0.0"
-    "@octokit/webhooks-types" "3.75.0"
+    "@octokit/webhooks-methods" "^2.0.0"
+    "@octokit/webhooks-types" "4.0.2"
     aggregate-error "^3.1.0"
 
 "@semantic-release/commit-analyzer@^8.0.0":
@@ -5581,10 +5572,10 @@ prelude-ls@~1.1.2:
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.1.2.tgz#21932a549f5e52ffd9a827f570e04be62a97da54"
   integrity sha1-IZMqVJ9eUv/ZqCf1cOBL5iqX2lQ=
 
-prettier@2.3.1:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.3.1.tgz#76903c3f8c4449bc9ac597acefa24dc5ad4cbea6"
-  integrity sha512-p+vNbgpLjif/+D+DwAZAbndtRrR0md0MwfmOVN9N+2RgyACMT+7tfaRnT+WDPkqnuVwleyuBIG2XBxKDme3hPA==
+prettier@2.3.2:
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.3.2.tgz#ef280a05ec253712e486233db5c6f23441e7342d"
+  integrity sha512-lnJzDfJ66zkMy58OL5/NY5zp70S7Nz6KqcKkXYzn2tMVrNxvbqaBpg7H3qHaLxCJ5lNMsGuM8+ohS7cZrthdLQ==
 
 pretty-format@^26.0.0, pretty-format@^26.6.2:
   version "26.6.2"
@@ -5992,10 +5983,10 @@ saxes@^5.0.1:
   dependencies:
     xmlchars "^2.2.0"
 
-semantic-release@^17.4.3:
-  version "17.4.3"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-17.4.3.tgz#e01b2d0c0adaf5a6cc427359f1df755d1e908927"
-  integrity sha512-lTOUSrkbaQ+TRs3+BmtJhLtPSyiO7iTGmh5SyuEFqNO8HQbQ4nzXg4UlPrDQasO/C0eFK/V0eCbOzJdjtKBOYw==
+semantic-release@^17.4.4:
+  version "17.4.4"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-17.4.4.tgz#650dd50ecb520a5a2bc6811305bc9d4d5c3128b1"
+  integrity sha512-fQIA0lw2Sy/9+TcoM/BxyzKCSwdUd8EPRwGoOuBLgxKigPCY6kaKs8TOsgUVy6QrlTYwni2yzbMb5Q2107P9eA==
   dependencies:
     "@semantic-release/commit-analyzer" "^8.0.0"
     "@semantic-release/error" "^2.2.0"
