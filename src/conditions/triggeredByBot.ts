@@ -4,6 +4,7 @@ import { github } from '../infrastructure/github'
 
 export const BOT_USERS = [
   'Snyk bot',
+  'snyk-bot',
   'dependabot[bot]',
   'dependabot-preview[bot]',
   'tf-security',
