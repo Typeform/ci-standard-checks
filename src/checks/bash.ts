@@ -21,8 +21,7 @@ export default function bashCheck({ name, inputs }: BashCheckParams): Check {
         return result
       }, {} as { [key: string]: string })
 
-      const TOKEN =
-        'KEY12341423059125984598019382980423190dsaahjldshf192312831098312dfasjhlf21321'
+      const CUSTOM_RANGE_KEY = 'custom-range'
       const env = {
         ...process.env,
         ...envInputs,
