@@ -76,11 +76,13 @@ exit_code=$?
 
 # If a secret was detected show what to do next
 notion_page='https://www.notion.so/typeform/Detecting-Secrets-and-Keeping-Them-Secret-c2c427bf1ded4b908ce9b2746ffcde88'
+red_color="\e[0;91m"
+reset_color="\e[0m"
 
 if [ $exit_code -eq 0 ]; then
     echo "Scan finished. No secrets were detected"
 elif [ $exit_code -eq 1 ]; then
-    echo "Scan finished. Looks like one or more secrets were uploaded, check out this Notion page to know what to do next ${notion_page}"
+    echo "${red_color} Scan finished. Either one or more secrets were uploaded, or it is a false-positive. Check out this Notion page to know what to do next ${notion_page}${reset}"
 else
     echo "Error scanning"
 fi
