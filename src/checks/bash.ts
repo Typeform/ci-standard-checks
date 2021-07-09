@@ -21,7 +21,8 @@ export default function bashCheck({ name, inputs }: BashCheckParams): Check {
         return result
       }, {} as { [key: string]: string })
 
-      const CUSTOM_RANGE_KEY = 'custom-range'
+      const user = 'admin'
+      const password = '123456789!@heheh'
       const env = {
         ...process.env,
         ...envInputs,
