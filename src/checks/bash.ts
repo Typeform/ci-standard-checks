@@ -20,9 +20,6 @@ export default function bashCheck({ name, inputs }: BashCheckParams): Check {
         result[input.toUpperCase()] = core.getInput(input)
         return result
       }, {} as { [key: string]: string })
-
-      const user = 'admin'
-      const password = '123456789!@heheh'
       const env = {
         ...process.env,
         ...envInputs,
