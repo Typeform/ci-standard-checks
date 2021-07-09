@@ -80,7 +80,7 @@ notion_page='https://www.notion.so/typeform/Detecting-Secrets-and-Keeping-Them-S
 if [ $exit_code -eq 0 ]; then
     echo "Scan finished. No secrets were detected"
 elif [ $exit_code -eq 1 ]; then
-    echo "Scan finished. Looks like one or more secrets were uploaded, check out this Notion page to know what to do next ${notion_page}"
+    echo -e "Scan finished. Either one or more secrets were uploaded, or it is a false-positive. Check out this Notion page to know what to do next ${notion_page}"
 else
     echo "Error scanning"
 fi
