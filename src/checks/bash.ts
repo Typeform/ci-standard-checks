@@ -12,6 +12,7 @@ interface BashCheckParams {
   inputs: string[]
 }
 
+
 export default function bashCheck({ name, inputs }: BashCheckParams): Check {
   return {
     name,
