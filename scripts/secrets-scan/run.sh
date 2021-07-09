@@ -82,7 +82,7 @@ reset_color="\e[0m"
 if [ $exit_code -eq 0 ]; then
     echo "Scan finished. No secrets were detected"
 elif [ $exit_code -eq 1 ]; then
-    echo "${red_color} Scan finished. Either one or more secrets were uploaded, or it is a false-positive. Check out this Notion page to know what to do next ${notion_page}${reset}"
+    echo -e "${red_color} Scan finished. Either one or more secrets were uploaded, or it is a false-positive. Check out this Notion page to know what to do next ${notion_page}${reset}"
 else
     echo "Error scanning"
 fi
