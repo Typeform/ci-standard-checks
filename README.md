@@ -109,7 +109,7 @@ The basics:
 * `fix(JIRA-123)` commits will trigger a *patch* version release
 
 *Major* versions are triggered by `BREAKING CHANGE` of `feat!` commits
-that should be avoided in general. SETI will plan and coordinate the
+that should be avoided in general. Engineering Intelligence will plan and coordinate the
 cut of new major releases when the time comes.
 
 ### Code in Main
