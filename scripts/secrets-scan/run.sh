@@ -38,10 +38,9 @@ gitleaks_version="v7.2.0"
 # Generate the final gitleaks config file. If the repo has a local config, merge both
 if [ -f ./"$local_config" ]; then
     docker container run --rm -v $repo_dir/$local_config:/app/$local_config \
-    $gitleaks_config_container python gitleaks_config_generator.py > $final_config
+    $gitleaks_config_container > $final_config
 else
-    docker container run --rm $gitleaks_config_container \
-    python gitleaks_config_generator.py > $final_config
+    docker container run --rm $gitleaks_config_container > $final_config
 fi
 
 if [ -z "${GITHUB_BASE_REF}" ]; then
