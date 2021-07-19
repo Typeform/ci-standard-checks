@@ -190,7 +190,7 @@ describe('Jira Linked check', () => {
 
 describe('hasJiraIssueKey', () => {
   it.each([
-    'SETI-123',
+    'EING-123',
     'ABC-789',
     'Some text including JIRA-123 in the middle',
   ])('returns true with issue key', (issueKey) => {
