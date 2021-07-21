@@ -47,7 +47,7 @@
     "@typeform/eslint-config": "^3.0.2",
     "@types/jest": "^26.0.24",
     "@types/node": "^15.14.1",
-    "@vercel/ncc": "^0.28.6",
+    "@vercel/ncc": "^0.29.0",
     "eslint": "^7.31.0",
     "husky": ">=7",
     "jest": "^27.0.6",
