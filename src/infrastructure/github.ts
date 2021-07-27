@@ -9,6 +9,12 @@ export type PullsGetResponse =
   Endpoints['GET /repos/{owner}/{repo}/pulls/{pull_number}']['response']['data']
 export type PullRequestsAssociatedWithCommitResponse =
   Endpoints['GET /repos/{owner}/{repo}/commits/{commit_sha}/pulls']['response']['data']
+export type PullRequestFiles =
+  Endpoints['GET /repos/{owner}/{repo}/pulls/{pull_number}/files']['response']['data']
+export type Content =
+  Endpoints['GET /repos/{owner}/{repo}/contents/{path}']['response']['data']
+export type Commit =
+  Endpoints['GET /repos/{owner}/{repo}/commits/{ref}']['response']['data']
 
 export class GitHub {
   context: Context
@@ -38,6 +44,34 @@ export class GitHub {
           previews: ['groot'],
         },
       })
+    return response.data
+  }
+
+  async getPullRequestFiles(pull_number: number): Promise<PullRequestFiles> {
+    const response = await this.octokit.rest.pulls.listFiles({
+      owner: this.context.repo.owner,
+      repo: this.context.repo.repo,
+      pull_number,
+    })
+    return response.data
+  }
+
+  async getCommit(ref: string): Promise<Commit> {
+    const response = await this.octokit.rest.repos.getCommit({
+      owner: this.context.repo.owner,
+      repo: this.context.repo.repo,
+      ref: ref,
+    })
+    return response.data
+  }
+
+  async downloadContent(path: string, ref?: string): Promise<Content> {
+    const response = await this.octokit.rest.repos.getContent({
+      owner: this.context.repo.owner,
+      repo: this.context.repo.repo,
+      path: path,
+      ref: ref,
+    })
     return response.data
   }
 }
