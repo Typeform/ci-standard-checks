@@ -41,7 +41,8 @@
     "@actions/exec": "^1.1.0",
     "@actions/github": "^5.0.0",
     "@octokit/types": "^6.18.1",
-    "@octokit/webhooks": "^9.8.4"
+    "@octokit/webhooks": "^9.8.4",
+    "csv-reader": "^1.0.8"
   },
   "devDependencies": {
     "@typeform/eslint-config": "^3.0.2",
