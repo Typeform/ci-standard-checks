@@ -1,3 +1,4 @@
+import exp from 'constants'
 import { mocked } from 'ts-jest/utils'
 
 import { Content, github } from '../infrastructure/github'
@@ -7,8 +8,10 @@ import {
   getFilesToIgnore,
   getCandidateFiles,
   isFileExtensionToBeScanned,
-  IGNOREFILE,
+  Ignorefile,
   Prediction,
+  PredictionResults,
+  printResultsAndExit,
   scanCsvForPii,
 } from './piiDetection'
 
@@ -114,7 +117,7 @@ describe('getFilesToIgnore', () => {
     github.downloadContent = jest.fn(() => {
       throw new HTTPError(404, 'Not Found')
     })
-    const result = await getFilesToIgnore(IGNOREFILE)
+    const result = await getFilesToIgnore(Ignorefile)
     expect(result).toEqual([])
   })
 
@@ -122,7 +125,7 @@ describe('getFilesToIgnore', () => {
     github.downloadContent = jest.fn(() => {
       throw new HTTPError(403, 'Forbidden')
     })
-    await expect(getFilesToIgnore(IGNOREFILE)).rejects.toThrow()
+    await expect(getFilesToIgnore(Ignorefile)).rejects.toThrow()
   })
 
   it('returns a string array with the files to be ignored', async () => {
@@ -134,7 +137,7 @@ tests/some/dir/super-fake.csv
 
     mockGithub.downloadContent.mockResolvedValue(response as Content)
 
-    const result = await getFilesToIgnore(IGNOREFILE)
+    const result = await getFilesToIgnore(Ignorefile)
     expect(result).toEqual([
       'fake-customer-data.csv',
       'tests/some/dir/super-fake.csv',
@@ -179,5 +182,50 @@ describe('isFileExtensionToBeScanned', () => {
     expect(isFileExtensionToBeScanned('another/longer/path/results.csv')).toBe(
       true
     )
+  })
+})
+
+describe('printResultsAndExit', () => {
+  it('returns true if the results are empty', () => {
+    const results: PredictionResults = []
+    expect(printResultsAndExit(results)).toBeTruthy()
+  })
+
+  it('returns true if none of the predictions were positive', () => {
+    const results: PredictionResults = [
+      {
+        file: 'some-file.csv',
+        prediction: {
+          detected: false,
+          dataType: [],
+        },
+      },
+      {
+        file: 'another-file.csv',
+        prediction: {
+          detected: false,
+        },
+      },
+    ]
+    expect(printResultsAndExit(results)).toBeTruthy()
+  })
+
+  it('returns false if any of the predictions were positive', () => {
+    const results: PredictionResults = [
+      {
+        file: 'some-file.csv',
+        prediction: {
+          detected: true,
+          dataType: ['ssn'],
+        },
+      },
+      {
+        file: 'another-file.csv',
+        prediction: {
+          detected: false,
+        },
+      },
+    ]
+    expect(printResultsAndExit(results)).toBeFalsy()
   })
 })

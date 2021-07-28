@@ -28,6 +28,11 @@ export type piiDataType = {
   regexp: RegExp
 }
 
+export type PredictionResults = {
+  file: string
+  prediction: Prediction
+}[]
+
 const piiData: piiDataType[] = [
   {
     type: 'us-phone-number',
@@ -53,18 +58,14 @@ const piiData: piiDataType[] = [
   },
 ]
 
-const FILE_EXTENSIONS_TO_SCAN = ['.csv']
-export const IGNOREFILE = '.piidetectionignore'
+const FileExtensionsToScan = ['.csv']
+export const Ignorefile = '.piidetectionignore'
 export const CsvDetectionThreshold = 0.7 // At least 70% of the CSV file lines must contain one of the detected data types
+const NotionPage = ''
 
 const piiDetection: Check = {
   name: 'pii-detection',
   async run(): Promise<boolean> {
-    // Depending on github.context.eventName (push or pull_request)
-    // the file will be downloaded differently:
-    // - push: getting the commit and then its files
-    // - pull_request: get head commit id and then its files
-
     let filesData
     if (github.context.eventName === 'push') {
       filesData = await downloadFilesDataFromPush()
@@ -77,7 +78,7 @@ const piiDetection: Check = {
       return true
     }
 
-    const ignoreFiles = await getFilesToIgnore(IGNOREFILE)
+    const ignoreFiles = await getFilesToIgnore(Ignorefile)
 
     const filesToBeScanned = getCandidateFiles(filesData, ignoreFiles)
 
@@ -86,10 +87,7 @@ const piiDetection: Check = {
       return true
     }
 
-    const results: {
-      file: string
-      prediction: Prediction
-    }[] = []
+    const results: PredictionResults = []
 
     core.info(`Scanning ${filesToBeScanned.length} files for PII`)
     for (const file of filesToBeScanned) {
@@ -107,7 +105,6 @@ const piiDetection: Check = {
 
         const ref = file.contents_url.split('?ref=')[1]
         content = await downloadFileContent(file.filename, ref)
-        // download file content to disk or memory??
       } catch (e) {
         core.error(`Error downloading ${file.filename}: ${e}`)
         continue
@@ -121,12 +118,7 @@ const piiDetection: Check = {
         })
     }
 
-    if (results.length === 0) {
-      return false
-    }
-
-    core.info(`${results.length} files detected with PII`)
-    return true
+    return printResultsAndExit(results)
   },
 }
 export default piiDetection
@@ -190,7 +182,7 @@ export async function downloadFileContent(
   filepath: string,
   ref?: string | undefined
 ): Promise<string> {
-  const response = await github.downloadContent(filepath, github.context.ref)
+  const response = await github.downloadContent(filepath, ref)
   if (!('content' in response)) throw new Error('No content in response')
 
   if (response.encoding === 'base64')
@@ -230,10 +222,36 @@ export function getCandidateFiles(
 }
 
 export function isFileExtensionToBeScanned(filename: string): boolean {
-  for (const ext of FILE_EXTENSIONS_TO_SCAN) {
+  for (const ext of FileExtensionsToScan) {
     if (filename.endsWith(ext)) {
       return true
     }
   }
   return false
+}
+
+export function printResultsAndExit(results: PredictionResults): boolean {
+  let shouldCheckPass = true
+
+  if (results.length === 0) {
+    core.info('No files with PII were detected')
+    return shouldCheckPass
+  }
+
+  for (const r of results) {
+    if (!r.prediction.detected) continue
+
+    if (r.prediction.dataType && r.prediction.dataType.length > 0) {
+      shouldCheckPass = false
+      core.info(
+        `The file ${r.file} contains ${r.prediction.dataType.toString()}`
+      )
+    }
+  }
+
+  if (!shouldCheckPass)
+    core.info(`Looks like one or more files contain Personal Identifiable Information (PII) or it's a false positive.
+Check out this Notion page to know what to do next ${NotionPage}`)
+
+  return shouldCheckPass
 }
