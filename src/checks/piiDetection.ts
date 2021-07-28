@@ -61,7 +61,8 @@ const piiData: piiDataType[] = [
 const FileExtensionsToScan = ['.csv']
 export const Ignorefile = '.piidetectionignore'
 export const CsvDetectionThreshold = 0.7 // At least 70% of the CSV file lines must contain one of the detected data types
-const NotionPage = ''
+const NotionPage =
+  'https://www.notion.so/typeform/PII-Detection-Check-11658ceb312c49a69681d2507e750748'
 
 const piiDetection: Check = {
   name: 'pii-detection',
