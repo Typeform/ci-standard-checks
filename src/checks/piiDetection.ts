@@ -67,17 +67,16 @@ const NotionPage =
 const piiDetection: Check = {
   name: 'pii-detection',
   async run(): Promise<boolean> {
-    let filesData
-    if (github.context.eventName === 'push') {
-      filesData = await downloadFilesDataFromPush()
-    } else if (github.context.eventName === 'pull_request') {
-      filesData = await downloadFilesDataFromPullRequest()
-    } else {
-      core.info(
+   if ( !['push', 'pull_request'].includes(github.context.eventName) ) {
+   core.info(
         'PII detection will only run on "push" and "pull_request" events. Skipping...'
       )
       return true
-    }
+}
+
+const filesData = github.context.eventName === 'push'
+       ? await downloadFilesDataFromPush()
+       : await downloadFilesDataFromPullRequest()
 
     const ignoreFiles = await getFilesToIgnore(Ignorefile)
 
