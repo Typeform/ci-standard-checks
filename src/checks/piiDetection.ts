@@ -189,10 +189,8 @@ export async function downloadFileContent(
   }
 
   return response.encoding === 'base64'
-     ? Buffer.from(response.content, 'base64').toString()
-     : response.content
-    return Buffer.from(response.content, 'base64').toString()
-  else return response.content
+    ? Buffer.from(response.content, 'base64').toString()
+    : response.content
 }
 
 export async function getFilesToIgnore(
