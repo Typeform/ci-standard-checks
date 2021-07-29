@@ -9,8 +9,22 @@ import { github } from '../infrastructure/github'
 
 import Check from './check'
 
-type FileData =
+type FilesData =
   Endpoints['GET /repos/{owner}/{repo}/commits/{ref}']['response']['data']['files']
+
+export type FileData = {
+  filename?: string
+  additions?: number
+  deletions?: number
+  changes?: number
+  status?: string
+  raw_url?: string
+  blob_url?: string
+  patch?: string
+  sha?: string
+  contents_url?: string
+  previous_filename?: string
+}
 
 export type PiiDataTypeName =
   | 'us-phone-number'
@@ -92,31 +106,16 @@ const piiDetection: Check = {
 
     core.info(`Scanning ${filesToBeScanned.length} files for PII`)
     for (const file of filesToBeScanned) {
-      let content: string
       try {
-        if (!file.contents_url) {
-          core.warning(`Unable to find file URL for ${JSON.stringify(file)}`)
-          continue
-        }
-
-        if (!file.filename) {
-          core.warning(`Unable to find file name for ${JSON.stringify(file)}`)
-          continue
-        }
-
-        const ref = file.contents_url.split('?ref=')[1]
-        content = await downloadFileContent(file.filename, ref)
+        const prediction = await processFile(file)
+        if (prediction.detected)
+          results.push({
+            file: file.filename ? file.filename : '',
+            prediction: prediction,
+          })
       } catch (e) {
-        core.error(`Error downloading ${file.filename}: ${e}`)
-        continue
+        core.error(`Error processing file: ${e}`)
       }
-
-      const prediction = await scanCsvForPii(content, 0.7)
-      if (prediction.detected)
-        results.push({
-          file: file.filename,
-          prediction: prediction,
-        })
     }
 
     return printResultsAndExit(results)
@@ -124,14 +123,29 @@ const piiDetection: Check = {
 }
 export default piiDetection
 
-async function downloadFilesDataFromPush(): Promise<FileData> {
+async function downloadFilesDataFromPush(): Promise<FilesData> {
   const commitData = await github.getCommit(github.context.sha)
   return commitData.files
 }
 
-async function downloadFilesDataFromPullRequest(): Promise<FileData> {
+async function downloadFilesDataFromPullRequest(): Promise<FilesData> {
   const pullPayload = github.context.payload as WebhookEventMap['pull_request']
   return github.getPullRequestFiles(pullPayload.pull_request.number)
+}
+
+export async function processFile(fileData: FileData): Promise<Prediction> {
+  if (!fileData.contents_url) {
+    throw new Error(`Unable to find file URL for ${JSON.stringify(fileData)}`)
+  }
+
+  if (!fileData.filename) {
+    throw new Error(`Unable to find file name for ${JSON.stringify(fileData)}`)
+  }
+
+  const ref = fileData.contents_url.split('?ref=')[1]
+  const content = await downloadFileContent(fileData.filename, ref)
+
+  return scanCsvForPii(content, CsvDetectionThreshold)
 }
 
 export function scanCsvForPii(
@@ -212,9 +226,9 @@ export async function getFilesToIgnore(
 }
 
 export function getCandidateFiles(
-  files: FileData,
+  files: FilesData,
   ignoreFiles: Array<string>
-): FileData {
+): FilesData {
   if (!files) throw new Error('files is undefined')
 
   const candidates = files.filter(

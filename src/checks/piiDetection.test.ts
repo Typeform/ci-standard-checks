@@ -1,4 +1,3 @@
-import exp from 'constants'
 import { mocked } from 'ts-jest/utils'
 
 import { Content, github } from '../infrastructure/github'
@@ -13,6 +12,8 @@ import {
   PredictionResults,
   printResultsAndExit,
   scanCsvForPii,
+  processFile,
+  FileData,
 } from './piiDetection'
 
 const mockGithub = mocked(github, true)
@@ -48,6 +49,49 @@ const sampleDownloadFileResponse: Content = {
     self: '',
   },
 }
+
+beforeEach(() => {
+  sampleDownloadFileResponse.content = Buffer.from('hello').toString('base64')
+  sampleDownloadFileResponse.encoding = 'base64'
+})
+
+describe('processFile', () => {
+  it('throws an error if contents_url does not exist', async () => {
+    const fileData: FileData = {}
+    await expect(() => processFile(fileData)).rejects.toThrow()
+  })
+
+  it('throws an error if filename does not exist', async () => {
+    const fileData: FileData = {
+      contents_url: 'https://somewhere.com',
+    }
+    await expect(() => processFile(fileData)).rejects.toThrow()
+  })
+
+  it('returns a prediction object with a false outcome when no PII is present', async () => {
+    const fileData: FileData = {
+      contents_url: 'https://somewhere.com',
+      filename: 'file.csv',
+    }
+
+    const response = sampleDownloadFileResponse
+    response.content = `data,data,data,data,data
+data,data,data,data,data
+data,data,data,data,data
+data,data,data,data,data`
+    response.encoding = 'none'
+
+    mockGithub.downloadContent.mockResolvedValue(response as Content)
+
+    const expectedPrediction: Prediction = {
+      detected: false,
+      dataType: [],
+    }
+
+    const result = await processFile(fileData)
+    expect(result).toEqual(expectedPrediction)
+  })
+})
 
 describe('scanCsvForPii', () => {
   it('returns a prediction with a positive detection of type us-phone-number when the content contains that type of data', async () => {
