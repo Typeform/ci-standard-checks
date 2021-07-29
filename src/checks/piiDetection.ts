@@ -188,7 +188,9 @@ export async function downloadFileContent(
     throw new Error('No content in response')
   }
 
-  if (response.encoding === 'base64')
+  return response.encoding === 'base64'
+     ? Buffer.from(response.content, 'base64').toString()
+     : response.content
     return Buffer.from(response.content, 'base64').toString()
   else return response.content
 }
