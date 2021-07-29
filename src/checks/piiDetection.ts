@@ -67,16 +67,17 @@ const NotionPage =
 const piiDetection: Check = {
   name: 'pii-detection',
   async run(): Promise<boolean> {
-   if ( !['push', 'pull_request'].includes(github.context.eventName) ) {
-   core.info(
+    if (!['push', 'pull_request'].includes(github.context.eventName)) {
+      core.info(
         'PII detection will only run on "push" and "pull_request" events. Skipping...'
       )
       return true
-}
+    }
 
-const filesData = github.context.eventName === 'push'
-       ? await downloadFilesDataFromPush()
-       : await downloadFilesDataFromPullRequest()
+    const filesData =
+      github.context.eventName === 'push'
+        ? await downloadFilesDataFromPush()
+        : await downloadFilesDataFromPullRequest()
 
     const ignoreFiles = await getFilesToIgnore(Ignorefile)
 
@@ -130,7 +131,7 @@ async function downloadFilesDataFromPush(): Promise<FileData> {
 
 async function downloadFilesDataFromPullRequest(): Promise<FileData> {
   const pullPayload = github.context.payload as WebhookEventMap['pull_request']
-  return await github.getPullRequestFiles(pullPayload.pull_request.number)
+  return github.getPullRequestFiles(pullPayload.pull_request.number)
 }
 
 export function scanCsvForPii(
@@ -183,7 +184,9 @@ export async function downloadFileContent(
   ref?: string | undefined
 ): Promise<string> {
   const response = await github.downloadContent(filepath, ref)
-  if (!('content' in response)) throw new Error('No content in response')
+  if (!('content' in response)) {
+    throw new Error('No content in response')
+  }
 
   if (response.encoding === 'base64')
     return Buffer.from(response.content, 'base64').toString()
@@ -200,7 +203,9 @@ export async function getFilesToIgnore(
     ignoreFiles = content.split('\n').filter((line) => line.length > 0)
   } catch (e) {
     // Skipping error if the file added in the ignorefile doesn't exist (HTTP 404)
-    if (!e.status || (e.status && e.status !== 404)) throw e
+    if (!e.status || (e.status && e.status !== 404)) {
+      throw e
+    }
   }
 
   return ignoreFiles
