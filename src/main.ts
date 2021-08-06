@@ -3,6 +3,7 @@ import * as core from '@actions/core'
 import Check from './checks/check'
 import bashCheck from './checks/bash'
 import jiraLinked from './checks/jiraLinked'
+import piiDetection from './checks/piiDetection'
 import { triggeredByBot, checkSkipped } from './conditions'
 
 const checks: Check[] = [
@@ -11,6 +12,7 @@ const checks: Check[] = [
     inputs: ['githubToken', 'dockerUsername', 'dockerPassword'],
   }),
   jiraLinked,
+  piiDetection,
 ]
 
 async function run(): Promise<void> {
