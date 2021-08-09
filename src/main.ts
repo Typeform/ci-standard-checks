@@ -26,6 +26,7 @@ async function run(): Promise<void> {
       if (checkSkipped(check)) {
         core.info(`Check '${check.name}' skipped in the workflow`)
       } else {
+        core.info(`Starting check ${check.name}`)
         core.startGroup(`check: ${check.name}`)
         await check.run()
         core.endGroup()
