@@ -254,7 +254,7 @@ describe('printResultsAndExit', () => {
     expect(printResultsAndExit(results)).toBeTruthy()
   })
 
-  it('returns false if any of the predictions were positive', () => {
+  it('throws an error if any of the predictions were positive', () => {
     const results: PredictionResults = [
       {
         file: 'some-file.csv',
@@ -270,6 +270,6 @@ describe('printResultsAndExit', () => {
         },
       },
     ]
-    expect(printResultsAndExit(results)).toBeFalsy()
+    expect(() => printResultsAndExit(results)).toThrow()
   })
 })

@@ -15,6 +15,8 @@ easier time rolling out new checks to teams. Win-win!
   again!
 - *secrets-scan*: make sure you're never ever ever commiting a secret to
   your repo. _Shhh, it's a secret_ :shushing_face:
+- *pii-detection*: make sure you're not uploading files with Personal Identifiable
+  Information to your repo.
 
 ## How to use it
 
