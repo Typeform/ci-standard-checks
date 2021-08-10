@@ -257,20 +257,23 @@ export function printResultsAndExit(results: PredictionResults): boolean {
     return shouldCheckPass
   }
 
+  let errorMessage = ''
   for (const r of results) {
     if (!r.prediction.detected) continue
 
     if (r.prediction.dataType && r.prediction.dataType.length > 0) {
       shouldCheckPass = false
-      core.info(
-        `The file ${r.file} contains ${r.prediction.dataType.toString()}`
-      )
+      errorMessage += `The file ${
+        r.file
+      } contains ${r.prediction.dataType.toString()}\n`
     }
   }
 
-  if (!shouldCheckPass)
-    core.info(`Looks like one or more files contain Personal Identifiable Information (PII) or it's a false positive.
-Check out this Notion page to know what to do next ${NotionPage}`)
+  if (!shouldCheckPass) {
+    errorMessage += `Looks like one or more files contain Personal Identifiable Information (PII) or it's a false positive.\n`
+    errorMessage += `Check out this Notion page to know what to do next ${NotionPage}\n`
+    throw new Error(errorMessage)
+  }
 
   return shouldCheckPass
 }
