@@ -9,12 +9,6 @@ inputs:
   githubToken:
     required: true
     description: 'The github token to get PR info when checking for Jira Issue key'
-  dockerUsername:
-    required: true
-    description: 'The docker username with access to Typeform gitleaks image'
-  dockerPassword:
-    required: true
-    description: 'The docker password with access to Typeform gitleaks image'
 runs:
   using: 'node12'
   main: 'dist/index.js'

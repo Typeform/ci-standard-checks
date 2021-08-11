@@ -9,15 +9,13 @@ then
     echo "Unable to find docker. Is it installed and added to your \$PATH?"
     exit 1
 fi
-# Check if user is logged in to quay.io
 
 DOCKERREGISTRY=quay.io
-docker login -u=${DOCKERUSERNAME} -p=${DOCKERPASSWORD} ${DOCKERREGISTRY}
 docker pull ${DOCKERREGISTRY}/typeform/gitleaks-config
 exit_code=$?
 
 if [ ! $exit_code -eq 0 ]; then
-    echo "Unable to pull gitleaks container image. Are you logged in ${DOCKERREGISTRY}?"
+    echo "Unable to pull gitleaks-config image"
     exit 1
 fi
 

@@ -16,13 +16,9 @@ mocked(getScriptsDir).mockReturnValue('/scripts')
 test('bash check calls script exec', () => {
   mockExec.exec.mockResolvedValue(0)
 
-  mockCore.getInput
-    .mockReturnValueOnce('username')
-    .mockReturnValueOnce('password')
-
   const c = bashCheck({
     name: 'secret-scan',
-    inputs: ['dockerUsername', 'dockerPassword'],
+    inputs: [],
   })
 
   c.run()
@@ -31,8 +27,4 @@ test('bash check calls script exec', () => {
   const call = mockExec.exec.mock.calls[0]
   expect(call[0]).toEqual('bash')
   expect(call[1]).toEqual(['/scripts/secret-scan/run.sh'])
-
-  const execOptions = call[2]
-  expect(execOptions?.env?.DOCKERUSERNAME).toEqual('username')
-  expect(execOptions?.env?.DOCKERPASSWORD).toEqual('password')
 })
