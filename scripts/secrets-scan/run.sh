@@ -3,6 +3,9 @@
 # exit when any command fails
 set -e
 
+echo "::warning file=run.sh,line=16,col=1::Unable to pull gitleaks-config image"
+
+
 # Check if docker is installed
 if ! command -v "docker" &> /dev/null
 then
@@ -16,7 +19,7 @@ exit_code=$?
 
 if [ ! $exit_code -eq 0 ]; then
     echo "Unable to pull gitleaks-config image"
-    exit 1
+    exit 0
 fi
 
 repo_dir=$GITHUB_WORKSPACE
