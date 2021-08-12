@@ -3,7 +3,7 @@
 # exit when any command fails
 set -e
 
-echo "::warning file=run.sh,line=16,col=1::Unable to pull gitleaks-config image"
+echo "::warning file=run.sh,line=16,col=1::TESTUnable to pull gitleaks-config image"
 
 
 # Check if docker is installed
