@@ -10,6 +10,7 @@ on:
 
 jobs:
   ci-standard-checks:
+    if: ${{ github.repository_owner == 'test' }}
     runs-on: [ubuntu-latest]
 
     steps:
