@@ -1,5 +1,4 @@
 import { mocked } from 'ts-jest/utils'
-
 import { github, PullsGetResponse } from '../infrastructure/github'
 
 import { BOT_USERS, triggeredByBot } from './triggeredByBot'
