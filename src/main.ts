@@ -5,6 +5,7 @@ import bashCheck from './checks/bash'
 import jiraLinked from './checks/jiraLinked'
 import piiDetection from './checks/piiDetection'
 import { triggeredByBot, checkSkipped } from './conditions'
+import { belongsToTypeformOrg } from './conditions/belongsToTypeformOrg'
 
 const checks: Check[] = [
   bashCheck({
@@ -16,6 +17,11 @@ const checks: Check[] = [
 ]
 
 async function run(): Promise<void> {
+  if (!(await belongsToTypeformOrg())) {
+    core.info('Executing outside of Typeform org, skipping all checks')
+    return
+  }
+
   if (await triggeredByBot()) {
     core.info('Action triggered by bot, skipping all checks')
     return

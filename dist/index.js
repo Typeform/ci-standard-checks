@@ -419,6 +419,33 @@ exports.printResultsAndExit = printResultsAndExit;
 
 /***/ }),
 
+/***/ 2705:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.belongsToTypeformOrg = void 0;
+const github_1 = __nccwpck_require__(5679);
+function belongsToTypeformOrg() {
+    return __awaiter(this, void 0, void 0, function* () {
+        return github_1.github.context.repo.owner === 'Typeform';
+    });
+}
+exports.belongsToTypeformOrg = belongsToTypeformOrg;
+
+
+/***/ }),
+
 /***/ 9741:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -718,6 +745,7 @@ const bash_1 = __importDefault(__nccwpck_require__(2888));
 const jiraLinked_1 = __importDefault(__nccwpck_require__(9496));
 const piiDetection_1 = __importDefault(__nccwpck_require__(5246));
 const conditions_1 = __nccwpck_require__(383);
+const belongsToTypeformOrg_1 = __nccwpck_require__(2705);
 const checks = [
     bash_1.default({
         name: 'secrets-scan',
@@ -728,6 +756,10 @@ const checks = [
 ];
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        if (!(yield belongsToTypeformOrg_1.belongsToTypeformOrg())) {
+            core.info('Executing outside of Typeform org, skipping all checks');
+            return;
+        }
         if (yield conditions_1.triggeredByBot()) {
             core.info('Action triggered by bot, skipping all checks');
             return;
