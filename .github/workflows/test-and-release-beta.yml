@@ -52,12 +52,12 @@ jobs:
           repository_url: https://github.com/Typeform/ci-standard-checks.git
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Update major version tag
+      - name: Update beta version tag
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
-          git config --global user.email "seti@typeform.com"
-          git config --global user.name "SETI Bot"
-          git tag -fa v1-beta -m "Update v${TAG}-beta tag"
+          git config --global user.email "setizaps@typeform.com"
+          git config --global user.name "Bender Bot Tf"
+          git tag -fa v${TAG}-beta -m "Update v${TAG}-beta tag"
           git push origin v${TAG}-beta --force
         env:
           TAG: ${{ steps.semantic.outputs.release-major }}

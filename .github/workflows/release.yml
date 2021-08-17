@@ -10,10 +10,10 @@ jobs:
         uses: actions/checkout@v2
       - name: Update major version tag
         run: |
-          git config --global user.email "seti@typeform.com"
-          git config --global user.name "SETI Bot"
-          git tag -fa v1 -m "Update ${TAG} tag"
-          git push origin ${TAG} --force
+          git config --global user.email "setizaps@typeform.com"
+          git config --global user.name "Bender Bot Tf"
+          git tag -fa v${TAG} -m "Update v${TAG} tag"
+          git push origin v${TAG} --force
         env:
-          TAG: v1
+          TAG: 1
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
