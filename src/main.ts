@@ -14,6 +14,10 @@ const checks: Check[] = [
   }),
   jiraLinked,
   piiDetection,
+  bashCheck({
+    name: 'validate-openapi',
+    inputs: []
+  })
 ]
 
 async function run(): Promise<void> {
