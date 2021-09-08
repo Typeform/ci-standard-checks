@@ -16,8 +16,8 @@ const checks: Check[] = [
   piiDetection,
   bashCheck({
     name: 'validate-openapi',
-    inputs: []
-  })
+    inputs: [],
+  }),
 ]
 
 async function run(): Promise<void> {
