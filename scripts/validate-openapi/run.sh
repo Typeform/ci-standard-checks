@@ -3,9 +3,23 @@
 # exit when any command fails
 set -e
 
-if [ ! -f $(pwd)/openapi.yaml ]; then
-    echo "Skipping OpenAPI validation."
-    exit 0
+if ! command -v "jq" &> /dev/null
+then
+    echo "Unable to find jq. Is it installed and added to your \$PATH?"
+    exit 1
+fi
+
+pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/commits"
+echo "Retrieving PR#$pull_number files info from ${PR_URL}"
+
+MODIFIED_API=$(curl -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL | \
+  jq '.[] | select(.filename == "openapi.yaml")' | \
+  wc -m)
+
+if [ $MODIFIED_API -eq 0 ]; then
+  echo "Skipping OpenAPI validation."
+  exit 0
 fi
 
 if ! command -v "npm" &> /dev/null
