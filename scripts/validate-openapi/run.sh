@@ -9,18 +9,17 @@ then
     exit 1
 fi
 
-pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
-echo "Retrieving PR#$pull_number files info from ${PR_URL}"
-
 if [ -z "${INPUT_GITHUBTOKEN}" ]; then
   echo "::error:: GitHub token is empty"
   exit 1
 fi
 
-curl -s -H "Authorization: Bearer ${INPUT_GITHUBTOKEN}" $PR_URL | tee  test.json
-MODIFIED_API=$(cat test.json |jq '.[] | select(.filename == "openapi.yaml")' | wc -m)
-echo $MODIFIED_API
+pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
+echo "Retrieving PR#$pull_number files info from ${PR_URL}"
+
+AUTH_HEADER="Authorization: Bearer ${INPUT_GITHUBTOKEN}"
+MODIFIED_API=$(curl -f -s -H "$AUTH_HEADER" "$PR_URL" | jq '.[] | select(.filename == "openapi.yaml")' | wc -m)
 
 if [ $MODIFIED_API -eq 0 ]; then
   echo "Skipping OpenAPI validation."
@@ -29,7 +28,7 @@ fi
 
 if ! command -v "npm" &> /dev/null
 then
-    echo "Unable to find npm. Is it installed and added to your \$PATH?"
+    echo "::error:: Unable to find npm. Is it installed and added to your \$PATH?"
     exit 1
 fi
 
