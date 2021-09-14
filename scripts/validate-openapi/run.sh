@@ -10,7 +10,7 @@ then
 fi
 
 pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/commits"
+PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
 echo "Retrieving PR#$pull_number files info from ${PR_URL}"
 
 MODIFIED_API=$(curl -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL | \
