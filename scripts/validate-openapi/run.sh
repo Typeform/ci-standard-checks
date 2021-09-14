@@ -13,7 +13,12 @@ pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
 PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
 echo "Retrieving PR#$pull_number files info from ${PR_URL}"
 
-curl -s -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL | tee  test.json
+if [ -z "${INPUT_GITHUBTOKEN}" ]; then
+  echo "::error:: GitHub token is empty"
+  exit 1
+fi
+
+curl -s -H "Authorization: Bearer ${INPUT_GITHUBTOKEN}" $PR_URL | tee  test.json
 MODIFIED_API=$(cat test.json |jq '.[] | select(.filename == "openapi.yaml")' | wc -m)
 echo $MODIFIED_API
 
