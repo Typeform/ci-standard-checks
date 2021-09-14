@@ -32,10 +32,10 @@ then
     exit 1
 fi
 
-npx openapi bundle --dereferenced openapi.yaml > openapi.der.yaml
+npx @redocly/openapi-cli bundle --dereferenced openapi.yaml > openapi.der.yaml
 
-npx swagger-cli validate openapi.yaml
+npx @apidevtools/swagger-cli validate openapi.yaml
 
-npx swagger-cli validate openapi.der.yaml
+npx @apidevtools/swagger-cli validate openapi.der.yaml
 
-npx openapi lint openapi.yaml openapi.der.yaml
+npx @redocly/openapi-cli lint openapi.yaml openapi.der.yaml
