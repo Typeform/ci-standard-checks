@@ -16,7 +16,7 @@ const checks: Check[] = [
   piiDetection,
   bashCheck({
     name: 'validate-openapi',
-    inputs: ['githubToken'],
+    inputs: [],
   }),
 ]
 
