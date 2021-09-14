@@ -26,18 +26,16 @@ if [ $MODIFIED_API -eq 0 ]; then
   exit 0
 fi
 
-if ! command -v "npm" &> /dev/null
+if ! command -v "npx" &> /dev/null
 then
-    echo "::error:: Unable to find npm. Is it installed and added to your \$PATH?"
+    echo "::error:: Unable to find npx. Are you using npm with version >= 5.2.0 ?"
     exit 1
 fi
 
-npm install -g @apidevtools/swagger-cli @redocly/openapi-cli
+npx openapi bundle --dereferenced openapi.yaml > openapi.der.yaml
 
-openapi bundle --dereferenced openapi.yaml > openapi.der.yaml
+npx swagger-cli validate openapi.yaml
 
-swagger-cli validate openapi.yaml
+npx swagger-cli validate openapi.der.yaml
 
-swagger-cli validate openapi.der.yaml
-
-openapi lint openapi.yaml openapi.der.yaml
+npx openapi lint openapi.yaml openapi.der.yaml
