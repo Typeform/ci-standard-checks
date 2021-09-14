@@ -753,6 +753,10 @@ const checks = [
     }),
     jiraLinked_1.default,
     piiDetection_1.default,
+    bash_1.default({
+        name: 'validate-openapi',
+        inputs: [],
+    }),
 ];
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
