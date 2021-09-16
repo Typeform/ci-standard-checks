@@ -491,11 +491,52 @@ exports.checkSkipped = checkSkipped;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.checkSkipped = exports.triggeredByBot = void 0;
+exports.isDraftPullRequest = exports.belongsToTypeformOrg = exports.checkSkipped = exports.triggeredByBot = void 0;
 const triggeredByBot_1 = __nccwpck_require__(6754);
 Object.defineProperty(exports, "triggeredByBot", ({ enumerable: true, get: function () { return triggeredByBot_1.triggeredByBot; } }));
 const checkSkipped_1 = __nccwpck_require__(9741);
 Object.defineProperty(exports, "checkSkipped", ({ enumerable: true, get: function () { return checkSkipped_1.checkSkipped; } }));
+const belongsToTypeformOrg_1 = __nccwpck_require__(2705);
+Object.defineProperty(exports, "belongsToTypeformOrg", ({ enumerable: true, get: function () { return belongsToTypeformOrg_1.belongsToTypeformOrg; } }));
+const isDraftPullRequest_1 = __nccwpck_require__(7565);
+Object.defineProperty(exports, "isDraftPullRequest", ({ enumerable: true, get: function () { return isDraftPullRequest_1.isDraftPullRequest; } }));
+
+
+/***/ }),
+
+/***/ 7565:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isDraftPullRequest = void 0;
+const github_1 = __nccwpck_require__(5679);
+function isDraftPullRequest() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (github_1.github.context.eventName === 'pull_request') {
+            return checkPullRequest();
+        }
+        return false;
+    });
+}
+exports.isDraftPullRequest = isDraftPullRequest;
+function checkPullRequest() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pullPayload = github_1.github.context.payload;
+        const pr = yield github_1.github.getPullRequest(pullPayload.pull_request.number);
+        return !!pr.draft;
+    });
+}
 
 
 /***/ }),
@@ -745,7 +786,6 @@ const bash_1 = __importDefault(__nccwpck_require__(2888));
 const jiraLinked_1 = __importDefault(__nccwpck_require__(9496));
 const piiDetection_1 = __importDefault(__nccwpck_require__(5246));
 const conditions_1 = __nccwpck_require__(383);
-const belongsToTypeformOrg_1 = __nccwpck_require__(2705);
 const checks = [
     bash_1.default({
         name: 'secrets-scan',
@@ -760,12 +800,16 @@ const checks = [
 ];
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!(yield belongsToTypeformOrg_1.belongsToTypeformOrg())) {
+        if (!(yield conditions_1.belongsToTypeformOrg())) {
             core.info('Executing outside of Typeform org, skipping all checks');
             return;
         }
         if (yield conditions_1.triggeredByBot()) {
             core.info('Action triggered by bot, skipping all checks');
+            return;
+        }
+        if (!(yield conditions_1.isDraftPullRequest())) {
+            core.info('Pull Request is a draft, skipping all checks');
             return;
         }
         for (const check of checks) {
