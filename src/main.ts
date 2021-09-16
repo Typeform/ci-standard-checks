@@ -4,8 +4,12 @@ import Check from './checks/check'
 import bashCheck from './checks/bash'
 import jiraLinked from './checks/jiraLinked'
 import piiDetection from './checks/piiDetection'
-import { triggeredByBot, checkSkipped } from './conditions'
-import { belongsToTypeformOrg } from './conditions/belongsToTypeformOrg'
+import {
+  triggeredByBot,
+  belongsToTypeformOrg,
+  checkSkipped,
+  isDraftPullRequest,
+} from './conditions'
 
 const checks: Check[] = [
   bashCheck({
@@ -28,6 +32,11 @@ async function run(): Promise<void> {
 
   if (await triggeredByBot()) {
     core.info('Action triggered by bot, skipping all checks')
+    return
+  }
+
+  if (!(await isDraftPullRequest())) {
+    core.info('Pull Request is a draft, skipping all checks')
     return
   }
 
