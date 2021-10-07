@@ -17,6 +17,7 @@ easier time rolling out new checks to teams. Win-win!
   your repo. _Shhh, it's a secret_ :shushing_face:
 - *pii-detection*: make sure you're not uploading files with Personal Identifiable
   Information to your repo.
+- *validate-openapi*: perform a validation and linting of the openapi.yaml if exist
 
 ## How to use it
 
