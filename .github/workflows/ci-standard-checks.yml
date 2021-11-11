@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
 
       - name: CI Standard Checks
-        uses: Typeform/ci-standard-checks@v1-beta
+        uses: Typeform/ci-standard-checks@EINT-1671
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           dockerUsername: ${{ secrets.GITLEAKS_DOCKER_USERNAME }}
