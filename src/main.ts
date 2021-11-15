@@ -35,11 +35,6 @@ async function run(): Promise<void> {
     return
   }
 
-  var a = isDraftPullRequest()
-
-  core.info('Checking if PR is draft')
-  core.info(String(a))
-
   if (await isDraftPullRequest()) {
     core.info('Pull Request is a draft, skipping all checks')
     return

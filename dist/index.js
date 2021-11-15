@@ -808,9 +808,6 @@ function run() {
             core.info('Action triggered by bot, skipping all checks');
             return;
         }
-        var a = conditions_1.isDraftPullRequest();
-        core.info('Checking if PR is draft');
-        core.info(String(a));
         if (yield conditions_1.isDraftPullRequest()) {
             core.info('Pull Request is a draft, skipping all checks');
             return;
