@@ -35,7 +35,7 @@ async function run(): Promise<void> {
     return
   }
 
-  if (!(await isDraftPullRequest())) {
+  if (await isDraftPullRequest()) {
     core.info('Pull Request is a draft, skipping all checks')
     return
   }
