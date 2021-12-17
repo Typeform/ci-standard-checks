@@ -13,15 +13,18 @@ fi
 file_to_search=Dockerfile
 repo_dir=$GITHUB_WORKSPACE
 repo_name="$(basename "$repo_dir")"
+random_number=${RANDOM}
 echo $repo_dir
 echo $repo_name
 
 if [ ! -f "$repo_dir/$file_to_search" ]; then
     echo "This repo appear to not contain any Dockerfile, skipping container security scans"
     exit 0
-else
-    echo "This repo contain a dockerfile, let's built it and scan it"
 fi
 
+#building docker images
+docker build -t $(repo_name):$(random_number) .
+
+docker images
 # TO DO
 exit 0
