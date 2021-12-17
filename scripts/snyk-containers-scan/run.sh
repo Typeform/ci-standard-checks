@@ -23,9 +23,10 @@ if [ ! -f "$repo_dir/$file_to_search" ]; then
 fi
 
 #building docker image
-cd $repo_dir
+# cd $repo_dir
 # docker build -t $repo_name:$timestamp .
-
+echo $SNYKTOKEN
+# docker run -t -e SNYK_TOKEN='8f644bd5-74e1-454e-a6d5-5626fe595a92' -v "/root/dummy-repo:/project" --entrypoint=snyk snyk:latest test --docker elasticsearch:6.8.13 --file=/project/Dockerfile --severity-threshold=critical
 
 
 

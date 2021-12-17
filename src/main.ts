@@ -18,7 +18,7 @@ const checks: Check[] = [
   }),
   bashCheck({
     name: 'snyk-containers-scan',
-    inputs: [],
+    inputs: ['snykToken'],
   }),
   jiraLinked,
   piiDetection,
