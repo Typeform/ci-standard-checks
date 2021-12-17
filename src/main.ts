@@ -16,6 +16,10 @@ const checks: Check[] = [
     name: 'secrets-scan',
     inputs: ['githubToken', 'dockerUsername', 'dockerPassword'],
   }),
+  bashCheck({
+    name: 'snyk-containers-scan',
+    inputs: [],
+  }),
   jiraLinked,
   piiDetection,
   bashCheck({

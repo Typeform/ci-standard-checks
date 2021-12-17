@@ -791,6 +791,10 @@ const checks = [
         name: 'secrets-scan',
         inputs: ['githubToken', 'dockerUsername', 'dockerPassword'],
     }),
+    bash_1.default({
+        name: 'snyk-containers-scan',
+        inputs: [],
+    }),
     jiraLinked_1.default,
     piiDetection_1.default,
     bash_1.default({
