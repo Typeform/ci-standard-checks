@@ -19,6 +19,8 @@ echo $repo_name
 if [ ! -f "$repo_dir/$file_to_search" ]; then
     echo "This repo appear to not contain any Dockerfile, skipping container security scans"
     exit 0
+else
+    echo "This repo contain a dockerfile, let's built it and scan it"
 fi
 
 # TO DO
