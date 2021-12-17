@@ -26,7 +26,6 @@ fi
 
 #building docker image
 cd $repo_dir
-docker login
 docker build -t $repo_name:$timestamp .
 docker run --rm --name=snyk_scanner \
     -t \
