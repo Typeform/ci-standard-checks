@@ -13,7 +13,7 @@ fi
 file_to_search=Dockerfile
 repo_dir=$GITHUB_WORKSPACE
 repo_name="$(basename "$repo_dir")"
-random_number=${RANDOM}
+timestamp=$(date +%s)
 echo $repo_dir
 echo $repo_name
 
@@ -22,11 +22,12 @@ if [ ! -f "$repo_dir/$file_to_search" ]; then
     exit 0
 fi
 
-#building docker images
-
+#building docker image
 cd $repo_dir
-ls -all
-docker build -t $repo_name:$random_number .
+# docker build -t $repo_name:$timestamp .
+
+
+
 
 docker images
 # TO DO
