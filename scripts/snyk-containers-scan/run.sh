@@ -23,7 +23,10 @@ if [ ! -f "$repo_dir/$file_to_search" ]; then
 fi
 
 #building docker images
-docker build -t $(repo_name):$(random_number) .
+
+cd $repo_dir
+ls -all
+docker build -t $repo_name:$random_number .
 
 docker images
 # TO DO
