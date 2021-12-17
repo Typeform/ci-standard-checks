@@ -13,6 +13,8 @@ fi
 file_to_search=Dockerfile
 repo_dir=$GITHUB_WORKSPACE
 repo_name="$(basename "$repo_dir")"
+echo $repo_dir
+echo $repo_name
 
 if [ ! -f "$repo_dir/$file_to_search" ]; then
     echo "This repo appear to not contain any Dockerfile, skipping container security scans"
@@ -20,5 +22,4 @@ if [ ! -f "$repo_dir/$file_to_search" ]; then
 fi
 
 # TO DO
-
 exit 0
