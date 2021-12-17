@@ -26,6 +26,7 @@ fi
 
 #building docker image
 cd $repo_dir
+docker login
 docker build -t $repo_name:$timestamp .
 docker run --rm --name=snyk_scanner \
     -t \
@@ -37,5 +38,19 @@ docker run --rm --name=snyk_scanner \
     --docker ${repo_name}:${timestamp} \
     --file=${docker_workspace}/${file_to_search} \
     --severity-threshold=${severity_threshold}
+
+exit_code=$?
+
+if [ $exit_code -eq 0 ]; then
+    echo "Vulnerabilities scan finished. No ${severity_threshold} vulnerabilities were found"
+elif [ $exit_code -eq 1 ]; then
+    echo -e "Scan finished. Some ${severity_threshold} vulnerabilities were found, please fix it"
+elif [ $exit_code -eq 2 ]; then
+    echo -e "We got a situation here, snyk program failed to complete his task"
+elif [ $exit_code -eq 3 ]; then
+    echo -e "Well, that should not happen!!"
+else
+    echo "Error scanning"
+fi
 
 exit 0
