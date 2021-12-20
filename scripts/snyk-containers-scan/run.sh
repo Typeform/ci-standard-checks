@@ -38,19 +38,19 @@ fi
 # 	--file=${docker_workspace}/${file_to_search} \
 # 	--severity-threshold=${severity_threshold}
 
-docker pull 567716553783.dkr.ecr.us-east-1.amazonaws.com/security-dummy-repo:1578715105
-exit_code=$?
-
-if [ $exit_code -eq 0 ]; then
-    echo "Vulnerabilities scan finished. No ${severity_threshold} vulnerabilities were found"
-elif [ $exit_code -eq 1 ]; then
-    echo -e "Scan finished. Some ${severity_threshold} vulnerabilities were found, please fix it"
-elif [ $exit_code -eq 2 ]; then
-    echo -e "We got a situation here, snyk program failed to complete his task"
-elif [ $exit_code -eq 3 ]; then
-    echo -e "Well, that should not happen!!"
-else
-    echo "Error scanning"
-fi
-
+# docker pull 567716553783.dkr.ecr.us-east-1.amazonaws.com/security-dummy-repo:1578715105
+# exit_code=$?
+#
+# if [ $exit_code -eq 0 ]; then
+#     echo "Vulnerabilities scan finished. No ${severity_threshold} vulnerabilities were found"
+# elif [ $exit_code -eq 1 ]; then
+#     echo -e "Scan finished. Some ${severity_threshold} vulnerabilities were found, please fix it"
+# elif [ $exit_code -eq 2 ]; then
+#     echo -e "We got a situation here, snyk program failed to complete his task"
+# elif [ $exit_code -eq 3 ]; then
+#     echo -e "Well, that should not happen!!"
+# else
+#     echo "Error scanning"
+# fi
+#
 exit 0
