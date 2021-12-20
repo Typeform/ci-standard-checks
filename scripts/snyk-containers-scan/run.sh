@@ -38,7 +38,7 @@ fi
 # 	--file=${docker_workspace}/${file_to_search} \
 # 	--severity-threshold=${severity_threshold}
 
-docker pull 567716553783.dkr.ecr.us-east-1.amazonaws.com/security-dummy-repo:latest
+docker pull 567716553783.dkr.ecr.us-east-1.amazonaws.com/security-dummy-repo:1578715105
 exit_code=$?
 
 if [ $exit_code -eq 0 ]; then
