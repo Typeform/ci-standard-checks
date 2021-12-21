@@ -34,7 +34,7 @@ docker run --rm --name=snyk_scanner \
 	-t \
 	-e SNYK_TOKEN=${SNYKTOKEN} \
 	-v "${repo_dir}:${docker_workspace}" \
-    -v /var/run/docker.sock:/var/run/docker.sock
+    -v /var/run/docker.sock:/var/run/docker.sock \
 	--entrypoint=snyk \
 	567716553783.dkr.ecr.us-east-1.amazonaws.com/security-dummy-repo:1603871124 \
 	test \
