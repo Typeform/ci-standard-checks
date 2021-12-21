@@ -26,7 +26,7 @@ fi
 #building docker image
 cd $repo_dir
 docker build -t $repo_name:$timestamp . > /dev/null 2>&1
-echo ">>>>>>> RUNINNG SCAN >>>>>>>>>>>"
+echo ">>>>>>> RUNINNG SCAN 1 >>>>>>>>>>>"
 docker run --rm --name=snyk_scanner \
 	-t \
 	-e SNYK_TOKEN=${SNYKTOKEN} \
