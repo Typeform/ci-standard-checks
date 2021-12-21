@@ -25,10 +25,7 @@ fi
 
 #building docker image
 cd $repo_dir
-# docker build -t $repo_name:$timestamp . > /dev/null 2>&1
-echo ">>>>>>> RUNINNG BUILD >>>>>>>>>>>"
 docker build -t $repo_name:$timestamp . > /dev/null 2>&1
-echo ">>>>>>> RUNINNG SCAN >>>>>>>>>>>"
 set +e
 docker run --rm --name=snyk_scanner \
     -t \
@@ -43,12 +40,9 @@ docker run --rm --name=snyk_scanner \
     --severity-threshold=${severity_threshold} \
     > $stdout_file 2>&1
 
-echo ">>>>>>> RUNINNG CAT >>>>>>>>>>>"
-# cat $stdout_file
-# while IFS= read -r line; do echo $line; done < $stdout_file
-grep -v 'Analyzing' $stdout_file
-
 exit_code=$?
+
+grep -v 'Analyzing' $stdout_file
 
 if [ $exit_code -eq 0 ]; then
     echo "Vulnerabilities scan finished. No ${severity_threshold} vulnerabilities were found"
