@@ -25,8 +25,11 @@ fi
 
 #building docker image
 cd $repo_dir
-docker build -t $repo_name:$timestamp . > /dev/null 2>&1
-echo ">>>>>>> RUNINNG SCAN 1 >>>>>>>>>>>"
+# docker build -t $repo_name:$timestamp . > /dev/null 2>&1
+echo ">>>>>>> RUNINNG BUILD >>>>>>>>>>>"
+docker build -t $repo_name:$timestamp . > $stdout_file 2>&1
+ls -la
+echo ">>>>>>> RUNINNG SCAN >>>>>>>>>>>"
 docker run --rm --name=snyk_scanner \
 	-t \
 	-e SNYK_TOKEN=${SNYKTOKEN} \
@@ -42,7 +45,6 @@ docker run --rm --name=snyk_scanner \
 
 exit_code=$?
 echo "printing to >>>>>>"$stdout_file
-ls -la
 cat $stdout_file
 
 if [ $exit_code -eq 0 ]; then
