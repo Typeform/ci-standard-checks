@@ -37,7 +37,7 @@ docker run --rm --name=snyk_scanner \
 	test \
 	--docker ${repo_name}:${timestamp} \
 	--file=${docker_workspace}/${file_to_search} \
-	--severity-threshold=${severity_threshold} > stdout_file 2>&1
+	--severity-threshold=${severity_threshold}
 
 
 exit_code=$?
