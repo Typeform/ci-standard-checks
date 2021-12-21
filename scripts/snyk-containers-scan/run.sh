@@ -29,6 +29,8 @@ cd $repo_dir
 echo ">>>>>>> RUNINNG BUILD >>>>>>>>>>>"
 docker build -t $repo_name:$timestamp . > $stdout_file 2>&1
 ls -la
+echo ">>>>>>> RUNINNG CAT >>>>>>>>>>>"
+cat $stdout_file
 echo ">>>>>>> RUNINNG SCAN >>>>>>>>>>>"
 docker run --rm --name=snyk_scanner \
 	-t \
