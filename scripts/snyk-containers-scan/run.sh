@@ -42,8 +42,12 @@ docker run --rm --name=snyk_scanner \
 	test \
 	--docker ${repo_name}:${timestamp} \
 	--file=${docker_workspace}/${file_to_search} \
-	--severity-threshold=${severity_threshold}
+	--severity-threshold=${severity_threshold} \
+    > $stdout_file 2>&1
 
+
+echo ">>>>>>> RUNINNG CAT >>>>>>>>>>>"
+cat $stdout_file
 
 exit_code=$?
 echo "printing to >>>>>>"$stdout_file
