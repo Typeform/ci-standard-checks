@@ -33,7 +33,6 @@ echo ">>>>>>> RUNINNG CAT >>>>>>>>>>>"
 cat $stdout_file
 echo ">>>>>>> RUNINNG SCAN >>>>>>>>>>>"
 docker run --rm --name=snyk_scanner \
-	-t \
 	-e SNYK_TOKEN=${SNYKTOKEN} \
 	-v "${repo_dir}:${docker_workspace}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
