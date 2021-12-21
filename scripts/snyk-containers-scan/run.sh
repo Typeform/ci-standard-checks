@@ -16,7 +16,7 @@ repo_dir=$GITHUB_WORKSPACE
 docker_workspace=/opt/workspace/
 repo_name="$(basename "$repo_dir")"
 timestamp=$(date +%s)
-stdout_file=/tmp/${repo_name}.${timestamp}
+stdout_file=${repo_name}.${timestamp}
 
 if [ ! -f "$repo_dir/$file_to_search" ]; then
     echo "This repo appear to not contain any Dockerfile, skipping container security scans"
@@ -41,7 +41,8 @@ docker run --rm --name=snyk_scanner \
 
 
 exit_code=$?
-
+echo "printing to >>>>>>"$stdout_file
+ls -la
 cat $stdout_file
 
 if [ $exit_code -eq 0 ]; then
