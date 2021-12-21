@@ -45,7 +45,8 @@ docker run --rm --name=snyk_scanner \
 
 echo ">>>>>>> RUNINNG CAT >>>>>>>>>>>"
 # cat $stdout_file
-while IFS= read -r line; do echo $line; done < $stdout_file
+# while IFS= read -r line; do echo $line; done < $stdout_file
+grep -v 'Analyzing' $stdout_file
 
 exit_code=$?
 
