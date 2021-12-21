@@ -41,7 +41,7 @@ docker run --rm --name=snyk_scanner \
     > $stdout_file 2>&1
 
 exit_code=$?
-cat $stdout_file
+tail -n +2 $stdout_file
 # grep -v 'Analyzing' $stdout_file
 
 if [ $exit_code -eq 0 ]; then
