@@ -16,8 +16,7 @@ repo_dir=$GITHUB_WORKSPACE
 docker_workspace=/opt/workspace/
 repo_name="$(basename "$repo_dir")"
 timestamp=$(date +%s)
-# echo $repo_dir
-# echo $repo_name
+stdout_file=/tmp/$repo_name.$timestamp
 
 if [ ! -f "$repo_dir/$file_to_search" ]; then
     echo "This repo appear to not contain any Dockerfile, skipping container security scans"
@@ -26,10 +25,8 @@ fi
 
 #building docker image
 cd $repo_dir
-docker build -t $repo_name:$timestamp .
-echo ">>>>>>> RUNINNG SCANNN >>>>>>>>>>>"
-docker images
-echo ">>>>>>> RUNINNG SCANNN >>>>>>>>>>>"
+docker build -t $repo_name:$timestamp . > /dev/null 2>&1
+echo ">>>>>>> RUNINNG SCAN >>>>>>>>>>>"
 docker run --rm --name=snyk_scanner \
 	-t \
 	-e SNYK_TOKEN=${SNYKTOKEN} \
@@ -40,7 +37,10 @@ docker run --rm --name=snyk_scanner \
 	test \
 	--docker ${repo_name}:${timestamp} \
 	--file=${docker_workspace}/${file_to_search} \
-	--severity-threshold=${severity_threshold}
+	--severity-threshold=${severity_threshold} > stdout_file 2>&1
+
+
+cat stdout_file
 
 exit_code=$?
 
