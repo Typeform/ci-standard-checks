@@ -56,4 +56,7 @@ else
     echo "Error scanning"
 fi
 
-exit 0
+# Clean up
+docker logout
+
+exit $exit_code
