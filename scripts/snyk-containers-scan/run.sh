@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # exit when any command fails
-set -e
+# set -e
 
 # Check if docker is installed
 if ! command -v "docker" &> /dev/null
@@ -33,15 +33,15 @@ echo ">>>>>>> RUNINNG CAT >>>>>>>>>>>"
 cat $stdout_file
 echo ">>>>>>> RUNINNG SCAN >>>>>>>>>>>"
 docker run --rm --name=snyk_scanner \
-	-e SNYK_TOKEN=${SNYKTOKEN} \
-	-v "${repo_dir}:${docker_workspace}" \
+    -e SNYK_TOKEN=${SNYKTOKEN} \
+    -v "${repo_dir}:${docker_workspace}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
-	--entrypoint=snyk \
-	567716553783.dkr.ecr.us-east-1.amazonaws.com/security-dummy-repo:1603871124 \
-	test \
-	--docker ${repo_name}:${timestamp} \
-	--file=${docker_workspace}/${file_to_search} \
-	--severity-threshold=${severity_threshold} \
+    --entrypoint=snyk \
+    567716553783.dkr.ecr.us-east-1.amazonaws.com/security-dummy-repo:1603871124 \
+    test \
+    --docker ${repo_name}:${timestamp} \
+    --file=${docker_workspace}/${file_to_search} \
+    --severity-threshold=${severity_threshold} \
     > $stdout_file 2>&1
 
 
