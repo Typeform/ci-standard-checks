@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # exit when any command fails
-# set -e
+set -e
 
 # Check if docker is installed
 if ! command -v "docker" &> /dev/null
@@ -27,12 +27,11 @@ fi
 cd $repo_dir
 # docker build -t $repo_name:$timestamp . > /dev/null 2>&1
 echo ">>>>>>> RUNINNG BUILD >>>>>>>>>>>"
-docker build -t $repo_name:$timestamp . > $stdout_file 2>&1
-ls -la
-echo ">>>>>>> RUNINNG CAT >>>>>>>>>>>"
-cat $stdout_file
+docker build -t $repo_name:$timestamp . > /dev/null 2>&1
 echo ">>>>>>> RUNINNG SCAN >>>>>>>>>>>"
+set +e
 docker run --rm --name=snyk_scanner \
+    -t \
     -e SNYK_TOKEN=${SNYKTOKEN} \
     -v "${repo_dir}:${docker_workspace}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
@@ -44,13 +43,10 @@ docker run --rm --name=snyk_scanner \
     --severity-threshold=${severity_threshold} \
     > $stdout_file 2>&1
 
-
 echo ">>>>>>> RUNINNG CAT >>>>>>>>>>>"
 cat $stdout_file
 
 exit_code=$?
-echo "printing to >>>>>>"$stdout_file
-cat $stdout_file
 
 if [ $exit_code -eq 0 ]; then
     echo "Vulnerabilities scan finished. No ${severity_threshold} vulnerabilities were found"
