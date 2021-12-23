@@ -3,6 +3,32 @@
 # exit when any command fails
 set -e
 
+repo_dir=$GITHUB_WORKSPACE
+tmp_dir="${repo_dir}/tmp.${RANDOM}"
+mkdir -p $tmp_dir
+
+file_to_search=Dockerfile
+severity_threshold=critical
+docker_workspace=/opt/workspace/
+repo_name="$(basename "$repo_dir")"
+timestamp=$(date +%s)
+stdout_file=${repo_name}.${timestamp}
+pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
+
+if [[ ! -f "$repo_dir/$file_to_search" ]]; then
+    echo "This repo appear to not contain any Dockerfile, skipping container security scans"
+    exit 0
+fi
+
+echo "Retrieving PR#$pull_number files info from ${PR_URL}"
+curl -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/files_list.json
+
+dockerfile_check=$(cat $tmp/files_list.json | jq -r '.[]|select(.filename | startswith("'$file_to_search'"))')
+if [[ ! $dockerfile_check ]]; then
+    echo -e "This PR does not contain any changes in $file_to_search, skipping checks"
+    exit 0
+fi
 
 # Check if docker is installed
 if ! command -v "docker" &> /dev/null
@@ -11,44 +37,7 @@ then
     exit 1
 fi
 
-repo_dir=$GITHUB_WORKSPACE
-tmp_dir="${repo_dir}/tmp.${RANDOM}"
-mkdir -p $tmp_dir
 
-# /repos/{owner}/{repo}/pulls/{pull_number}/files'
-# /repos/{owner}/{repo}/pulls/{pull_number}/commits
-
-pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
-
-echo "Retrieving PR#$pull_number files info from ${PR_URL}"
-
-curl -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/files_list.json
-# cat $tmp_dir/commit_list.json | jq 'map(.sha)' | jq '.[]' | sed -r 's/"//g' > $commits_file
-# echo "$(cat $commits_file | wc -l | sed -r 's/ //g') commits found in PR#$pull_number"
-echo -e "printint json"
-cat $tmp_dir/files_list.json
-
-exit 0
-#########################################################################
-
-
-
-
-echo -e "Let's build your docker images and scan for vulnerabilities"
-file_to_search=Dockerfile
-severity_threshold=critical
-docker_workspace=/opt/workspace/
-repo_name="$(basename "$repo_dir")"
-timestamp=$(date +%s)
-stdout_file=${repo_name}.${timestamp}
-
-if [ ! -f "$repo_dir/$file_to_search" ]; then
-    echo "This repo appear to not contain any Dockerfile, skipping container security scans"
-    exit 0
-fi
-
-#building docker image
 cd $repo_dir
 docker build -t $repo_name:$timestamp . > /dev/null 2>&1
 set +e
