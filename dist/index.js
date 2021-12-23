@@ -793,7 +793,7 @@ const checks = [
     }),
     bash_1.default({
         name: 'snyk-containers-scan',
-        inputs: ['snykToken'],
+        inputs: ['snykToken', 'githubToken'],
     }),
     jiraLinked_1.default,
     piiDetection_1.default,
