@@ -4,8 +4,8 @@
 set -e
 
 repo_dir=$GITHUB_WORKSPACE
-tmp_dir="${repo_dir}/tmp.${RANDOM}"
 file_to_search=Dockerfile
+tmp_dir="${repo_dir}/tmp.${RANDOM}"
 severity_threshold=critical
 docker_workspace=/opt/workspace/
 repo_name="$(basename "$repo_dir")"
@@ -16,14 +16,16 @@ PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
 
 mkdir -p $tmp_dir
 
-if [[ ! -f "$repo_dir/$file_to_search" ]]; then
-    echo "This repo appear to not contain any Dockerfile, skipping container security scans"
-    exit 0
-fi
+# # if there is no Dockerfile in this repo, let's no waste time
+# if [[ ! -f "$repo_dir/$file_to_search" ]]; then
+#     echo "This repo appear to not contain any Dockerfile, skipping container security scans"
+#     exit 0
+# fi
 
-echo "Retrieving PR#$pull_number files info from ${PR_URL}"
+# Retrieving list of modified files in this PR
 curl -s -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/files_list.json
 
+# If no Dockerfile file has been fond in this PR, let's skip the check
 dockerfile_check=$(cat $tmp_dir/files_list.json | jq -r '.[]|select(.filename | startswith("'$file_to_search'"))')
 if [[ ! $dockerfile_check ]]; then
     echo -e "This PR does not contain any changes in $file_to_search, skipping checks"
