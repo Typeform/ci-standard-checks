@@ -22,7 +22,7 @@ if [[ ! -f "$repo_dir/$file_to_search" ]]; then
 fi
 
 echo "Retrieving PR#$pull_number files info from ${PR_URL}"
-curl -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/files_list.json
+curl -s -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/files_list.json
 
 dockerfile_check=$(cat $tmp_dir/files_list.json | jq -r '.[]|select(.filename | startswith("'$file_to_search'"))')
 if [[ ! $dockerfile_check ]]; then
