@@ -3,6 +3,7 @@
 # exit when any command fails
 set -e
 
+
 # Check if docker is installed
 if ! command -v "docker" &> /dev/null
 then
@@ -10,9 +11,33 @@ then
     exit 1
 fi
 
+repo_dir=$GITHUB_WORKSPACE
+tmp_dir="${repo_dir}/tmp.${RANDOM}"
+mkdir -p $tmp_dir
+
+# /repos/{owner}/{repo}/pulls/{pull_number}/files'
+# /repos/{owner}/{repo}/pulls/{pull_number}/commits
+
+pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
+
+echo "Retrieving PR#$pull_number files info from ${PR_URL}"
+
+curl -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/files_list.json
+# cat $tmp_dir/commit_list.json | jq 'map(.sha)' | jq '.[]' | sed -r 's/"//g' > $commits_file
+# echo "$(cat $commits_file | wc -l | sed -r 's/ //g') commits found in PR#$pull_number"
+echo -e "printint json"
+cat $tmp_dir/files_list.json
+
+exit 0
+#########################################################################
+
+
+
+
+echo -e "Let's build your docker images and scan for vulnerabilities"
 file_to_search=Dockerfile
 severity_threshold=critical
-repo_dir=$GITHUB_WORKSPACE
 docker_workspace=/opt/workspace/
 repo_name="$(basename "$repo_dir")"
 timestamp=$(date +%s)
@@ -44,14 +69,15 @@ exit_code=$?
 
 # tweak to go around bizzare formatting of github actions web console
 sed -i 1d $stdout_file
+sed -i '/Testing/d' $stdout_file
 sed -i '/Pro tip/d' $stdout_file
 sed -i '/To remove/d' $stdout_file
 cat $stdout_file
 
 if [ $exit_code -eq 0 ]; then
-    echo "Vulnerabilities scan finished. No ${severity_threshold} vulnerabilities were found"
+    echo -e "Vulnerabilities scan finished. No ${severity_threshold} vulnerabilities were found"
 elif [ $exit_code -eq 1 ]; then
-    echo -e "Scan finished. Some ${severity_threshold} vulnerabilities were found, please fix it"
+    echo -e "Scan finished. Some ${severity_threshold} vulnerabilities were found, please fix it?"
 elif [ $exit_code -eq 2 ]; then
     echo -e "We got a situation here, snyk program failed to complete his task"
 elif [ $exit_code -eq 3 ]; then
