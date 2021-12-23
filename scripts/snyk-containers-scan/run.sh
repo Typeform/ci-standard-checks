@@ -28,7 +28,7 @@ curl -s -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/files_list.
 # If no Dockerfile file has been fond in this PR, let's skip the check
 dockerfile_check=$(cat $tmp_dir/files_list.json | jq -r '.[]|select(.filename | startswith("'$file_to_search'"))')
 if [[ ! $dockerfile_check ]]; then
-    echo -e "This PR does not contain any changes in $file_to_search, skipping checks"
+    echo -e "This PR does not contain any $file_to_search, skipping scans"
     exit 0
 fi
 
@@ -65,10 +65,13 @@ sed -i '/Pro tip/d' $stdout_file
 sed -i '/To remove/d' $stdout_file
 cat $stdout_file
 
+wth_is_that_wiki='https://www.notion.so/typeform/What-is-this-new-CI-check-437257998c014520a98f155870ed474e'
+
 if [ $exit_code -eq 0 ]; then
     echo -e "Vulnerabilities scan finished. No ${severity_threshold} vulnerabilities were found"
 elif [ $exit_code -eq 1 ]; then
     echo -e "Scan finished. Some ${severity_threshold} vulnerabilities were found, please fix it?"
+    echo -e "Wondering how to understand this output, check out this page ${wth_is_that_wiki}"
 elif [ $exit_code -eq 2 ]; then
     echo -e "We got a situation here, snyk program failed to complete his task"
 elif [ $exit_code -eq 3 ]; then
