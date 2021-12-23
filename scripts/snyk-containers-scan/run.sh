@@ -5,8 +5,6 @@ set -e
 
 repo_dir=$GITHUB_WORKSPACE
 tmp_dir="${repo_dir}/tmp.${RANDOM}"
-mkdir -p $tmp_dir
-
 file_to_search=Dockerfile
 severity_threshold=critical
 docker_workspace=/opt/workspace/
@@ -16,6 +14,8 @@ stdout_file=${repo_name}.${timestamp}
 pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
 PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
 
+mkdir -p $tmp_dir
+
 if [[ ! -f "$repo_dir/$file_to_search" ]]; then
     echo "This repo appear to not contain any Dockerfile, skipping container security scans"
     exit 0
@@ -24,7 +24,7 @@ fi
 echo "Retrieving PR#$pull_number files info from ${PR_URL}"
 curl -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/files_list.json
 
-dockerfile_check=$(cat $tmp/files_list.json | jq -r '.[]|select(.filename | startswith("'$file_to_search'"))')
+dockerfile_check=$(cat $tmp_dir/files_list.json | jq -r '.[]|select(.filename | startswith("'$file_to_search'"))')
 if [[ ! $dockerfile_check ]]; then
     echo -e "This PR does not contain any changes in $file_to_search, skipping checks"
     exit 0
