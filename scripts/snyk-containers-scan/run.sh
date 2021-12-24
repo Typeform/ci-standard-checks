@@ -16,8 +16,6 @@ docker_workspace=/opt/workspace/
 repo_name="$(basename "$repo_dir")"
 timestamp=$(date +%s)
 stdout_file=${repo_name}.${timestamp}
-pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
 
 mkdir -p $tmp_dir
 
@@ -29,6 +27,8 @@ if [ -z "${GITHUB_BASE_REF}" ] ; then
     fi
 else
     # Retrieving list of modified files in this PR
+    pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+    PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
     curl -s -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/files_list.json
 
     # If no Dockerfile file has been fond in this PR, let's skip the check
@@ -64,12 +64,14 @@ docker run --rm --name=snyk_scanner \
 
 exit_code=$?
 
-# tweak to go around bizzare formatting of github actions web console
+# tweaks to go around bizzare formatting of github actions web console
 sed -i 1d $stdout_file
 sed -i '/- Analyzing/d' $stdout_file
 sed -i '/Testing/d' $stdout_file
 sed -i '/Pro tip/d' $stdout_file
 sed -i '/To remove/d' $stdout_file
+
+# let's display the output of the scan
 cat $stdout_file
 
 wth_is_that_wiki='https://www.notion.so/typeform/What-is-this-new-CI-check-437257998c014520a98f155870ed474e'
@@ -77,7 +79,7 @@ wth_is_that_wiki='https://www.notion.so/typeform/What-is-this-new-CI-check-43725
 if [ $exit_code -eq 0 ]; then
     echo -e "Vulnerabilities scan finished. No ${severity_threshold} vulnerabilities were found"
 elif [ $exit_code -eq 1 ]; then
-    echo -e "Scan finished. Some ${severity_threshold} vulnerabilities were found, please fix it?"
+    echo -e "Scan finished. Some ${severity_threshold} vulnerabilities were found"
     echo -e "Wondering how to understand this output, check out this page ${wth_is_that_wiki}"
 elif [ $exit_code -eq 2 ]; then
     echo -e "We got a situation here, snyk program failed to complete his task"
