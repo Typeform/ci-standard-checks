@@ -49,7 +49,7 @@ docker run --rm --name=snyk_scanner \
     -v "${repo_dir}:${docker_workspace}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
     --entrypoint=snyk \
-    567716553783.dkr.ecr.us-east-1.amazonaws.com/security-dummy-repo:1603871124 \
+    567716553783.dkr.ecr.us-east-1.amazonaws.com/snyk-security-cli:1618494892 \
     test \
     --docker ${repo_name}:${timestamp} \
     --file=${docker_workspace}/${file_to_search} \
