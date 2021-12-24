@@ -21,10 +21,12 @@ PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
 
 mkdir -p $tmp_dir
 
-if [ -z "${GITHUB_BASE_REF}" ] && [[ ! -f "$repo_dir/$file_to_search" ]]; then
-    # if its a push and there is no  Dockerfile in this repo, let's no waste time
-    echo "This repo appear to not contain any Dockerfile, skipping container security scans"
-    exit 0
+if [ -z "${GITHUB_BASE_REF}" ] ; then
+    if [[ ! -f "$repo_dir/$file_to_search" ]]; then
+        # if its a push and there is no  Dockerfile in this repo, let's no waste time
+        echo "This repo appear to not contain any Dockerfile, skipping container security scans"
+        exit 0
+    fi
 else
     # Retrieving list of modified files in this PR
     curl -s -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/files_list.json
