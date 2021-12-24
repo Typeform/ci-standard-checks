@@ -3,6 +3,11 @@
 # exit when any command fails
 set -e
 
+if [ -z "${SNYKTOKEN}" ]; then
+    echo -e "Could not find snyk token, skipping scan"
+    exit 0
+fi
+
 repo_dir=$GITHUB_WORKSPACE
 file_to_search=Dockerfile
 tmp_dir="${repo_dir}/tmp.${RANDOM}"
