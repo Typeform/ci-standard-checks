@@ -16,21 +16,20 @@ PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
 
 mkdir -p $tmp_dir
 
-# # if there is no Dockerfile in this repo, let's no waste time
-# if [[ ! -f "$repo_dir/$file_to_search" ]]; then
-#     echo "This repo appear to not contain any Dockerfile, skipping container security scans"
-#     exit 0
-# fi
-
-# Retrieving list of modified files in this PR
-curl -s -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/files_list.json
-
-# If no Dockerfile file has been fond in this PR, let's skip the check
-dockerfile_check=$(cat $tmp_dir/files_list.json | jq -r '.[]|select(.filename | startswith("'$file_to_search'"))')
-if [[ ! $dockerfile_check ]]; then
-    echo -e "This PR does not contain any $file_to_search, skipping scans"
+if [ -z "${GITHUB_BASE_REF}" ] && [[ ! -f "$repo_dir/$file_to_search" ]]; then
+    # if its a push and there is no  Dockerfile in this repo, let's no waste time
+    echo "This repo appear to not contain any Dockerfile, skipping container security scans"
     exit 0
-fi
+else
+    # Retrieving list of modified files in this PR
+    curl -s -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/files_list.json
+
+    # If no Dockerfile file has been fond in this PR, let's skip the check
+    dockerfile_check=$(cat $tmp_dir/files_list.json | jq -r '.[]|select(.filename | startswith("'$file_to_search'"))')
+    if [[ ! $dockerfile_check ]]; then
+        echo -e "This PR does not contain any $file_to_search, skipping scans"
+        exit 0
+    fi
 
 # Check if docker is installed
 if ! command -v "docker" &> /dev/null
@@ -60,6 +59,7 @@ exit_code=$?
 
 # tweak to go around bizzare formatting of github actions web console
 sed -i 1d $stdout_file
+sed -i '/- Analyzing/d' $stdout_file
 sed -i '/Testing/d' $stdout_file
 sed -i '/Pro tip/d' $stdout_file
 sed -i '/To remove/d' $stdout_file
