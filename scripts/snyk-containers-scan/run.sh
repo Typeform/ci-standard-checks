@@ -8,7 +8,19 @@ if [ -z "${SNYKTOKEN}" ]; then
     exit 0
 fi
 
-repo_dir=$GITHUB_WORKSPACE
+echo "GITHUB_WORKSPACE"
+echo $GITHUB_WORKSPACE
+echo "GITHUB_BASE_REF"
+echo $GITHUB_BASE_REF
+echo "repo_dir"
+echo ${repo_dir}
+echo "GITHUB_EVENT_PATH"
+echo ${GITHUB_EVENT_PATH}
+echo "GITHUB_REF"
+echo ${GITHUB_REF}
+
+exit 0
+
 file_to_search=Dockerfile
 tmp_dir="${repo_dir}/tmp.${RANDOM}"
 severity_threshold=critical
@@ -71,25 +83,4 @@ sed -i '/Testing/d' $stdout_file
 sed -i '/Pro tip/d' $stdout_file
 sed -i '/To remove/d' $stdout_file
 
-# let's display the output of the scan
-cat $stdout_file
 
-wth_is_that_wiki='https://www.notion.so/typeform/What-is-this-new-CI-check-437257998c014520a98f155870ed474e'
-
-if [ $exit_code -eq 0 ]; then
-    echo -e "Vulnerabilities scan finished. No ${severity_threshold} vulnerabilities were found"
-elif [ $exit_code -eq 1 ]; then
-    echo -e "Scan finished. Some ${severity_threshold} vulnerabilities were found"
-    echo -e "Wondering how to understand this output, check out this page ${wth_is_that_wiki}"
-elif [ $exit_code -eq 2 ]; then
-    echo -e "We got a situation here, snyk program failed to complete his task"
-elif [ $exit_code -eq 3 ]; then
-    echo -e "Well, that should not happen!!"
-else
-    echo "Error scanning"
-fi
-
-# Clean up
-docker logout
-
-exit $exit_code
