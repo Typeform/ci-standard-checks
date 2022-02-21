@@ -27,11 +27,9 @@ echo "GITHUB_REPOSITORY"
 echo ${GITHUB_REPOSITORY}
 
 PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
-tmp_dir="${repo_dir}/tmp.${RANDOM}"
-mkdir -p $tmp_dir
-curl -s -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/files_list.json
 
-cat $tmp_dir/files_list.json
+curl -s -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL 
+
 
 exit 0
 
