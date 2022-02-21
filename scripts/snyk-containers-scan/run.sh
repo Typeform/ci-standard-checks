@@ -19,7 +19,6 @@ repo_name="$(basename "$repo_dir")"
 echo ${repo_name}
 echo "GITHUB_EVENT_PATH"
 echo ${GITHUB_EVENT_PATH}
-cat ${GITHUB_EVENT_PATH}
 echo "GITHUB_REF"
 echo ${GITHUB_REF}
 echo "GITHUB_API_URL"
