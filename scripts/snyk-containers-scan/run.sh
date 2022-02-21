@@ -25,7 +25,7 @@ echo "GITHUB_API_URL"
 echo "${GITHUB_API_URL}"
 echo "GITHUB_REPOSITORY"
 echo ${GITHUB_REPOSITORY}
-
+pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
 PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
 echo "PR_URL"
 echo ${PR_URL}
