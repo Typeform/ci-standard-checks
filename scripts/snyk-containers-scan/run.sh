@@ -28,6 +28,8 @@ echo ${GITHUB_REPOSITORY}
 
 PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
 
+echo ${PR_URL}
+
 curl -s -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL 
 
 
