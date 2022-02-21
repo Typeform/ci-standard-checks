@@ -14,10 +14,22 @@ echo "GITHUB_BASE_REF"
 echo $GITHUB_BASE_REF
 echo "repo_dir"
 echo ${repo_dir}
+echo "repo_name"
+repo_name="$(basename "$repo_dir")"
+echo ${repo_name}
 echo "GITHUB_EVENT_PATH"
 echo ${GITHUB_EVENT_PATH}
 echo "GITHUB_REF"
 echo ${GITHUB_REF}
+echo "GITHUB_API_URL"
+echo "${GITHUB_API_URL}"
+echo "GITHUB_REPOSITORY"
+echo ${GITHUB_REPOSITORY}
+
+PR_URL="$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$pull_number/files"
+curl -s -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/files_list.json
+
+cat $tmp_dir/files_list.json
 
 exit 0
 
