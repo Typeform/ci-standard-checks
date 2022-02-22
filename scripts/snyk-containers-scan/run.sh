@@ -18,7 +18,7 @@ docker run --rm --name=snyk_scanner \
 -e GITHUB_REPOSITORY=${GITHUB_REPOSITORY} \
 -e GITHUB_API_URL=${GITHUB_API_URL} \
 -e GITHUBTOKEN=${GITHUBTOKEN} \
--e SNYK_TOKEN=${SNYK_TOKEN} \
+-e SNYK_TOKEN=${SNYKTOKEN} \
 -e DOCKER_WORKSPACE=${DOCKER_WORKSPACE} \
 -v "${GITHUB_WORKSPACE}:${DOCKER_WORKSPACE}" \
 -v /var/run/docker.sock:/var/run/docker.sock \
