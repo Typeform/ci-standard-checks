@@ -24,6 +24,8 @@ docker run --rm --name=snyk_scanner \
 -v /var/run/docker.sock:/var/run/docker.sock \
 567716553783.dkr.ecr.us-east-1.amazonaws.com/snyk-security-cli:1645547127
 
+docker images
+
 # Clean up
 docker logout
 
