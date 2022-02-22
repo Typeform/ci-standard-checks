@@ -18,11 +18,11 @@ docker run --rm --name=snyk_scanner \
 -e GITHUB_REPOSITORY=${GITHUB_REPOSITORY} \
 -e GITHUB_API_URL=${GITHUB_API_URL} \
 -e GITHUBTOKEN=${GITHUBTOKEN} \
--e SNYKTOKEN=${SNYKTOKEN} \
+-e SNYK_TOKEN=${SNYK_TOKEN} \
 -e DOCKER_WORKSPACE=${DOCKER_WORKSPACE} \
 -v "${GITHUB_WORKSPACE}:${DOCKER_WORKSPACE}" \
 -v /var/run/docker.sock:/var/run/docker.sock \
-567716553783.dkr.ecr.us-east-1.amazonaws.com/snyk-security-cli:1645547129
+567716553783.dkr.ecr.us-east-1.amazonaws.com/snyk-security-cli:1645547130
 
 docker images
 
