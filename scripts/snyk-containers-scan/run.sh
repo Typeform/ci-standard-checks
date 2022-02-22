@@ -37,6 +37,7 @@ cd ${repo_dir}
 git branch --show-current
 pwd
 ls -latrn
+echo $(git branch --show-current)
 
 
 exit 0
