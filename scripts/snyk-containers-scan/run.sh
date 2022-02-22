@@ -37,6 +37,7 @@ cd ${repo_dir}
 git branch --show-current
 pwd
 ls -latrn
+cat Dockerfile.ci
 echo "------------------"
 echo $(git branch --show-current)
 echo $(git rev-parse --abbrev-ref HEAD)
