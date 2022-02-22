@@ -11,7 +11,7 @@ fi
 
 DOCKER_WORKSPACE=/opt/workspace/
 
-
+set +e
 docker run --rm --name=snyk_scanner \
 -t \
 -e GITHUB_REF=${GITHUB_REF} \
@@ -22,7 +22,7 @@ docker run --rm --name=snyk_scanner \
 -e DOCKER_WORKSPACE=${DOCKER_WORKSPACE} \
 -v "${GITHUB_WORKSPACE}:${DOCKER_WORKSPACE}" \
 -v /var/run/docker.sock:/var/run/docker.sock \
-567716553783.dkr.ecr.us-east-1.amazonaws.com/snyk-security-cli:1645547128
+567716553783.dkr.ecr.us-east-1.amazonaws.com/snyk-security-cli:1645547129
 
 docker images
 
