@@ -34,6 +34,7 @@ echo "repo_name"
 repo_name="$(basename "$repo_dir")"
 echo ${repo_name}
 cd ${repo_dir}
+git branch --show-current
 pwd
 ls -latrn
 
