@@ -32,6 +32,9 @@ echo ${PR_URL}
 
 curl -s -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL 
 
+cd ${repo_dir}
+ls -ltarn
+
 
 exit 0
 
