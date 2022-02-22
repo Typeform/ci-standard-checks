@@ -37,8 +37,10 @@ cd ${repo_dir}
 git branch --show-current
 pwd
 ls -latrn
+echo "------------------"
 echo $(git branch --show-current)
-
+echo $(git rev-parse --abbrev-ref HEAD)
+echo "------------------"
 
 exit 0
 
