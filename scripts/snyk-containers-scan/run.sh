@@ -12,11 +12,6 @@ echo "GITHUB_WORKSPACE"
 echo $GITHUB_WORKSPACE
 echo "GITHUB_BASE_REF"
 echo $GITHUB_BASE_REF
-echo "repo_dir"
-echo ${repo_dir}
-echo "repo_name"
-repo_name="$(basename "$repo_dir")"
-echo ${repo_name}
 echo "GITHUB_EVENT_PATH"
 echo ${GITHUB_EVENT_PATH}
 echo "GITHUB_REF"
@@ -33,6 +28,12 @@ echo ${PR_URL}
 curl -s -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL 
 
 repo_dir=$GITHUB_WORKSPACE
+echo "repo_dir"
+echo ${repo_dir}
+echo "repo_name"
+repo_name="$(basename "$repo_dir")"
+echo ${repo_name}
+cd ${repo_dir}
 pwd
 ls -latrn
 
