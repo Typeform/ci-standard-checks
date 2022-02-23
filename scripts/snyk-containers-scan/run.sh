@@ -3,7 +3,6 @@
 # exit when any command fails
 set -e
 
-
 if [ -z "${SNYKTOKEN}" ]; then
     echo -e "Could not find snyk token, skipping scan"
     exit 0
