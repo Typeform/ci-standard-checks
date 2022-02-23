@@ -8,13 +8,15 @@ if [ -z "${SNYKTOKEN}" ]; then
     echo -e "Could not find snyk token, skipping scan"
     exit 0
 fi
-
+#low|medium|high|critical. With this option, only vulnerabilities of the specified level or higher are reported.
+THRESHOLD=critical
 DOCKER_WORKSPACE=/opt/workspace/
 
 set +e
 docker run --rm --name=snyk_scanner \
 -t \
 -e GITHUB_REF=${GITHUB_REF} \
+-e THRESHOLD=${THRESHOLD} \
 -e GITHUB_REPOSITORY=${GITHUB_REPOSITORY} \
 -e GITHUB_API_URL=${GITHUB_API_URL} \
 -e GITHUBTOKEN=${GITHUBTOKEN} \
