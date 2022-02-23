@@ -23,7 +23,7 @@ docker run --rm --name=snyk_scanner \
 -e DOCKER_WORKSPACE=${DOCKER_WORKSPACE} \
 -v "${GITHUB_WORKSPACE}:${DOCKER_WORKSPACE}" \
 -v /var/run/docker.sock:/var/run/docker.sock \
-567716553783.dkr.ecr.us-east-1.amazonaws.com/snyk-security-cli:1645547142
+567716553783.dkr.ecr.us-east-1.amazonaws.com/snyk-security-cli:1645547143
 
 exit 0
 
