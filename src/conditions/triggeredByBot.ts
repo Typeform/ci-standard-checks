@@ -9,6 +9,7 @@ export const BOT_USERS = [
   'dependabot-preview[bot]',
   'tf-security',
   'seti-tf',
+  'tf-IT'
 ]
 
 export async function triggeredByBot(): Promise<boolean> {
