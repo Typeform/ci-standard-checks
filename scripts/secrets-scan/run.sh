@@ -47,7 +47,7 @@ fi
 if [ -z "${GITHUB_BASE_REF}" ]; then
     # push event
     echo "Using commit SHA ${GITHUB_SHA} for push event"
-    commit_opts="--commit=${GITHUB_SHA}"
+    commit_opts="--log-opts=${GITHUB_SHA}"
 else
     # pull_request event
     pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
@@ -57,7 +57,7 @@ else
     cat $tmp_dir/commit_list.json | jq 'map(.sha)' | jq '.[]' | sed -r 's/"//g' > $commits_file
     echo "$(cat $commits_file | wc -l | sed -r 's/ //g') commits found in PR#$pull_number"
 
-    commit_opts="--commits-file=${commits_file}"
+    commit_opts="--log-opts=${commits_file}"
 fi
 
 # Do not exit if the gitleaks run fails. This way we can display some custom messages.
