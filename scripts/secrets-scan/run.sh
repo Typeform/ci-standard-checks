@@ -59,8 +59,9 @@ else
     cat $commits_file
     echo "---"
     echo "$(cat $commits_file | wc -l | sed -r 's/ //g') commits found in PR#$pull_number"
-
-    commit_opts="--log-opts=${commits_file}"
+    base_ref=$(head $commits_file)
+    head_ref=$(tail $commits_file)
+    commit_opts="--log-opts=$base_ref..$head_ref"
 fi
 
 # Do not exit if the gitleaks run fails. This way we can display some custom messages.
