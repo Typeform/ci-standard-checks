@@ -55,6 +55,9 @@ else
     echo "Retrieving PR#$pull_number commits info from ${PR_URL}"
     curl -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/commit_list.json
     cat $tmp_dir/commit_list.json | jq 'map(.sha)' | jq '.[]' | sed -r 's/"//g' > $commits_file
+    echo "commits file"
+    cat $commits_file
+    echo "---"
     echo "$(cat $commits_file | wc -l | sed -r 's/ //g') commits found in PR#$pull_number"
 
     commit_opts="--log-opts=${commits_file}"
