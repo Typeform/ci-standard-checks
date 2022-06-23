@@ -33,14 +33,14 @@ final_config="$tmp_dir/gitleaks_config.toml"
 commits_file="$tmp_dir/commit_list.txt"
 gitleaks_config_container="${DOCKERREGISTRY}/typeform/gitleaks-config"
 gitleaks_container="zricethezav/gitleaks"
-gitleaks_version="v7.2.0"
+gitleaks_version="v8.8.8"
 
 # Generate the final gitleaks config file. If the repo has a local config, merge both
 if [ -f ./"$local_config" ]; then
     docker container run --rm -v $repo_dir/$local_config:/app/$local_config \
-    $gitleaks_config_container > $final_config
+    $gitleaks_config_container "--v8-config" > $final_config
 else
-    docker container run --rm $gitleaks_config_container > $final_config
+    docker container run --rm $gitleaks_config_container "--v8-config" > $final_config
 fi
 
 if [ -z "${GITHUB_BASE_REF}" ]; then
@@ -63,14 +63,19 @@ fi
 set +e
 
 # Run gitleaks with the generated config
+gitleaks_cmd="detect \
+    --config ${final_config} \
+    --source /tmp/${repo_name} \
+    --report-format json \
+    ${commit_opts} \
+    --verbose"
 docker container run --rm --name=gitleaks \
     -v $final_config:$final_config \
     -v $commits_file:$commits_file \
     -v $repo_dir:/tmp/$repo_name \
-    $gitleaks_container:$gitleaks_version --config-path=$final_config --path=/tmp/$repo_name --verbose \
-    $commit_opts
+    $gitleaks_container:$gitleaks_version ${gitleaks_cmd}
 
-# Maintain the exit code of the gitleaks run
+# Keep the exit code of the gitleaks run
 exit_code=$?
 
 # If a secret was detected show what to do next
