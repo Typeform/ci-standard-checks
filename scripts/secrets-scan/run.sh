@@ -47,7 +47,7 @@ fi
 if [ -z "${GITHUB_BASE_REF}" ]; then
     # push event
     echo "Using commit SHA ${GITHUB_SHA} for push event"
-    commit_opts="--log-opts=${GITHUB_SHA}"
+    commit_opts="--log-opts=${GITHUB_SHA}..${GITHUB_SHA}"
 else
     # pull_request event
     pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
