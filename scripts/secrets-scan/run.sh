@@ -34,13 +34,14 @@ commits_file="$tmp_dir/commit_list.txt"
 gitleaks_config_container="${DOCKERREGISTRY}/typeform/gitleaks-config"
 gitleaks_container="zricethezav/gitleaks"
 gitleaks_version="v8.8.8"
+gitleaks_config_cmd="python gitleaks_config_generator.py --v8-config"
 
 # Generate the final gitleaks config file. If the repo has a local config, merge both
 if [ -f ./"$local_config" ]; then
     docker container run --rm -v $repo_dir/$local_config:/app/$local_config \
-    $gitleaks_config_container "--v8-config" > $final_config
+    $gitleaks_config_container $gitleaks_config_cmd > $final_config
 else
-    docker container run --rm $gitleaks_config_container "--v8-config" > $final_config
+    docker container run --rm $gitleaks_config_container $gitleaks_config_cmd > $final_config
 fi
 
 if [ -z "${GITHUB_BASE_REF}" ]; then
