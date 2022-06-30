@@ -51,7 +51,7 @@ jobs:
         with:
           repository_url: https://github.com/Typeform/ci-standard-checks.git
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: Update beta version tag
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
@@ -61,4 +61,4 @@ jobs:
           git push origin v${TAG}-beta --force
         env:
           TAG: ${{ steps.semantic.outputs.release-major }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
