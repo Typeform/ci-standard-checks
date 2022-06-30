@@ -64,6 +64,8 @@ fi
 # Do not exit if the gitleaks run fails. This way we can display some custom messages.
 set +e
 
+echo "Using gitleaks${gitleaks_version}"
+
 # Run gitleaks with the generated config
 gitleaks_cmd="detect \
     --config ${final_config} \
