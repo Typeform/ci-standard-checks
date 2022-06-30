@@ -33,20 +33,21 @@ final_config="$tmp_dir/gitleaks_config.toml"
 commits_file="$tmp_dir/commit_list.txt"
 gitleaks_config_container="${DOCKERREGISTRY}/typeform/gitleaks-config"
 gitleaks_container="zricethezav/gitleaks"
-gitleaks_version="v7.2.0"
+gitleaks_version="v8.8.8"
+gitleaks_config_cmd="python gitleaks_config_generator.py --v8-config"
 
 # Generate the final gitleaks config file. If the repo has a local config, merge both
 if [ -f ./"$local_config" ]; then
     docker container run --rm -v $repo_dir/$local_config:/app/$local_config \
-    $gitleaks_config_container > $final_config
+    $gitleaks_config_container $gitleaks_config_cmd > $final_config
 else
-    docker container run --rm $gitleaks_config_container > $final_config
+    docker container run --rm $gitleaks_config_container $gitleaks_config_cmd > $final_config
 fi
 
 if [ -z "${GITHUB_BASE_REF}" ]; then
     # push event
     echo "Using commit SHA ${GITHUB_SHA} for push event"
-    commit_opts="--commit=${GITHUB_SHA}"
+    commit_opts="--log-opts=${GITHUB_SHA}..${GITHUB_SHA}"
 else
     # pull_request event
     pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
@@ -55,22 +56,28 @@ else
     curl -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/commit_list.json
     cat $tmp_dir/commit_list.json | jq 'map(.sha)' | jq '.[]' | sed -r 's/"//g' > $commits_file
     echo "$(cat $commits_file | wc -l | sed -r 's/ //g') commits found in PR#$pull_number"
-
-    commit_opts="--commits-file=${commits_file}"
+    base_ref=$(head $commits_file)
+    head_ref=$(tail $commits_file)
+    commit_opts="--log-opts=$base_ref..$head_ref"
 fi
 
 # Do not exit if the gitleaks run fails. This way we can display some custom messages.
 set +e
 
 # Run gitleaks with the generated config
+gitleaks_cmd="detect \
+    --config ${final_config} \
+    --source /tmp/${repo_name} \
+    --report-format json \
+    ${commit_opts} \
+    --verbose"
 docker container run --rm --name=gitleaks \
     -v $final_config:$final_config \
     -v $commits_file:$commits_file \
     -v $repo_dir:/tmp/$repo_name \
-    $gitleaks_container:$gitleaks_version --config-path=$final_config --path=/tmp/$repo_name --verbose \
-    $commit_opts
+    $gitleaks_container:$gitleaks_version ${gitleaks_cmd}
 
-# Maintain the exit code of the gitleaks run
+# Keep the exit code of the gitleaks run
 exit_code=$?
 
 # If a secret was detected show what to do next
