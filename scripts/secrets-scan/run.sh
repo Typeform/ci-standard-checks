@@ -56,8 +56,8 @@ else
     curl -H "Authorization: Bearer ${GITHUBTOKEN}" $PR_URL > $tmp_dir/commit_list.json
     cat $tmp_dir/commit_list.json | jq 'map(.sha)' | jq '.[]' | sed -r 's/"//g' > $commits_file
     echo "$(cat $commits_file | wc -l | sed -r 's/ //g') commits found in PR#$pull_number"
-    base_ref=$(head $commits_file)
-    head_ref=$(tail $commits_file)
+    base_ref=$(head -n1 $commits_file)
+    head_ref=$(tail -n1 $commits_file)
     commit_opts="--log-opts=$base_ref..$head_ref"
 fi
 
