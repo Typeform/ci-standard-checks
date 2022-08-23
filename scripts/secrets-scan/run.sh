@@ -68,9 +68,9 @@ echo "Using gitleaks${gitleaks_version}"
 
 # Run gitleaks with the generated config
 gitleaks_cmd="detect \
-    --config ${final_config} \
-    --source /tmp/${repo_name} \
-    --report-format json \
+    --config=${final_config} \
+    --source=/tmp/${repo_name} \
+    --report-format=json \
     --log-opts=\"${log_opts}\" \
     --verbose"
 echo "${gitleaks_cmd}"
