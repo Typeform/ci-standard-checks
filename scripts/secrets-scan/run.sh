@@ -75,7 +75,7 @@ gitleaks_cmd="detect \
     --report-format=json \
     --log-opts=\"${log_opts}\" \
     --verbose"
-echo "${gitleaks_cmd}"
+echo ${gitleaks_cmd}
 docker container run --rm --name=gitleaks \
     -v $final_config:$final_config \
     -v $commits_file:$commits_file \
