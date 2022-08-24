@@ -47,7 +47,9 @@ fi
 if [ -z "${GITHUB_BASE_REF}" ]; then
     # push event
     echo "Using commit SHA ${GITHUB_SHA} for push event"
-    log_opts="--first-parent --no-merges ${GITHUB_SHA}^..${GITHUB_SHA}"
+    # not including --first-parent and --no-merges until https://github.com/zricethezav/gitleaks/issues/964 is fixed
+    #log_opts="--first-parent --no-merges ${GITHUB_SHA}^..${GITHUB_SHA}"
+    log_opts="${GITHUB_SHA}^..${GITHUB_SHA}"
 else
     # pull_request event
     pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
@@ -58,9 +60,9 @@ else
     echo "$(cat $commits_file | wc -l | sed -r 's/ //g') commits found in PR#$pull_number"
     base_ref=$(head -n1 $commits_file)
     head_ref=$(tail -n1 $commits_file)
-    merge_opts="--first-parent --no-merges "
-    log_opts="${merge_opts}${base_ref}^..${head_ref}"
-    #log_opts="$base_ref^..$head_ref"
+    # not including --first-parent and --no-merges until https://github.com/zricethezav/gitleaks/issues/964 is fixed
+    #log_opts="--first-parent --no-merges ${base_ref}^..${head_ref}"
+    log_opts="${base_ref}^..${head_ref}"
 fi
 
 # Do not exit if the gitleaks run fails. This way we can display some custom messages.
@@ -75,7 +77,7 @@ gitleaks_cmd="detect \
     --report-format=json \
     --log-opts=\"${log_opts}\" \
     --verbose"
-echo ${gitleaks_cmd}
+echo "${gitleaks_cmd}"
 docker container run --rm --name=gitleaks \
     -v $final_config:$final_config \
     -v $commits_file:$commits_file \
