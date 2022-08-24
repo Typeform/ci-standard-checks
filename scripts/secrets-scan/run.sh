@@ -58,8 +58,9 @@ else
     echo "$(cat $commits_file | wc -l | sed -r 's/ //g') commits found in PR#$pull_number"
     base_ref=$(head -n1 $commits_file)
     head_ref=$(tail -n1 $commits_file)
-    #log_opts="--first-parent --no-merges $base_ref^..$head_ref"
-    log_opts="$base_ref^..$head_ref"
+    merge_opts="--first-parent --no-merges "
+    log_opts="${merge_opts}${base_ref}^..${head_ref}"
+    #log_opts="$base_ref^..$head_ref"
 fi
 
 # Do not exit if the gitleaks run fails. This way we can display some custom messages.
