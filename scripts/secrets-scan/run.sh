@@ -71,12 +71,12 @@ set +e
 echo "Using gitleaks${gitleaks_version}"
 
 # Run gitleaks with the generated config
-gitleaks_cmd="detect \
+gitleaks_cmd='detect \
     --config=${final_config} \
     --source=/tmp/${repo_name} \
     --report-format=json \
     --log-opts=\"${log_opts}\" \
-    --verbose"
+    --verbose'
 echo "${gitleaks_cmd}"
 docker container run --rm --name=gitleaks \
     -v $final_config:$final_config \
