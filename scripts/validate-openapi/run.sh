@@ -32,10 +32,20 @@ then
     exit 1
 fi
 
+# Create redocly config file
+cat > .redocly.yaml << EOF
+extends:
+  - recommended
+rules:
+  operation-4xx-response: off
+  security-defined: warn
+EOF
+
+echo "#cli bundle"
 npx @redocly/cli bundle --dereferenced openapi.yaml > openapi.der.yaml
-
+echo "#swagger validate openapi"
 npx @apidevtools/swagger-cli validate openapi.yaml
-
+echo "#swagger validate openapi.der"
 npx @apidevtools/swagger-cli validate openapi.der.yaml
-
+echo "#cli lint"
 npx @redocly/cli lint openapi.yaml openapi.der.yaml
