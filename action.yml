@@ -16,5 +16,5 @@ inputs:
     required: true
     description: 'The docker password with access to Typeform gitleaks image'
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'
