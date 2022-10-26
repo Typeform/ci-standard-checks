@@ -157,7 +157,7 @@ will be published and a new release will happen automatically! :rocket:
 ## Validate
 
 There's a [test.yml](.github/workflows/test.yml) workflow in the repo
-referencing `./` to test the acion itself. This will be run to
+referencing `./` to test the action itself. This will be run to
 validate every PR. :white_check_mark:
 
 See the [actions
