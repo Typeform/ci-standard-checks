@@ -41,8 +41,14 @@ rules:
   security-defined: warn
 EOF
 
-npx @apidevtools/swagger-cli validate openapi.yaml
+IFS=$'\n' files=($(find . -name openapi.yaml))
 
-npx @redocly/cli lint openapi.yaml
+for f in ${files[@]}; do
+    npx @apidevtools/swagger-cli validate "$f"
+done
 
-npx @redocly/cli bundle --dereferenced --ext json --output openapi.json openapi.yaml
+for f in ${files[@]}; do
+    npx @redocly/cli lint "$f"
+done
+
+npx @redocly/cli bundle --dereferenced --ext json --output openapi.json $(echo ${files})
