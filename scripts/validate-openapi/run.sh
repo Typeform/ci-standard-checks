@@ -41,7 +41,8 @@ rules:
   security-defined: warn
 EOF
 
-IFS=$'\n' files=($(find . -name openapi.yaml))
+# Limiting the depth limits the risk of (irrelevant) `openapi.yaml` files being found in eg. `_gomodcache` or `node_modules`
+IFS=$'\n' files=($(find . -depth 3 -name openapi.yaml))
 
 for f in ${files[@]}; do
     npx @apidevtools/swagger-cli validate "$f"
