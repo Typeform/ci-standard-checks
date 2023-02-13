@@ -438,7 +438,8 @@ exports.belongsToTypeformOrg = void 0;
 const github_1 = __nccwpck_require__(5679);
 function belongsToTypeformOrg() {
     return __awaiter(this, void 0, void 0, function* () {
-        return github_1.github.context.repo.owner === 'Typeform';
+        return (github_1.github.context.repo.owner === 'Typeform' ||
+            github_1.github.context.repo.owner === 'typeform-security');
     });
 }
 exports.belongsToTypeformOrg = belongsToTypeformOrg;
@@ -565,6 +566,7 @@ exports.BOT_USERS = [
     'dependabot-preview[bot]',
     'tf-security',
     'seti-tf',
+    'tf-IT'
 ];
 function triggeredByBot() {
     return __awaiter(this, void 0, void 0, function* () {
