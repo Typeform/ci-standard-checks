@@ -20,6 +20,15 @@ describe('outsideTypeformOrg', () => {
     await expect(belongsToTypeformOrg()).resolves.toBeTruthy()
   })
 
+  it('returns true when repo owned by typeform-security', async () => {
+    mockContext.repo = {
+      owner: 'typeform-security',
+      repo: 'security-infra',
+    }
+
+    await expect(belongsToTypeformOrg()).resolves.toBeTruthy()
+  })
+
   it('returns false when repo owned by someone else', async () => {
     mockContext.repo = {
       owner: 'SomeRandomPerson',
