@@ -1,16 +1,14 @@
-name: CI/CD
+name: Continuous Delivery
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["test-and-release-beta"]
+    types:
+      - completed
 
 jobs:
-  ci-cd:
-    name: Run CI and CD
+  cd:
+    name: Generate distribution and push it
     runs-on: ubuntu-latest
 
     steps:
@@ -48,6 +46,6 @@ jobs:
           git config --global user.email "setizaps@typeform.com"
           git config --global user.name "Bender Bot Tf"
           git checkout ${BRANCH}
-          git add -f dist/
+          git add dist/
           git commit -a -m "generates new distribution based on ${LAST_COMMIT_SHA:0:7}"
           git push --set-upstream origin ${BRANCH}
