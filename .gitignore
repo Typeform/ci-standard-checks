@@ -100,3 +100,6 @@ lib/**/*
 
 # IDE
 .idea
+
+# Transpiled code
+dist/
