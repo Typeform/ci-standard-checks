@@ -47,6 +47,6 @@ jobs:
         run: |
           git config --global user.email "setizaps@typeform.com"
           git config --global user.name "Bender Bot Tf"
-          git add dist/
+          git add -f dist/
           git commit -a -m "generates new distribution based on ${LAST_COMMIT_SHA:0:7}"
           git push --set-upstream origin ${BRANCH}
