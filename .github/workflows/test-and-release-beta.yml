@@ -19,15 +19,18 @@ jobs:
           yarn install
       - run: |
           yarn run all
-      - run: |
-          yarn all
-  test: # make sure the action works on a clean machine without building
+  test: # make sure the action works on a clean machine (needs building)
     needs: [build]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - run: |
+          yarn install
+      - run: |
+          yarn all
+          
       - name: Test all checks
         uses: ./
         with:
