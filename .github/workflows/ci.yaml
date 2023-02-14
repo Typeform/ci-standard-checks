@@ -27,5 +27,26 @@ jobs:
       - name: Install Node.js dependencies
         run: yarn install
 
-      - name: Run yarn all
+      - name: Generate distribution
         run: yarn all
+
+      - name: Setup last commit SHA (PR)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          echo "LAST_COMMIT_SHA=${{ github.event.pull_request.head.sha }}" >> ${GITHUB_ENV}
+
+      - name: Setup last commit SHA (Push)
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          echo "LAST_COMMIT_SHA=${GITHUB_SHA}" >> ${GITHUB_ENV}
+
+      - name: Commit generated distribution
+        env:
+          LAST_COMMIT_SHA: ${{ env.LAST_COMMIT_SHA }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          git config --global user.email "setizaps@typeform.com"
+          git config --global user.name "Bender Bot Tf"
+          git add dist/
+          git commit -a -m "generates new distribution based on ${LAST_COMMIT_SHA:0:7}"
+          git push --set-upstream origin ${BRANCH}
