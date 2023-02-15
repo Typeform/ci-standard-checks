@@ -2,7 +2,7 @@ name: Continuous Delivery
 
 on:
   workflow_run:
-    workflows: [test-and-release-beta]
+    workflows: [CI Standard Checks]
     types:
       - completed
 
