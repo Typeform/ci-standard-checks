@@ -2,12 +2,13 @@ name: Continuous Delivery
 
 on:
   workflow_run:
-    workflows: ["test-and-release-beta"]
+    workflows: [test-and-release-beta]
     types:
       - completed
 
 jobs:
   cd:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Generate distribution and push it
     runs-on: ubuntu-latest
 
