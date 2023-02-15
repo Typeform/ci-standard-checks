@@ -2,7 +2,7 @@ name: Continuous Delivery
 
 on:
   workflow_run:
-    workflows: [CI Standard Checks]
+    workflows: ["CI Standard Checks"]
     types:
       - completed
 
