@@ -14,7 +14,7 @@ import {
 const checks: Check[] = [
   bashCheck({
     name: 'secrets-scan',
-    inputs: ['githubToken', 'dockerUsername', 'dockerPassword'],
+    inputs: ['githubToken'],
   }),
   jiraLinked,
   piiDetection,
