@@ -2,7 +2,7 @@
   <a href="https://github.com/Typeform/ci-standard-checks/actions"><img alt="ci-standard-checks status" src="https://github.com/Typeform/ci-standard-checks/workflows/build-test/badge.svg"></a>
 </p>
 
-# Continuous Integration Standard Checks
+# Continuous Integration Standard Checks 
 
 This action is collecting certain standardized checks across the
 Typeform organisation in a single central place, so that teams have an
