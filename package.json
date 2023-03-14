@@ -26,7 +26,8 @@
   ],
   "release": {
     "branches": [
-      "main"
+      "main",
+      "releases/force-beta-v1"
     ],
     "plugins": [
       "@semantic-release/commit-analyzer",
