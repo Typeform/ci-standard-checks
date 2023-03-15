@@ -791,7 +791,7 @@ const conditions_1 = __nccwpck_require__(383);
 const checks = [
     bash_1.default({
         name: 'secrets-scan',
-        inputs: ['githubToken', 'dockerUsername', 'dockerPassword'],
+        inputs: ['githubToken'],
     }),
     jiraLinked_1.default,
     piiDetection_1.default,

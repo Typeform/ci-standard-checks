@@ -9,15 +9,13 @@ then
     echo "Unable to find docker. Is it installed and added to your \$PATH?"
     exit 1
 fi
-# Check if user is logged in to quay.io
 
-DOCKERREGISTRY=quay.io
-docker login -u=${DOCKERUSERNAME} -p=${DOCKERPASSWORD} ${DOCKERREGISTRY}
+DOCKERREGISTRY=public.ecr.aws
 docker pull ${DOCKERREGISTRY}/typeform/gitleaks-config
 exit_code=$?
 
 if [ ! $exit_code -eq 0 ]; then
-    echo "Unable to pull gitleaks container image. Are you logged in ${DOCKERREGISTRY}?"
+    echo "Unable to pull gitleaks container image from ${DOCKERREGISTRY}"
     exit 1
 fi
 
@@ -34,7 +32,7 @@ commits_file="$tmp_dir/commit_list.txt"
 gitleaks_config_container="${DOCKERREGISTRY}/typeform/gitleaks-config"
 gitleaks_container="zricethezav/gitleaks"
 gitleaks_version="v8.8.8"
-gitleaks_config_cmd="python gitleaks_config_generator.py --v8-config"
+gitleaks_config_cmd="python gitleaks_config_generator.py"
 
 # Generate the final gitleaks config file. If the repo has a local config, merge both
 if [ -f ./"$local_config" ]; then
@@ -97,8 +95,5 @@ elif [ $exit_code -eq 1 ]; then
 else
     echo "Error scanning"
 fi
-
-# Clean up
-docker logout
 
 exit $exit_code
