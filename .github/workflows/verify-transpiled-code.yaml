@@ -1,0 +1,34 @@
+name: 'verify-transpiled-code'
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare environment
+      - run: |
+          yarn install
+          mv dist/ source-dist
+          yarn run all
+      - name: Run integrity check
+        run: |
+          #!/bin/bash
+
+          hash_function="sha256sum"
+
+          for file in dist/*
+          do
+                  source_file=${file/dist/source-dist}
+
+                  hash_source=$(${hash_function} "${source_file}" | awk '{print $1;}')
+                  hash_target=$(${hash_function} "${file}" | awk '{print $1;}')
+
+                  if [ ! "${hash_source}" == "${hash_target}" ]; then
+                          echo "There is a mismatch in ${file}. Either you forgot to generate it and push it or it wasn't generated correctly."
+                          exit 1
+                  fi
+          done
