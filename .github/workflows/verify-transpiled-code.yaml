@@ -9,12 +9,12 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare environment
       - uses: actions/checkout@v3
       - run: |
           yarn install
           mv dist/ source-dist
           yarn run all
+
       - name: Run integrity check
         run: |
           #!/bin/bash
