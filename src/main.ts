@@ -25,6 +25,7 @@ const checks: Check[] = [
 ]
 
 async function run(): Promise<void> {
+  core.info('test message to test verify-transpiled-code')
   if (!(await belongsToTypeformOrg())) {
     core.info('Executing outside of Typeform org, skipping all checks')
     return
