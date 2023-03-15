@@ -25,7 +25,6 @@ const checks: Check[] = [
 ]
 
 async function run(): Promise<void> {
-  // nothing relevant
   if (!(await belongsToTypeformOrg())) {
     core.info('Executing outside of Typeform org, skipping all checks')
     return
