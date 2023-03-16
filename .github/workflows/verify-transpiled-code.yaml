@@ -23,7 +23,7 @@ jobs:
 
           for file in dist/*
           do
-                  source_file=${file/dist/source-dist}
+                  source_file=${file/dist/source-dist} # Replaces "dist" for "source-dist" in ${file}
 
                   hash_source=$(${hash_function} "${source_file}" | awk '{print $1;}')
                   hash_target=$(${hash_function} "${file}" | awk '{print $1;}')
