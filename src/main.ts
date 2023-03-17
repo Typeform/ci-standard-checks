@@ -4,10 +4,12 @@ import Check from './checks/check'
 import bashCheck from './checks/bash'
 import jiraLinked from './checks/jiraLinked'
 import piiDetection from './checks/piiDetection'
+import requiredTypeScript from './checks/requiredTypeScript'
 import {
   triggeredByBot,
   belongsToTypeformOrg,
   checkSkipped,
+  checkEnabled,
   isDraftPullRequest,
 } from './conditions'
 
@@ -21,6 +23,7 @@ const mandatoryChecks: Check[] = [
 
 const additionalChecks: Check[] = [
   jiraLinked,
+  requiredTypeScript,
   bashCheck({
     name: 'validate-openapi',
     inputs: [],
@@ -48,6 +51,8 @@ async function run(): Promise<void> {
     try {
       if (checkSkipped(check)) {
         core.info(`Check '${check.name}' skipped in the workflow`)
+      } else if (check.optional && !checkEnabled(check)) {
+        core.info(`Optional check '${check.name}' not enabled in the workflow`)
       } else {
         core.startGroup(`check: ${check.name}`)
         await check.run()

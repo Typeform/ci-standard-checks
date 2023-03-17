@@ -6,6 +6,10 @@ inputs:
     required: true
     default: ''
     description: 'Checks to be skipped'
+  enableChecks:
+    required: true
+    default: ''
+    description: 'Optional checks to enable'
   githubToken:
     required: true
     description: 'The github token to get PR info when checking for Jira Issue key'

@@ -39,6 +39,14 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN  }}
           dockerUsername: ${{ secrets.GITLEAKS_DOCKER_USERNAME }}
           dockerPassword: ${{ secrets.GITLEAKS_DOCKER_PASSWORD }}
+
+      - name: Test enabling optional checks
+        uses: ./
+        with:
+          enableChecks: 'required-typescript'
+          githubToken: ${{ secrets.GITHUB_TOKEN  }}
+          dockerUsername: ${{ secrets.GITLEAKS_DOCKER_USERNAME }}
+          dockerPassword: ${{ secrets.GITLEAKS_DOCKER_PASSWORD }}
   release: # this releases in beta
     needs: [build, test]
     runs-on: ubuntu-latest
