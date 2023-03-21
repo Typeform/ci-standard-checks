@@ -50,34 +50,10 @@ async function checkPullRequest(): Promise<boolean> {
   core.info(`Title: ${pr.title}`)
   core.info(`Branch: ${pr.head.ref}`)
 
-  const files = await github.getPullRequestFiles(
-    pullPayload.pull_request.number
-  )
-
-  let errors = files
-    .filter((f) => isForbiddenJSFile(f.filename))
-    .map(
-      (f) =>
-        `Only TypeScript is allowed for new changes, file must be migrated: ${f}`
-    )
-
-  const globber = await glob.create('**/tsconfig.json')
-  const tsconfigs = await globber.glob()
-
-  errors = errors.concat(
-    tsconfigs
-      .map((f) => ({
-        filename: f,
-        contents: fs.readFileSync(f, { encoding: 'utf-8' }),
-      }))
-      .filter((f) => !!f.contents)
-      .map((f) =>
-        missingTSConfigSettings(JSON.parse(f.contents)).map(
-          (err) => `${f.filename} doesn't meet minimum requirements: ${err}`
-        )
-      )
-      .reduce((acc, errs) => acc.concat(errs), [])
-  )
+  const errors = [
+    ...(await checkJsUsage(pr.number)),
+    ...(await checkTsConfig()),
+  ]
 
   if (errors.length > 0) {
     throw new Error(errors.join('\n'))
@@ -89,14 +65,48 @@ async function checkPullRequest(): Promise<boolean> {
   return true
 }
 
-function isForbiddenJSFile(filename: string): boolean {
+export async function checkJsUsage(prNumber: number): Promise<string[]> {
+  const files = await github.getPullRequestFiles(prNumber)
+
+  return files
+    .filter((f) => isForbiddenJSFile(f.filename))
+    .map(
+      (f) =>
+        `Only TypeScript is allowed for new changes, file must be migrated: ${f}`
+    )
+}
+
+export async function checkTsConfig(): Promise<string[]> {
+  const errors = []
+
+  const globber = await glob.create('**/tsconfig.json')
+  const tsconfigFiles = await globber.glob()
+
+  for (const filename of tsconfigFiles) {
+    const content = fs.readFileSync(filename, { encoding: 'utf-8' })
+
+    if (!content) continue
+
+    const missingSettings = missingTSConfigSettings(JSON.parse(content))
+
+    errors.push(
+      ...missingSettings.map(
+        (err) => `${filename} doesn't meet minimum requirements: ${err}`
+      )
+    )
+  }
+
+  return errors
+}
+
+export function isForbiddenJSFile(filename: string): boolean {
   const isTest = /\.(spec|test)\.jsx?$/i
   const isJS = /\.jsx?$/i
 
   return isJS.test(filename) && !isTest.test(filename)
 }
 
-function missingTSConfigSettings(tsconfig: TSConfig): string[] {
+export function missingTSConfigSettings(tsconfig: TSConfig): string[] {
   const errors = []
 
   if (tsconfig.compilerOptions?.allowUnreachableCode !== false) {
