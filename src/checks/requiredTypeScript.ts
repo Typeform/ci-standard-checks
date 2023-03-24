@@ -1,16 +1,15 @@
-import * as fs from 'fs'
-
 import * as core from '@actions/core'
-import * as glob from '@actions/glob'
+import * as CommentedJSON from 'comment-json'
 
 import { WebhookEventMap } from '@octokit/webhooks-types'
 
 import { github } from '../infrastructure/github'
+import * as fs from '../infrastructure/fs'
 import { isBot } from '../conditions/triggeredByBot'
 
 import Check from './check'
 
-type TSConfig = {
+type TsConfig = {
   compilerOptions?: {
     allowUnreachableCode?: boolean
     noImplicitAny?: boolean
@@ -79,15 +78,26 @@ export async function checkJsUsage(prNumber: number): Promise<string[]> {
 export async function checkTsConfig(): Promise<string[]> {
   const errors = []
 
-  const globber = await glob.create('**/tsconfig.json')
-  const tsconfigFiles = await globber.glob()
+  const tsconfigFiles = await fs.glob('**/tsconfig.json', [/^node_modules\//])
 
   for (const filename of tsconfigFiles) {
-    const content = fs.readFileSync(filename, { encoding: 'utf-8' })
+    const content = fs.readFile(filename)
+    let missingSettings: string[] = []
 
     if (!content) continue
 
-    const missingSettings = missingTSConfigSettings(JSON.parse(content))
+    try {
+      const parsed = CommentedJSON.parse(content)
+
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        throw new Error('expected an object')
+      }
+
+      missingSettings = missingTsConfigSettings(parsed as TsConfig)
+    } catch (e) {
+      errors.push(`${filename} is not valid JSON: "${e}"`)
+      continue
+    }
 
     errors.push(
       ...missingSettings.map(
@@ -106,7 +116,7 @@ export function isForbiddenJSFile(filename: string): boolean {
   return isJS.test(filename) && !isTest.test(filename)
 }
 
-export function missingTSConfigSettings(tsconfig: TSConfig): string[] {
+export function missingTsConfigSettings(tsconfig: TsConfig): string[] {
   const errors = []
 
   if (tsconfig.compilerOptions?.allowUnreachableCode !== false) {
