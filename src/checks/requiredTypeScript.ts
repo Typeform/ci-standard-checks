@@ -69,9 +69,10 @@ export async function checkJsUsage(prNumber: number): Promise<string[]> {
 
   return files
     .filter((f) => isForbiddenJSFile(f.filename))
+    .filter((f) => f.additions > f.deletions)
     .map(
       (f) =>
-        `Only TypeScript is allowed for new changes, file must be migrated: ${f}`
+        `Only TypeScript is allowed for new changes; migrate file or extract changes to TS file: ${f}`
     )
 }
 

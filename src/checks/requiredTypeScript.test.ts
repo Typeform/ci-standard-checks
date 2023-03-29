@@ -80,7 +80,7 @@ describe('Required TypeScript check', () => {
     it('throws error for PR with JS changes but good tsconfig', async () => {
       pullRequestResponse.user.login = 'regular-user'
       mockGithub.getPullRequestFiles.mockResolvedValue([
-        { filename: 'filename.js' },
+        { filename: 'filename.js', additions: 100, deletions: 20 },
       ] as PullRequestFiles)
       mockGlob.mockResolvedValue(['tsconfig.json'])
       mockReadFile.mockReturnValue(
@@ -115,7 +115,7 @@ describe('Required TypeScript check', () => {
     it('throws error for PR with JS changes and bad tsconfig', async () => {
       pullRequestResponse.user.login = 'regular-user'
       mockGithub.getPullRequestFiles.mockResolvedValue([
-        { filename: 'filename.js' },
+        { filename: 'filename.js', additions: 100, deletions: 20 },
       ] as PullRequestFiles)
       mockGlob.mockResolvedValue(['tsconfig.json'])
       mockReadFile.mockReturnValue(
