@@ -67,8 +67,21 @@ async function checkPullRequest(): Promise<boolean> {
 export async function checkJsUsage(prNumber: number): Promise<string[]> {
   const files = await github.getPullRequestFiles(prNumber)
 
-  return files
-    .filter((f) => isForbiddenJSFile(f.filename))
+  const jsFiles = files.filter((f) => isForbiddenJSFile(f.filename))
+
+  const overallJsAdditions = jsFiles.reduce((additions, f) => {
+    return additions + f.additions - f.deletions
+  }, 0)
+
+  if (overallJsAdditions <= 0) {
+    // overall, JS adoption is decreasing. either code is being migrated,
+    // or it is being extracted to somewhere else, or deleted completely
+    return []
+  }
+
+  // only warn about files *reducing* TS adoption - that is, files adding
+  // new JS lines
+  return jsFiles
     .filter((f) => f.additions > f.deletions)
     .map(
       (f) =>

@@ -95,6 +95,42 @@ describe('Required TypeScript check', () => {
       await expect(requiredTypeScript.run()).rejects.toThrow()
     })
 
+    it('returns true for PR with JS changes but good tsconfig and increasing TS adoption', async () => {
+      pullRequestResponse.user.login = 'regular-user'
+      mockGithub.getPullRequestFiles.mockResolvedValue([
+        { filename: 'filename.js', additions: 100, deletions: 120 },
+      ] as PullRequestFiles)
+      mockGlob.mockResolvedValue(['tsconfig.json'])
+      mockReadFile.mockReturnValue(
+        JSON.stringify({
+          compilerOptions: {
+            allowUnreachableCode: false,
+            noImplicitAny: true,
+          },
+        })
+      )
+
+      await expect(requiredTypeScript.run()).resolves.toBeTruthy()
+    })
+
+    it('returns true for PR with JS changes but good tsconfig and stable TS adoption', async () => {
+      pullRequestResponse.user.login = 'regular-user'
+      mockGithub.getPullRequestFiles.mockResolvedValue([
+        { filename: 'filename.js', additions: 100, deletions: 100 },
+      ] as PullRequestFiles)
+      mockGlob.mockResolvedValue(['tsconfig.json'])
+      mockReadFile.mockReturnValue(
+        JSON.stringify({
+          compilerOptions: {
+            allowUnreachableCode: false,
+            noImplicitAny: true,
+          },
+        })
+      )
+
+      await expect(requiredTypeScript.run()).resolves.toBeTruthy()
+    })
+
     it('throws error for PR without JS changes but bad tsconfig', async () => {
       pullRequestResponse.user.login = 'regular-user'
       mockGithub.getPullRequestFiles.mockResolvedValue([
