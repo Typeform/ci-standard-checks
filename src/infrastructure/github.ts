@@ -15,6 +15,8 @@ export type Content =
   Endpoints['GET /repos/{owner}/{repo}/contents/{path}']['response']['data']
 export type Commit =
   Endpoints['GET /repos/{owner}/{repo}/commits/{ref}']['response']['data']
+export type Comment =
+  Endpoints['GET /repos/{owner}/{repo}/issues/{issue_number}/comments']['response']['data'][0]
 
 export class GitHub {
   context: Context
@@ -73,6 +75,66 @@ export class GitHub {
       ref: ref,
     })
     return response.data
+  }
+
+  /**
+   * Lists all existing comments on an issue or PR.
+   * Pagination is handled automatically.
+   * @param pull_number the issue or PR number
+   * @returns an array of comments
+   */
+  async *listComments(pull_number: number): AsyncGenerator<Comment> {
+    for await (const { data: comments } of this.octokit.paginate.iterator(
+      this.octokit.rest.issues.listComments,
+      {
+        owner: this.context.repo.owner,
+        repo: this.context.repo.repo,
+        issue_number: pull_number,
+        per_page: 100,
+      }
+    )) {
+      if (!comments.length) break
+
+      for (const comment of comments) {
+        yield comment
+      }
+    }
+  }
+
+  /**
+   * "Pins" a comment at the top of an issue or PR.
+   * Either creates a new comment or updates the existing one; comments are matched
+   * using the `header` param, which is also rendered as `h3`.
+   * @param pull_number the issue or PR number
+   * @param match RegExp to match when finding an existing comment to update
+   * @param content comment content
+   */
+  async pinComment(
+    pull_number: number,
+    match: RegExp,
+    content: string
+  ): Promise<Comment['id']> {
+    for await (const comment of this.listComments(pull_number)) {
+      if (comment.body && comment.body.match(match)) {
+        this.octokit.rest.issues.updateComment({
+          owner: this.context.repo.owner,
+          repo: this.context.repo.repo,
+          comment_id: comment.id,
+          body: content,
+        })
+
+        return comment.id
+      }
+    }
+
+    const response = await this.octokit.rest.issues.createComment({
+      owner: this.context.repo.owner,
+      repo: this.context.repo.repo,
+      issue_number: pull_number,
+      body: content,
+    })
+
+    return response.data.id
   }
 }
 
