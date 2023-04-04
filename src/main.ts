@@ -11,13 +11,16 @@ import {
   isDraftPullRequest,
 } from './conditions'
 
-const checks: Check[] = [
+const mandatoryChecks: Check[] = [
   bashCheck({
     name: 'secrets-scan',
     inputs: ['githubToken'],
   }),
-  jiraLinked,
   piiDetection,
+]
+
+const additionalChecks: Check[] = [
+  jiraLinked,
   bashCheck({
     name: 'validate-openapi',
     inputs: [],
@@ -25,6 +28,8 @@ const checks: Check[] = [
 ]
 
 async function run(): Promise<void> {
+  let checks: Check[] = mandatoryChecks
+
   if (!(await belongsToTypeformOrg())) {
     core.info('Executing outside of Typeform org, skipping all checks')
     return
@@ -35,9 +40,8 @@ async function run(): Promise<void> {
     return
   }
 
-  if (await isDraftPullRequest()) {
-    core.info('Pull Request is a draft, skipping all checks')
-    return
+  if (!(await isDraftPullRequest())) {
+    checks = checks.concat(additionalChecks)
   }
 
   for (const check of checks) {

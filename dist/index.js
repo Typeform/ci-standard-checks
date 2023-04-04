@@ -788,13 +788,15 @@ const bash_1 = __importDefault(__nccwpck_require__(2888));
 const jiraLinked_1 = __importDefault(__nccwpck_require__(9496));
 const piiDetection_1 = __importDefault(__nccwpck_require__(5246));
 const conditions_1 = __nccwpck_require__(383);
-const checks = [
+const mandatoryChecks = [
     bash_1.default({
         name: 'secrets-scan',
         inputs: ['githubToken'],
     }),
-    jiraLinked_1.default,
     piiDetection_1.default,
+];
+const additionalChecks = [
+    jiraLinked_1.default,
     bash_1.default({
         name: 'validate-openapi',
         inputs: [],
@@ -802,6 +804,7 @@ const checks = [
 ];
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        let checks = mandatoryChecks;
         if (!(yield conditions_1.belongsToTypeformOrg())) {
             core.info('Executing outside of Typeform org, skipping all checks');
             return;
@@ -810,9 +813,8 @@ function run() {
             core.info('Action triggered by bot, skipping all checks');
             return;
         }
-        if (yield conditions_1.isDraftPullRequest()) {
-            core.info('Pull Request is a draft, skipping all checks');
-            return;
+        if (!(yield conditions_1.isDraftPullRequest())) {
+            checks = checks.concat(additionalChecks);
         }
         for (const check of checks) {
             try {
