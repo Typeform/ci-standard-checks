@@ -19,7 +19,7 @@ const mandatoryChecks: Check[] = [
   piiDetection,
 ]
 
-const complementaryChecks: Check[] = [
+const additionalChecks: Check[] = [
   jiraLinked,
   bashCheck({
     name: 'validate-openapi',
@@ -41,7 +41,7 @@ async function run(): Promise<void> {
   }
 
   if (!(await isDraftPullRequest())) {
-    checks = checks.concat(complementaryChecks)
+    checks = checks.concat(additionalChecks)
   }
 
   for (const check of checks) {

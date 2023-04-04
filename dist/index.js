@@ -795,7 +795,7 @@ const mandatoryChecks = [
     }),
     piiDetection_1.default,
 ];
-const complementaryChecks = [
+const additionalChecks = [
     jiraLinked_1.default,
     bash_1.default({
         name: 'validate-openapi',
@@ -814,7 +814,7 @@ function run() {
             return;
         }
         if (!(yield conditions_1.isDraftPullRequest())) {
-            checks = checks.concat(complementaryChecks);
+            checks = checks.concat(additionalChecks);
         }
         for (const check of checks) {
             try {
