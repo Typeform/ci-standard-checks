@@ -175,6 +175,7 @@ describe('Required TypeScript check', () => {
     })
 
     it('pins a GitHub comment with the adoption %', async () => {
+      pullRequestResponse.user.login = 'regular-user'
       mockGithub.getPullRequestFiles.mockResolvedValue([
         { filename: 'file.ts' },
       ] as PullRequestFiles)
