@@ -9,7 +9,9 @@ import { glob, readFile } from '../infrastructure/fs'
 import { BOT_USERS } from '../conditions/triggeredByBot'
 
 import requiredTypeScript, {
+  formatAdoptionPercentage,
   isForbiddenJSFile,
+  measureTsAdoption,
   missingTsConfigSettings,
 } from './requiredTypeScript'
 
@@ -226,6 +228,32 @@ describe('isForbiddenJSFile', () => {
     'vendor/style.css',
   ])('it returns false with unrelated files [%s]', (filename) => {
     expect(isForbiddenJSFile(filename)).toBeFalsy()
+  })
+})
+
+describe('measureTsAdoption', () => {
+  it('correctly calculates and formats adoption %', async () => {
+    mockGlob.mockImplementation(async ({ patterns }) => {
+      if (patterns[0].includes('js')) {
+        return ['file.js']
+      } else if (patterns[0].includes('ts')) {
+        return ['file.ts']
+      }
+      return []
+    })
+    mockReadFile.mockImplementation((path) => {
+      switch (path) {
+        case 'file.js':
+          return 'this\nis a\njs\nfile'
+        case 'file.ts':
+          return 'this\nis a\nlonger\nts\nfile\nso it has\nmore\nadoption'
+      }
+      return ''
+    })
+
+    await expect(
+      measureTsAdoption().then((x) => formatAdoptionPercentage(x))
+    ).resolves.toBe('66.7%')
   })
 })
 

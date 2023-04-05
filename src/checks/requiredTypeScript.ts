@@ -89,10 +89,41 @@ export async function checkJsUsage(prNumber: number): Promise<string[]> {
     )
 }
 
+export function formatAdoptionPercentage(adoption: number): string {
+  return adoption.toLocaleString(undefined, {
+    style: 'percent',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 1,
+  })
+}
+
+export async function measureTsAdoption(): Promise<number> {
+  const jsFiles = await fs.glob({
+    patterns: ['**/*.js', '**/*.jsx'],
+    exclude: [/^node_modules\//, /\.(spec|test).jsx?$/],
+  })
+  const tsFiles = await fs.glob({
+    patterns: ['**/*.ts', '**/*.tsx'],
+    exclude: [/^node_modules\//, /\.(spec|test).tsx?$/],
+  })
+
+  const jsLines = jsFiles
+    .map((f) => fs.readFile(f).split('\n').length)
+    .reduce((total, lines) => total + lines, 0)
+  const tsLines = tsFiles
+    .map((f) => fs.readFile(f).split('\n').length)
+    .reduce((total, lines) => total + lines, 0)
+
+  return tsLines / (jsLines + tsLines)
+}
+
 export async function checkTsConfig(): Promise<string[]> {
   const errors = []
 
-  const tsconfigFiles = await fs.glob('**/tsconfig.json', [/^node_modules\//])
+  const tsconfigFiles = await fs.glob({
+    patterns: ['**/tsconfig.json'],
+    exclude: [/^node_modules\//],
+  })
 
   for (const filename of tsconfigFiles) {
     const content = fs.readFile(filename)
