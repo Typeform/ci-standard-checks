@@ -454,7 +454,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.missingTsConfigSettings = exports.isForbiddenJSFile = exports.checkTsConfig = exports.checkJsUsage = void 0;
+exports.missingTsConfigSettings = exports.isForbiddenJSFile = exports.checkTsConfig = exports.measureTsAdoption = exports.formatAdoptionPercentage = exports.checkJsUsage = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const CommentedJSON = __importStar(__nccwpck_require__(3165));
 const github_1 = __nccwpck_require__(5679);
@@ -495,6 +495,11 @@ function checkPullRequest() {
             throw new Error(errors.join('\n'));
         }
         core.info('OK! No forbidden JS additions/changes or missing "tsconfig.json" settings');
+        const adoption = yield measureTsAdoption();
+        const commentId = yield github_1.github.pinComment(pr.number, /## TypeScript adoption/, `## TypeScript adoption
+Current adoption level: **${formatAdoptionPercentage(adoption)}**
+`);
+        core.info(`Pinned adoption % comment: #${commentId}`);
         return true;
     });
 }
@@ -518,10 +523,41 @@ function checkJsUsage(prNumber) {
     });
 }
 exports.checkJsUsage = checkJsUsage;
+function formatAdoptionPercentage(adoption) {
+    return adoption.toLocaleString(undefined, {
+        style: 'percent',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 1,
+    });
+}
+exports.formatAdoptionPercentage = formatAdoptionPercentage;
+function measureTsAdoption() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const jsFiles = yield fs.glob({
+            patterns: ['**/*.js', '**/*.jsx'],
+            exclude: [/^node_modules\//, /\.(spec|test).jsx?$/],
+        });
+        const tsFiles = yield fs.glob({
+            patterns: ['**/*.ts', '**/*.tsx'],
+            exclude: [/^node_modules\//, /\.(spec|test).tsx?$/],
+        });
+        const jsLines = jsFiles
+            .map((f) => fs.readFile(f).split('\n').length)
+            .reduce((total, lines) => total + lines, 0);
+        const tsLines = tsFiles
+            .map((f) => fs.readFile(f).split('\n').length)
+            .reduce((total, lines) => total + lines, 0);
+        return tsLines / (jsLines + tsLines);
+    });
+}
+exports.measureTsAdoption = measureTsAdoption;
 function checkTsConfig() {
     return __awaiter(this, void 0, void 0, function* () {
         const errors = [];
-        const tsconfigFiles = yield fs.glob('**/tsconfig.json', [/^node_modules\//]);
+        const tsconfigFiles = yield fs.glob({
+            patterns: ['**/tsconfig.json'],
+            exclude: [/^node_modules\//],
+        });
         for (const filename of tsconfigFiles) {
             const content = fs.readFile(filename);
             let missingSettings = [];
@@ -869,9 +905,9 @@ const fs_1 = __importDefault(__nccwpck_require__(7147));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const process_1 = __importDefault(__nccwpck_require__(7282));
 const actionsGlob = __importStar(__nccwpck_require__(8090));
-function glob(pattern, exclude = []) {
+function glob({ patterns = [], exclude = [], }) {
     return __awaiter(this, void 0, void 0, function* () {
-        const globber = yield actionsGlob.create(pattern);
+        const globber = yield actionsGlob.create(patterns.join('\n'));
         const files = (yield globber.glob())
             .map((f) => path_1.default.relative(process_1.default.cwd(), f))
             .filter((f) => !exclude.some((rx) => f.match(rx)));
