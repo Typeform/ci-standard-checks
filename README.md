@@ -38,7 +38,6 @@ input with the names of the checks you want to skip separated by
 commas:
 
 ```yaml
-
 ---
 with:
   skipChecks: 'jira-linked,secret-scan'
@@ -53,7 +52,6 @@ Some checks that are not yet mandatory will be disabled by default; you can opt-
 to them by providing `enableChecks` as an input, just like for [skipping checks](#skipping-checks):
 
 ```yaml
-
 ---
 with:
   enableChecks: 'required-typescript'
@@ -174,7 +172,7 @@ will be published and a new release will happen automatically! :rocket:
 
 ## Validate
 
-There's a [test.yml](.github/workflows/test.yml) workflow in the repo
+There's a [test-and-release-beta.yml](.github/workflows/test-and-release-beta.yml) workflow in the repo
 referencing `./` to test the action itself. This will be run to
 validate every PR. :white_check_mark:
 
