@@ -25,6 +25,7 @@ jest.mock('../infrastructure/fs')
 describe('Required TypeScript check', () => {
   describe('pull_request event', () => {
     const pullRequestResponse = {
+      number: 5,
       title: '',
       head: {
         ref: '',
@@ -171,6 +172,46 @@ describe('Required TypeScript check', () => {
       pullRequestResponse.user.login = botUser
 
       await expect(requiredTypeScript.run()).resolves.toBeTruthy()
+    })
+
+    it('pins a GitHub comment with the adoption %', async () => {
+      mockGithub.getPullRequestFiles.mockResolvedValue([
+        { filename: 'file.ts' },
+      ] as PullRequestFiles)
+      mockGlob.mockImplementation(async ({ patterns }) => {
+        if (patterns[0].includes('tsconfig.json')) {
+          return ['tsconfig.json']
+        } else if (patterns[0].includes('js')) {
+          return ['file.js']
+        } else if (patterns[0].includes('ts')) {
+          return ['file.ts']
+        }
+        return []
+      })
+      mockReadFile.mockImplementation((path) => {
+        switch (path) {
+          case 'tsconfig.json':
+            return JSON.stringify({
+              compilerOptions: {
+                allowUnreachableCode: false,
+                noImplicitAny: true,
+              },
+            })
+          case 'file.js':
+            return 'this\nis a\njs\nfile'
+          case 'file.ts':
+            return 'this\nis a\nlonger\nts\nfile\nso it has\nmore\nadoption'
+        }
+        return ''
+      })
+
+      await requiredTypeScript.run()
+
+      expect(mockGithub.pinComment).toHaveBeenCalledWith(
+        5,
+        /## TypeScript adoption/,
+        '## TypeScript adoption\nCurrent adoption level: **66.7%**\n'
+      )
     })
   })
 })

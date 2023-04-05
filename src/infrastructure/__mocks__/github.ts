@@ -11,4 +11,6 @@ export const github = {
   getPullRequestFiles: jest.fn(),
   getPullRequestsAssociatedWithCommit: jest.fn(),
   downloadContent: jest.fn(),
+  listComments: jest.fn(),
+  pinComment: jest.fn(),
 }

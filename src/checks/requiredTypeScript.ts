@@ -61,6 +61,18 @@ async function checkPullRequest(): Promise<boolean> {
   core.info(
     'OK! No forbidden JS additions/changes or missing "tsconfig.json" settings'
   )
+
+  const adoption = await measureTsAdoption()
+  const commentId = await github.pinComment(
+    pr.number,
+    /## TypeScript adoption/,
+    `## TypeScript adoption
+Current adoption level: **${formatAdoptionPercentage(adoption)}**
+`
+  )
+
+  core.info(`Pinned adoption % comment: #${commentId}`)
+
   return true
 }
 
