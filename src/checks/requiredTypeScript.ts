@@ -59,12 +59,16 @@ async function checkPullRequest(): Promise<boolean> {
     exclude: filter,
   })
 
-  if (jsFiles.length || tsconfigFiles.length) {
-    const errors = [
-      ...(await checkJsUsage(jsFiles)),
-      ...(await checkTsConfig(tsconfigFiles)),
-    ]
+  const errors = []
 
+  if (jsFiles.length || tsconfigFiles.length) {
+    errors.push(
+      ...(await checkJsUsage(jsFiles)),
+      ...(await checkTsConfig(tsconfigFiles))
+    )
+  }
+
+  if (jsFiles.length || errors.length > 0) {
     const adoption = await measureTsAdoption(filter)
     const commentId = await github.pinComment(
       pr.number,
@@ -75,10 +79,10 @@ Current adoption level: **${formatAdoptionPercentage(adoption)}**
     )
 
     core.info(`Pinned adoption % comment: #${commentId}`)
+  }
 
-    if (errors.length > 0) {
-      throw new Error(errors.join('\n'))
-    }
+  if (errors.length) {
+    throw new Error(errors.join('\n'))
   }
 
   core.info(
@@ -92,7 +96,7 @@ export async function checkJsUsage(
   files: { filename: string; additions: number; deletions: number }[]
 ): Promise<string[]> {
   const overallJsAdditions = files.reduce((additions, f) => {
-    return additions + f.additions - f.deletions
+    return additions + (f.additions ?? 0) - (f.deletions ?? 0)
   }, 0)
 
   if (overallJsAdditions <= 0) {
@@ -104,7 +108,7 @@ export async function checkJsUsage(
   // only warn about files *reducing* TS adoption - that is, files adding
   // new JS lines
   return files
-    .filter((f) => f.additions > f.deletions)
+    .filter((f) => (f.additions ?? 0) > (f.deletions ?? 0))
     .map(
       (f) =>
         `Only TypeScript is allowed for new changes; migrate file or extract changes to TS file: ${f.filename}`

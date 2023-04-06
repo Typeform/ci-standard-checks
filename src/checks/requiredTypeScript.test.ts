@@ -174,10 +174,10 @@ describe('Required TypeScript check', () => {
       await expect(requiredTypeScript.run()).resolves.toBeTruthy()
     })
 
-    it('pins a GitHub comment with the adoption %', async () => {
+    it('pins a GitHub comment with the adoption % if JS changes', async () => {
       pullRequestResponse.user.login = 'regular-user'
       mockGithub.getPullRequestFiles.mockResolvedValue([
-        { filename: 'file.ts' },
+        { filename: 'file.js', additions: 3 },
       ] as PullRequestFiles)
       mockGlob.mockImplementation(async ({ patterns }) => {
         if (patterns[0].includes('tsconfig.json')) {
@@ -206,7 +206,45 @@ describe('Required TypeScript check', () => {
         return ''
       })
 
-      await requiredTypeScript.run()
+      await expect(requiredTypeScript.run()).rejects.toThrow()
+
+      expect(mockGithub.pinComment).toHaveBeenCalledWith(
+        5,
+        /## TypeScript adoption/,
+        '## TypeScript adoption\nCurrent adoption level: **66.7%**\n'
+      )
+    })
+
+    it('pins a GitHub comment with the adoption % if bad tsconfig', async () => {
+      pullRequestResponse.user.login = 'regular-user'
+      mockGithub.getPullRequestFiles.mockResolvedValue([
+        { filename: 'file.ts' },
+      ] as PullRequestFiles)
+      mockGlob.mockImplementation(async ({ patterns }) => {
+        if (patterns[0].includes('tsconfig.json')) {
+          return ['tsconfig.json']
+        } else if (patterns[0].includes('js')) {
+          return ['file.js']
+        } else if (patterns[0].includes('ts')) {
+          return ['file.ts']
+        }
+        return []
+      })
+      mockReadFile.mockImplementation((path) => {
+        switch (path) {
+          case 'tsconfig.json':
+            return JSON.stringify({
+              compilerOptions: {},
+            })
+          case 'file.js':
+            return 'this\nis a\njs\nfile'
+          case 'file.ts':
+            return 'this\nis a\nlonger\nts\nfile\nso it has\nmore\nadoption'
+        }
+        return ''
+      })
+
+      await expect(requiredTypeScript.run()).rejects.toThrow()
 
       expect(mockGithub.pinComment).toHaveBeenCalledWith(
         5,
@@ -232,6 +270,43 @@ describe('Required TypeScript check', () => {
       })
       mockReadFile.mockImplementation((path) => {
         switch (path) {
+          case 'file.js':
+            return 'this\nis a\njs\nfile'
+          case 'file.ts':
+            return 'this\nis a\nlonger\nts\nfile\nso it has\nmore\nadoption'
+        }
+        return ''
+      })
+
+      await requiredTypeScript.run()
+
+      expect(mockGithub.pinComment).not.toHaveBeenCalled()
+    })
+
+    it('does not pin a GitHub comment with the adoption % if no JS changes and tsconfig is good', async () => {
+      pullRequestResponse.user.login = 'regular-user'
+      mockGithub.getPullRequestFiles.mockResolvedValue([
+        { filename: 'file.ts' },
+      ] as PullRequestFiles)
+      mockGlob.mockImplementation(async ({ patterns }) => {
+        if (patterns[0].includes('tsconfig.json')) {
+          return ['tsconfig.json']
+        } else if (patterns[0].includes('.js')) {
+          return ['file.js']
+        } else if (patterns[0].includes('.ts')) {
+          return ['file.ts']
+        }
+        return []
+      })
+      mockReadFile.mockImplementation((path) => {
+        switch (path) {
+          case 'tsconfig.json':
+            return JSON.stringify({
+              compilerOptions: {
+                allowUnreachableCode: false,
+                noImplicitAny: true,
+              },
+            })
           case 'file.js':
             return 'this\nis a\njs\nfile'
           case 'file.ts':
