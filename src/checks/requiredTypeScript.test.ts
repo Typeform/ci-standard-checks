@@ -214,6 +214,36 @@ describe('Required TypeScript check', () => {
         '## TypeScript adoption\nCurrent adoption level: **66.7%**\n'
       )
     })
+
+    it('does not pin a GitHub comment with the adoption % if no JS changes and no tsconfig', async () => {
+      pullRequestResponse.user.login = 'regular-user'
+      mockGithub.getPullRequestFiles.mockResolvedValue([
+        { filename: 'file.ts' },
+      ] as PullRequestFiles)
+      mockGlob.mockImplementation(async ({ patterns }) => {
+        if (patterns[0].includes('tsconfig.json')) {
+          return []
+        } else if (patterns[0].includes('.js')) {
+          return ['file.js']
+        } else if (patterns[0].includes('.ts')) {
+          return ['file.ts']
+        }
+        return []
+      })
+      mockReadFile.mockImplementation((path) => {
+        switch (path) {
+          case 'file.js':
+            return 'this\nis a\njs\nfile'
+          case 'file.ts':
+            return 'this\nis a\nlonger\nts\nfile\nso it has\nmore\nadoption'
+        }
+        return ''
+      })
+
+      await requiredTypeScript.run()
+
+      expect(mockGithub.pinComment).not.toHaveBeenCalled()
+    })
   })
 })
 

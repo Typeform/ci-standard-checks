@@ -52,42 +52,46 @@ async function checkPullRequest(): Promise<boolean> {
 
   const filter = getIgnoreFilter()
 
-  const errors = [
-    ...(await checkJsUsage(pr.number, filter)),
-    ...(await checkTsConfig(filter)),
-  ]
+  const files = await github.getPullRequestFiles(pr.number)
+  const jsFiles = files.filter((f) => isForbiddenJSFile(f.filename, filter))
+  const tsconfigFiles = await fs.glob({
+    patterns: ['**/tsconfig.json'],
+    exclude: filter,
+  })
 
-  if (errors.length > 0) {
-    throw new Error(errors.join('\n'))
+  if (jsFiles.length || tsconfigFiles.length) {
+    const errors = [
+      ...(await checkJsUsage(jsFiles)),
+      ...(await checkTsConfig(tsconfigFiles)),
+    ]
+
+    const adoption = await measureTsAdoption(filter)
+    const commentId = await github.pinComment(
+      pr.number,
+      /## TypeScript adoption/,
+      `## TypeScript adoption
+Current adoption level: **${formatAdoptionPercentage(adoption)}**
+`
+    )
+
+    core.info(`Pinned adoption % comment: #${commentId}`)
+
+    if (errors.length > 0) {
+      throw new Error(errors.join('\n'))
+    }
   }
 
   core.info(
-    'OK! No forbidden JS additions/changes or missing "tsconfig.json" settings'
+    'OK! JS adoption not increasing, and no missing "tsconfig.json" settings'
   )
-
-  const adoption = await measureTsAdoption(filter)
-  const commentId = await github.pinComment(
-    pr.number,
-    /## TypeScript adoption/,
-    `## TypeScript adoption
-Current adoption level: **${formatAdoptionPercentage(adoption)}**
-`
-  )
-
-  core.info(`Pinned adoption % comment: #${commentId}`)
 
   return true
 }
 
 export async function checkJsUsage(
-  prNumber: number,
-  filter: IgnoredFileFilter = getIgnoreFilter()
+  files: { filename: string; additions: number; deletions: number }[]
 ): Promise<string[]> {
-  const files = await github.getPullRequestFiles(prNumber)
-
-  const jsFiles = files.filter((f) => isForbiddenJSFile(f.filename))
-
-  const overallJsAdditions = jsFiles.reduce((additions, f) => {
+  const overallJsAdditions = files.reduce((additions, f) => {
     return additions + f.additions - f.deletions
   }, 0)
 
@@ -99,7 +103,7 @@ export async function checkJsUsage(
 
   // only warn about files *reducing* TS adoption - that is, files adding
   // new JS lines
-  return jsFiles
+  return files
     .filter((f) => f.additions > f.deletions)
     .map(
       (f) =>
@@ -137,17 +141,10 @@ export async function measureTsAdoption(
   return tsLines / (jsLines + tsLines)
 }
 
-export async function checkTsConfig(
-  filter: IgnoredFileFilter = getIgnoreFilter()
-): Promise<string[]> {
+async function checkTsConfig(files: string[]): Promise<string[]> {
   const errors = []
 
-  const tsconfigFiles = await fs.glob({
-    patterns: ['**/tsconfig.json'],
-    exclude: filter,
-  })
-
-  for (const filename of tsconfigFiles) {
+  for (const filename of files) {
     const content = fs.readFile(filename)
     let missingSettings: string[] = []
 
@@ -193,13 +190,13 @@ export function missingTsConfigSettings(tsconfig: TsConfig): string[] {
   }
 
   if (tsconfig.compilerOptions?.noImplicitAny !== true) {
-    errors.push('compilerOptions.noImplicitAny must be true')
+    errors.push('compilerOptions.noImplicitAny must be true 123')
   }
 
   return errors
 }
 
-export function getIgnoreFilter(): IgnoredFileFilter {
+function getIgnoreFilter(): IgnoredFileFilter {
   const filter = ignore().add([
     '*.spec.js',
     '*.spec.jsx',

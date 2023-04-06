@@ -457,7 +457,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getIgnoreFilter = exports.missingTsConfigSettings = exports.isForbiddenJSFile = exports.checkTsConfig = exports.measureTsAdoption = exports.formatAdoptionPercentage = exports.checkJsUsage = void 0;
+exports.missingTsConfigSettings = exports.isForbiddenJSFile = exports.measureTsAdoption = exports.formatAdoptionPercentage = exports.checkJsUsage = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const CommentedJSON = __importStar(__nccwpck_require__(3165));
 const github_1 = __nccwpck_require__(5679);
@@ -492,27 +492,33 @@ function checkPullRequest() {
         core.info(`Title: ${pr.title}`);
         core.info(`Branch: ${pr.head.ref}`);
         const filter = getIgnoreFilter();
-        const errors = [
-            ...(yield checkJsUsage(pr.number, filter)),
-            ...(yield checkTsConfig(filter)),
-        ];
-        if (errors.length > 0) {
-            throw new Error(errors.join('\n'));
-        }
-        core.info('OK! No forbidden JS additions/changes or missing "tsconfig.json" settings');
-        const adoption = yield measureTsAdoption(filter);
-        const commentId = yield github_1.github.pinComment(pr.number, /## TypeScript adoption/, `## TypeScript adoption
+        const files = yield github_1.github.getPullRequestFiles(pr.number);
+        const jsFiles = files.filter((f) => isForbiddenJSFile(f.filename, filter));
+        const tsconfigFiles = yield fs.glob({
+            patterns: ['**/tsconfig.json'],
+            exclude: filter,
+        });
+        if (jsFiles.length || tsconfigFiles.length) {
+            const errors = [
+                ...(yield checkJsUsage(jsFiles)),
+                ...(yield checkTsConfig(tsconfigFiles)),
+            ];
+            const adoption = yield measureTsAdoption(filter);
+            const commentId = yield github_1.github.pinComment(pr.number, /## TypeScript adoption/, `## TypeScript adoption
 Current adoption level: **${formatAdoptionPercentage(adoption)}**
 `);
-        core.info(`Pinned adoption % comment: #${commentId}`);
+            core.info(`Pinned adoption % comment: #${commentId}`);
+            if (errors.length > 0) {
+                throw new Error(errors.join('\n'));
+            }
+        }
+        core.info('OK! JS adoption not increasing, and no missing "tsconfig.json" settings');
         return true;
     });
 }
-function checkJsUsage(prNumber, filter = getIgnoreFilter()) {
+function checkJsUsage(files) {
     return __awaiter(this, void 0, void 0, function* () {
-        const files = yield github_1.github.getPullRequestFiles(prNumber);
-        const jsFiles = files.filter((f) => isForbiddenJSFile(f.filename));
-        const overallJsAdditions = jsFiles.reduce((additions, f) => {
+        const overallJsAdditions = files.reduce((additions, f) => {
             return additions + f.additions - f.deletions;
         }, 0);
         if (overallJsAdditions <= 0) {
@@ -522,7 +528,7 @@ function checkJsUsage(prNumber, filter = getIgnoreFilter()) {
         }
         // only warn about files *reducing* TS adoption - that is, files adding
         // new JS lines
-        return jsFiles
+        return files
             .filter((f) => f.additions > f.deletions)
             .map((f) => `Only TypeScript is allowed for new changes; migrate file or extract changes to TS file: ${f.filename}`);
     });
@@ -556,14 +562,10 @@ function measureTsAdoption(filter = getIgnoreFilter()) {
     });
 }
 exports.measureTsAdoption = measureTsAdoption;
-function checkTsConfig(filter = getIgnoreFilter()) {
+function checkTsConfig(files) {
     return __awaiter(this, void 0, void 0, function* () {
         const errors = [];
-        const tsconfigFiles = yield fs.glob({
-            patterns: ['**/tsconfig.json'],
-            exclude: filter,
-        });
-        for (const filename of tsconfigFiles) {
+        for (const filename of files) {
             const content = fs.readFile(filename);
             let missingSettings = [];
             if (!content)
@@ -584,7 +586,6 @@ function checkTsConfig(filter = getIgnoreFilter()) {
         return errors;
     });
 }
-exports.checkTsConfig = checkTsConfig;
 function isForbiddenJSFile(filename, filter = getIgnoreFilter()) {
     const jsPattern = /\.jsx?$/i;
     return jsPattern.test(filename) && !filter.ignores(filename);
@@ -597,7 +598,7 @@ function missingTsConfigSettings(tsconfig) {
         errors.push('compilerOptions.allowUnreachableCode must be false');
     }
     if (((_b = tsconfig.compilerOptions) === null || _b === void 0 ? void 0 : _b.noImplicitAny) !== true) {
-        errors.push('compilerOptions.noImplicitAny must be true');
+        errors.push('compilerOptions.noImplicitAny must be true 123');
     }
     return errors;
 }
@@ -624,7 +625,6 @@ function getIgnoreFilter() {
     }
     return filter;
 }
-exports.getIgnoreFilter = getIgnoreFilter;
 
 
 /***/ }),
