@@ -8,6 +8,7 @@ import * as fs from '../infrastructure/fs'
 import { isBot } from '../conditions/triggeredByBot'
 
 import Check from './check'
+import ignore, { Ignore as IgnoredFileFilter } from 'ignore'
 
 type TsConfig = {
   compilerOptions?: {
@@ -49,9 +50,11 @@ async function checkPullRequest(): Promise<boolean> {
   core.info(`Title: ${pr.title}`)
   core.info(`Branch: ${pr.head.ref}`)
 
+  const filter = getIgnoreFilter()
+
   const errors = [
-    ...(await checkJsUsage(pr.number)),
-    ...(await checkTsConfig()),
+    ...(await checkJsUsage(pr.number, filter)),
+    ...(await checkTsConfig(filter)),
   ]
 
   if (errors.length > 0) {
@@ -62,7 +65,7 @@ async function checkPullRequest(): Promise<boolean> {
     'OK! No forbidden JS additions/changes or missing "tsconfig.json" settings'
   )
 
-  const adoption = await measureTsAdoption()
+  const adoption = await measureTsAdoption(filter)
   const commentId = await github.pinComment(
     pr.number,
     /## TypeScript adoption/,
@@ -76,7 +79,10 @@ Current adoption level: **${formatAdoptionPercentage(adoption)}**
   return true
 }
 
-export async function checkJsUsage(prNumber: number): Promise<string[]> {
+export async function checkJsUsage(
+  prNumber: number,
+  filter: IgnoredFileFilter = getIgnoreFilter()
+): Promise<string[]> {
   const files = await github.getPullRequestFiles(prNumber)
 
   const jsFiles = files.filter((f) => isForbiddenJSFile(f.filename))
@@ -109,14 +115,16 @@ export function formatAdoptionPercentage(adoption: number): string {
   })
 }
 
-export async function measureTsAdoption(): Promise<number> {
+export async function measureTsAdoption(
+  filter: IgnoredFileFilter = getIgnoreFilter()
+): Promise<number> {
   const jsFiles = await fs.glob({
     patterns: ['**/*.js', '**/*.jsx'],
-    exclude: [/^node_modules\//, /\.(spec|test).jsx?$/],
+    exclude: filter,
   })
   const tsFiles = await fs.glob({
     patterns: ['**/*.ts', '**/*.tsx'],
-    exclude: [/^node_modules\//, /\.(spec|test).tsx?$/],
+    exclude: filter,
   })
 
   const jsLines = jsFiles
@@ -129,12 +137,14 @@ export async function measureTsAdoption(): Promise<number> {
   return tsLines / (jsLines + tsLines)
 }
 
-export async function checkTsConfig(): Promise<string[]> {
+export async function checkTsConfig(
+  filter: IgnoredFileFilter = getIgnoreFilter()
+): Promise<string[]> {
   const errors = []
 
   const tsconfigFiles = await fs.glob({
     patterns: ['**/tsconfig.json'],
-    exclude: [/^node_modules\//],
+    exclude: filter,
   })
 
   for (const filename of tsconfigFiles) {
@@ -166,11 +176,13 @@ export async function checkTsConfig(): Promise<string[]> {
   return errors
 }
 
-export function isForbiddenJSFile(filename: string): boolean {
-  const isTest = /\.(spec|test)\.jsx?$/i
-  const isJS = /\.jsx?$/i
+export function isForbiddenJSFile(
+  filename: string,
+  filter: IgnoredFileFilter = getIgnoreFilter()
+): boolean {
+  const jsPattern = /\.jsx?$/i
 
-  return isJS.test(filename) && !isTest.test(filename)
+  return jsPattern.test(filename) && !filter.ignores(filename)
 }
 
 export function missingTsConfigSettings(tsconfig: TsConfig): string[] {
@@ -185,4 +197,28 @@ export function missingTsConfigSettings(tsconfig: TsConfig): string[] {
   }
 
   return errors
+}
+
+export function getIgnoreFilter(): IgnoredFileFilter {
+  const filter = ignore().add([
+    '*.spec.js',
+    '*.spec.jsx',
+    '*.test.js',
+    '*.test.jsx',
+    'node_modules/',
+  ])
+
+  try {
+    filter.add(fs.readFile('.gitignore'))
+  } catch {
+    // no gitignore
+  }
+
+  try {
+    filter.add(fs.readFile('.eslintignore'))
+  } catch {
+    // no eslintignore
+  }
+
+  return filter
 }

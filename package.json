@@ -44,7 +44,8 @@
     "@octokit/types": "^6.19.1",
     "@octokit/webhooks": "^9.13.0",
     "comment-json": "^4.2.3",
-    "csv-reader": "^1.0.8"
+    "csv-reader": "^1.0.8",
+    "ignore": "^5.2.4"
   },
   "devDependencies": {
     "@typeform/eslint-config": "^3.0.2",
