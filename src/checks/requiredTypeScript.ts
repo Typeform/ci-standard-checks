@@ -17,6 +17,11 @@ type TsConfig = {
   }
 }
 
+type Error = {
+  file: string
+  message: string
+}
+
 const requiredTypeScript: Check = {
   name: 'required-typescript',
   optional: true,
@@ -59,7 +64,7 @@ async function checkPullRequest(): Promise<boolean> {
     exclude: filter,
   })
 
-  const errors = []
+  const errors: Error[] = []
 
   if (jsFiles.length || tsconfigFiles.length) {
     errors.push(
@@ -82,7 +87,15 @@ Current adoption level: **${formatAdoptionPercentage(adoption)}**
   }
 
   if (errors.length) {
-    throw new Error(errors.join('\n'))
+    for (const err of errors) {
+      core.error(err.message, {
+        file: err.file,
+      })
+    }
+
+    throw new Error(
+      'One or more files do not meet the Required TypeScript standard; check error annotations for more information'
+    )
   }
 
   core.info(
@@ -94,7 +107,7 @@ Current adoption level: **${formatAdoptionPercentage(adoption)}**
 
 export async function checkJsUsage(
   files: { filename: string; additions: number; deletions: number }[]
-): Promise<string[]> {
+): Promise<Error[]> {
   const overallJsAdditions = files.reduce((additions, f) => {
     return additions + (f.additions ?? 0) - (f.deletions ?? 0)
   }, 0)
@@ -109,10 +122,10 @@ export async function checkJsUsage(
   // new JS lines
   return files
     .filter((f) => (f.additions ?? 0) > (f.deletions ?? 0))
-    .map(
-      (f) =>
-        `Only TypeScript is allowed for new changes; migrate file or extract changes to TS file: ${f.filename}`
-    )
+    .map((f) => ({
+      file: f.filename,
+      message: `Only TypeScript is allowed for new changes; migrate file or extract changes to TS file`,
+    }))
 }
 
 export function formatAdoptionPercentage(adoption: number): string {
@@ -145,8 +158,8 @@ export async function measureTsAdoption(
   return tsLines / (jsLines + tsLines)
 }
 
-async function checkTsConfig(files: string[]): Promise<string[]> {
-  const errors = []
+async function checkTsConfig(files: string[]): Promise<Error[]> {
+  const errors: Error[] = []
 
   for (const filename of files) {
     const content = fs.readFile(filename)
@@ -163,14 +176,15 @@ async function checkTsConfig(files: string[]): Promise<string[]> {
 
       missingSettings = missingTsConfigSettings(parsed as TsConfig)
     } catch (e) {
-      errors.push(`${filename} is not valid JSON: "${e}"`)
+      errors.push({ file: filename, message: `Not valid JSON: "${e}"` })
       continue
     }
 
     errors.push(
-      ...missingSettings.map(
-        (err) => `${filename} doesn't meet minimum requirements: ${err}`
-      )
+      ...missingSettings.map((err) => ({
+        file: filename,
+        message: `Minimum requirements not met: ${err}`,
+      }))
     )
   }
 
