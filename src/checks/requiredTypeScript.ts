@@ -97,7 +97,7 @@ export async function checkJsUsage(prNumber: number): Promise<string[]> {
     .filter((f) => f.additions > f.deletions)
     .map(
       (f) =>
-        `Only TypeScript is allowed for new changes; migrate file or extract changes to TS file: ${f}`
+        `Only TypeScript is allowed for new changes; migrate file or extract changes to TS file: ${f.filename}`
     )
 }
 
