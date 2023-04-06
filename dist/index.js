@@ -498,19 +498,19 @@ function checkPullRequest() {
             patterns: ['**/tsconfig.json'],
             exclude: filter,
         });
+        const errors = [];
         if (jsFiles.length || tsconfigFiles.length) {
-            const errors = [
-                ...(yield checkJsUsage(jsFiles)),
-                ...(yield checkTsConfig(tsconfigFiles)),
-            ];
+            errors.push(...(yield checkJsUsage(jsFiles)), ...(yield checkTsConfig(tsconfigFiles)));
+        }
+        if (jsFiles.length || errors.length > 0) {
             const adoption = yield measureTsAdoption(filter);
             const commentId = yield github_1.github.pinComment(pr.number, /## TypeScript adoption/, `## TypeScript adoption
 Current adoption level: **${formatAdoptionPercentage(adoption)}**
 `);
             core.info(`Pinned adoption % comment: #${commentId}`);
-            if (errors.length > 0) {
-                throw new Error(errors.join('\n'));
-            }
+        }
+        if (errors.length) {
+            throw new Error(errors.join('\n'));
         }
         core.info('OK! JS adoption not increasing, and no missing "tsconfig.json" settings');
         return true;
@@ -519,7 +519,8 @@ Current adoption level: **${formatAdoptionPercentage(adoption)}**
 function checkJsUsage(files) {
     return __awaiter(this, void 0, void 0, function* () {
         const overallJsAdditions = files.reduce((additions, f) => {
-            return additions + f.additions - f.deletions;
+            var _a, _b;
+            return additions + ((_a = f.additions) !== null && _a !== void 0 ? _a : 0) - ((_b = f.deletions) !== null && _b !== void 0 ? _b : 0);
         }, 0);
         if (overallJsAdditions <= 0) {
             // overall, JS adoption is decreasing. either code is being migrated,
@@ -529,7 +530,7 @@ function checkJsUsage(files) {
         // only warn about files *reducing* TS adoption - that is, files adding
         // new JS lines
         return files
-            .filter((f) => f.additions > f.deletions)
+            .filter((f) => { var _a, _b; return ((_a = f.additions) !== null && _a !== void 0 ? _a : 0) > ((_b = f.deletions) !== null && _b !== void 0 ? _b : 0); })
             .map((f) => `Only TypeScript is allowed for new changes; migrate file or extract changes to TS file: ${f.filename}`);
     });
 }
