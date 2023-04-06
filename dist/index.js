@@ -599,7 +599,7 @@ function missingTsConfigSettings(tsconfig) {
         errors.push('compilerOptions.allowUnreachableCode must be false');
     }
     if (((_b = tsconfig.compilerOptions) === null || _b === void 0 ? void 0 : _b.noImplicitAny) !== true) {
-        errors.push('compilerOptions.noImplicitAny must be true 123');
+        errors.push('compilerOptions.noImplicitAny must be true');
     }
     return errors;
 }

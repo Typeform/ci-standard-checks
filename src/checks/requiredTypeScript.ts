@@ -194,7 +194,7 @@ export function missingTsConfigSettings(tsconfig: TsConfig): string[] {
   }
 
   if (tsconfig.compilerOptions?.noImplicitAny !== true) {
-    errors.push('compilerOptions.noImplicitAny must be true 123')
+    errors.push('compilerOptions.noImplicitAny must be true')
   }
 
   return errors
