@@ -9,12 +9,18 @@ import Check from './check'
 
 interface BashCheckParams {
   name: string
+  optional?: boolean
   inputs: string[]
 }
 
-export default function bashCheck({ name, inputs }: BashCheckParams): Check {
+export default function bashCheck({
+  name,
+  optional,
+  inputs,
+}: BashCheckParams): Check {
   return {
     name,
+    optional,
     async run(): Promise<number> {
       const envInputs = inputs.reduce((result, input) => {
         result[input.toUpperCase()] = core.getInput(input)

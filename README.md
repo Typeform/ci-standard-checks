@@ -11,13 +11,15 @@ easier time rolling out new checks to teams. Win-win!
 
 ## Included Checks
 
-- *jira-linked*: never forget a Jira Issue key in your commits or PRs
+- `jira-linked`: never forget a Jira Issue key in your commits or PRs
   again!
-- *secrets-scan*: make sure you're never ever ever commiting a secret to
+- `secrets-scan`: make sure you're never ever ever commiting a secret to
   your repo. _Shhh, it's a secret_ :shushing_face:
-- *pii-detection*: make sure you're not uploading files with Personal Identifiable
+- `pii-detection`: make sure you're not uploading files with Personal Identifiable
   Information to your repo.
-- *validate-openapi*: perform a validation and linting of the openapi.yaml if exists
+- `validate-openapi`: perform a validation and linting of the openapi.yaml if exists
+- `required-typescript`: in JS/TS repositories, make sure only TypeScript is allowed
+  for new code and `tsconfig.json` meets minimum typing requirements.
 
 ## How to use it
 
@@ -35,11 +37,24 @@ particular case. In that case, you can provide `skipChecks` as an
 input with the names of the checks you want to skip separated by
 commas:
 
-``` yaml
-...
+```yaml
+---
 with:
-    skipChecks: 'jira-linked,secret-scan'
-...
+  skipChecks: 'jira-linked,secret-scan'
+```
+
+Refer to the [list of checks](#included-checks) for the proper names
+to use.
+
+### Enabling optional Checks
+
+Some checks that are not yet mandatory will be disabled by default; you can opt-in
+to them by providing `enableChecks` as an input, just like for [skipping checks](#skipping-checks):
+
+```yaml
+---
+with:
+  enableChecks: 'required-typescript'
 ```
 
 Refer to the [list of checks](#included-checks) for the proper names
@@ -105,13 +120,14 @@ your workflow file.
 
 We use
 [semantic-release](https://github.com/semantic-release/semantic-release)
-to release new versions of the action. 
+to release new versions of the action.
 
 The basics:
-* `feat(JIRA-123)` commits will trigger a *minor* version release
-* `fix(JIRA-123)` commits will trigger a *patch* version release
 
-*Major* versions are triggered by `BREAKING CHANGE` of `feat!` commits
+- `feat(JIRA-123)` commits will trigger a _minor_ version release
+- `fix(JIRA-123)` commits will trigger a _patch_ version release
+
+_Major_ versions are triggered by `BREAKING CHANGE` of `feat!` commits
 that should be avoided in general. Engineering Intelligence will plan and coordinate the
 cut of new major releases when the time comes.
 
@@ -156,7 +172,7 @@ will be published and a new release will happen automatically! :rocket:
 
 ## Validate
 
-There's a [test.yml](.github/workflows/test.yml) workflow in the repo
+There's a [test-and-release-beta.yml](.github/workflows/test-and-release-beta.yml) workflow in the repo
 referencing `./` to test the action itself. This will be run to
 validate every PR. :white_check_mark:
 
@@ -175,4 +191,3 @@ To release to the major version, you can manually trigger the `release` workflow
 See the [GitHub Action versioning
 documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
 for more info about the convention.
-
