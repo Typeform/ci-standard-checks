@@ -94,7 +94,8 @@ Current adoption level: **${formatAdoptionPercentage(adoption)}**
     }
 
     throw new Error(
-      'One or more files do not meet the Required TypeScript standard; check error annotations for more information'
+      'One or more files do not meet the Required TypeScript standard; check error annotations for more information.\n' +
+        'If you think this is incorrect, you can ignore files and folders using ".eslintignore" or ".gitignore".'
     )
   }
 
@@ -201,7 +202,7 @@ export function isForbiddenJSFile(
 }
 
 export function missingTsConfigSettings(tsconfig: TsConfig): string[] {
-  const errors = []
+  const errors: string[] = []
 
   if (tsconfig.compilerOptions?.allowUnreachableCode !== false) {
     errors.push('compilerOptions.allowUnreachableCode must be false')
