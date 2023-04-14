@@ -515,7 +515,8 @@ Current adoption level: **${formatAdoptionPercentage(adoption)}**
                     file: err.file,
                 });
             }
-            throw new Error('One or more files do not meet the Required TypeScript standard; check error annotations for more information');
+            throw new Error('One or more files do not meet the Required TypeScript standard; check error annotations for more information.\n' +
+                'If you think this is incorrect, you can ignore files and folders using ".eslintignore" or ".gitignore".');
         }
         core.info('OK! JS adoption not increasing, and no missing "tsconfig.json" settings');
         return true;
