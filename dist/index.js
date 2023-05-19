@@ -622,6 +622,7 @@ function getIgnoreFilter() {
         '*.spec.jsx',
         '*.test.js',
         '*.test.jsx',
+        'mock*',
         'node_modules/',
     ]);
     try {
