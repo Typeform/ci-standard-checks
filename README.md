@@ -24,7 +24,7 @@ easier time rolling out new checks to teams. Win-win!
 ## How to use it
 
 Add this action to your workflow by using the [CI Standard
-Checks](https://github.com/Typeform/.github/blob/main/workflow-templates/ci-standard-checks.yml)
+Checks](https://github.com/Typeform/.github/blob/318bec99ec142dca703ddc78899ee2a788bca236/workflow-templates/ci-standard-checks.yml)
 workflow. You can also find it in the workflow templates for your
 repo, and it looks like this:
 
