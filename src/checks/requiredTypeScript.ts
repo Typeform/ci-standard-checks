@@ -24,7 +24,7 @@ type Error = {
 
 const requiredTypeScript: Check = {
   name: 'required-typescript',
-  optional: true,
+  optional: false,
   async run(): Promise<boolean> {
     if (github.context.eventName === 'pull_request') {
       return checkPullRequest()
