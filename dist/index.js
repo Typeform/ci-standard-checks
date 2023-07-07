@@ -466,7 +466,7 @@ const triggeredByBot_1 = __nccwpck_require__(6754);
 const ignore_1 = __importDefault(__nccwpck_require__(1230));
 const requiredTypeScript = {
     name: 'required-typescript',
-    optional: true,
+    optional: false,
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             if (github_1.github.context.eventName === 'pull_request') {
