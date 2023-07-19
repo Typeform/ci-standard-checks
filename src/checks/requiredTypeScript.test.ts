@@ -14,13 +14,16 @@ import requiredTypeScript, {
   measureTsAdoption,
   missingTsConfigSettings,
 } from './requiredTypeScript'
+import { getTypescriptConfigOptions } from './utils'
 
 const mockGithub = mocked(github, true)
 const mockGlob = mocked(glob, true)
 const mockReadFile = mocked(readFile, true)
+const mockGetTypescriptConfigOptions = mocked(getTypescriptConfigOptions, true)
 
 jest.mock('../infrastructure/github')
 jest.mock('../infrastructure/fs')
+jest.mock('./utils')
 
 describe('Required TypeScript check', () => {
   describe('pull_request event', () => {
@@ -68,14 +71,12 @@ describe('Required TypeScript check', () => {
         { filename: 'workflows/test.yaml' },
       ] as PullRequestFiles)
       mockGlob.mockResolvedValue(['tsconfig.json'])
-      mockReadFile.mockReturnValue(
-        JSON.stringify({
-          compilerOptions: {
-            allowUnreachableCode: false,
-            noImplicitAny: true,
-          },
-        })
-      )
+      mockGetTypescriptConfigOptions.mockReturnValue({
+        compilerOptions: {
+          allowUnreachableCode: false,
+          noImplicitAny: true,
+        },
+      })
 
       await expect(requiredTypeScript.run()).resolves.toBeTruthy()
     })
@@ -86,14 +87,12 @@ describe('Required TypeScript check', () => {
         { filename: 'filename.js', additions: 100, deletions: 20 },
       ] as PullRequestFiles)
       mockGlob.mockResolvedValue(['tsconfig.json'])
-      mockReadFile.mockReturnValue(
-        JSON.stringify({
-          compilerOptions: {
-            allowUnreachableCode: false,
-            noImplicitAny: true,
-          },
-        })
-      )
+      mockGetTypescriptConfigOptions.mockReturnValue({
+        compilerOptions: {
+          allowUnreachableCode: false,
+          noImplicitAny: true,
+        },
+      })
 
       await expect(requiredTypeScript.run()).rejects.toThrow()
     })
@@ -122,14 +121,12 @@ describe('Required TypeScript check', () => {
         { filename: 'filename.js', additions: 100, deletions: 100 },
       ] as PullRequestFiles)
       mockGlob.mockResolvedValue(['tsconfig.json'])
-      mockReadFile.mockReturnValue(
-        JSON.stringify({
-          compilerOptions: {
-            allowUnreachableCode: false,
-            noImplicitAny: true,
-          },
-        })
-      )
+      mockGetTypescriptConfigOptions.mockReturnValue({
+        compilerOptions: {
+          allowUnreachableCode: false,
+          noImplicitAny: true,
+        },
+      })
 
       await expect(requiredTypeScript.run()).resolves.toBeTruthy()
     })
@@ -140,13 +137,11 @@ describe('Required TypeScript check', () => {
         { filename: 'filename.ts' },
       ] as PullRequestFiles)
       mockGlob.mockResolvedValue(['tsconfig.json'])
-      mockReadFile.mockReturnValue(
-        JSON.stringify({
-          compilerOptions: {
-            noImplicitAny: false,
-          },
-        })
-      )
+      mockGetTypescriptConfigOptions.mockReturnValue({
+        compilerOptions: {
+          noImplicitAny: false,
+        },
+      })
 
       await expect(requiredTypeScript.run()).rejects.toThrow()
     })
@@ -157,13 +152,11 @@ describe('Required TypeScript check', () => {
         { filename: 'filename.js', additions: 100, deletions: 20 },
       ] as PullRequestFiles)
       mockGlob.mockResolvedValue(['tsconfig.json'])
-      mockReadFile.mockReturnValue(
-        JSON.stringify({
-          compilerOptions: {
-            noImplicitAny: false,
-          },
-        })
-      )
+      mockGetTypescriptConfigOptions.mockReturnValue({
+        compilerOptions: {
+          noImplicitAny: false,
+        },
+      })
 
       await expect(requiredTypeScript.run()).rejects.toThrow()
     })
@@ -189,15 +182,16 @@ describe('Required TypeScript check', () => {
         }
         return []
       })
+
+      mockGetTypescriptConfigOptions.mockReturnValue({
+        compilerOptions: {
+          allowUnreachableCode: false,
+          noImplicitAny: true,
+        },
+      })
+
       mockReadFile.mockImplementation((path) => {
         switch (path) {
-          case 'tsconfig.json':
-            return JSON.stringify({
-              compilerOptions: {
-                allowUnreachableCode: false,
-                noImplicitAny: true,
-              },
-            })
           case 'file.js':
             return 'this\nis a\njs\nfile'
           case 'file.ts':
@@ -230,12 +224,12 @@ describe('Required TypeScript check', () => {
         }
         return []
       })
+      mockGetTypescriptConfigOptions.mockReturnValue({
+        compilerOptions: {},
+      })
+
       mockReadFile.mockImplementation((path) => {
         switch (path) {
-          case 'tsconfig.json':
-            return JSON.stringify({
-              compilerOptions: {},
-            })
           case 'file.js':
             return 'this\nis a\njs\nfile'
           case 'file.ts':
@@ -298,15 +292,15 @@ describe('Required TypeScript check', () => {
         }
         return []
       })
+      mockGetTypescriptConfigOptions.mockReturnValue({
+        compilerOptions: {
+          allowUnreachableCode: false,
+          noImplicitAny: true,
+        },
+      })
+
       mockReadFile.mockImplementation((path) => {
         switch (path) {
-          case 'tsconfig.json':
-            return JSON.stringify({
-              compilerOptions: {
-                allowUnreachableCode: false,
-                noImplicitAny: true,
-              },
-            })
           case 'file.js':
             return 'this\nis a\njs\nfile'
           case 'file.ts':
