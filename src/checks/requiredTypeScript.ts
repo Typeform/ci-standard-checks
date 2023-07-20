@@ -1,16 +1,15 @@
 import * as core from '@actions/core'
-import * as CommentedJSON from 'comment-json'
-
 import { WebhookEventMap } from '@octokit/webhooks-types'
+import ignore, { Ignore as IgnoredFileFilter } from 'ignore'
 
 import { github } from '../infrastructure/github'
 import * as fs from '../infrastructure/fs'
 import { isBot } from '../conditions/triggeredByBot'
 
 import Check from './check'
-import ignore, { Ignore as IgnoredFileFilter } from 'ignore'
+import { getTypescriptConfigOptions } from './utils'
 
-type TsConfig = {
+export type TsConfig = {
   compilerOptions?: {
     allowUnreachableCode?: boolean
     noImplicitAny?: boolean
@@ -159,23 +158,22 @@ export async function measureTsAdoption(
   return tsLines / (jsLines + tsLines)
 }
 
-async function checkTsConfig(files: string[]): Promise<Error[]> {
+export async function checkTsConfig(files: string[]): Promise<Error[]> {
   const errors: Error[] = []
 
   for (const filename of files) {
-    const content = fs.readFile(filename)
+    const content = getTypescriptConfigOptions(filename)
+
     let missingSettings: string[] = []
 
     if (!content) continue
 
     try {
-      const parsed = CommentedJSON.parse(content)
-
-      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      if (typeof content !== 'object' || Array.isArray(content)) {
         throw new Error('expected an object')
       }
 
-      missingSettings = missingTsConfigSettings(parsed as TsConfig)
+      missingSettings = missingTsConfigSettings(content)
     } catch (e) {
       errors.push({ file: filename, message: `Not valid JSON: "${e}"` })
       continue
