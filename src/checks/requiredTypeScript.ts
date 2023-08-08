@@ -12,6 +12,7 @@ import ignore, { Ignore as IgnoredFileFilter } from 'ignore'
 
 type TsConfig = {
   compilerOptions?: {
+    strict?: boolean
     allowUnreachableCode?: boolean
     noImplicitAny?: boolean
   }
@@ -208,7 +209,11 @@ export function missingTsConfigSettings(tsconfig: TsConfig): string[] {
     errors.push('compilerOptions.allowUnreachableCode must be false')
   }
 
-  if (tsconfig.compilerOptions?.noImplicitAny !== true) {
+  if (
+    (tsconfig.compilerOptions?.strict !== true &&
+      tsconfig.compilerOptions?.noImplicitAny !== true) ||
+    tsconfig.compilerOptions?.noImplicitAny === false
+  ) {
     errors.push('compilerOptions.noImplicitAny must be true')
   }
 

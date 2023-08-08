@@ -445,4 +445,25 @@ describe('missingTsConfigSettings', () => {
       })
     ).not.toContainEqual(expect.stringMatching(/compilerOptions.noImplicitAny/))
   })
+  it('considers compilerOptions.noImplicitAny = true if compilerOptions.strict = true', () => {
+    expect(
+      missingTsConfigSettings({
+        compilerOptions: {
+          strict: true,
+          allowUnreachableCode: false,
+        },
+      })
+    ).not.toContainEqual(expect.stringMatching(/compilerOptions.noImplicitAny/))
+  })
+  it('requires not setting compilerOptions.noImplicitAny = false if compilerOptions.strict = true', () => {
+    expect(
+      missingTsConfigSettings({
+        compilerOptions: {
+          strict: true,
+          noImplicitAny: false,
+          allowUnreachableCode: false,
+        },
+      })
+    ).toContainEqual(expect.stringMatching(/compilerOptions.noImplicitAny/))
+  })
 })
