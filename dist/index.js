@@ -605,12 +605,14 @@ function isForbiddenJSFile(filename, filter = getIgnoreFilter()) {
 }
 exports.isForbiddenJSFile = isForbiddenJSFile;
 function missingTsConfigSettings(tsconfig) {
-    var _a, _b;
+    var _a, _b, _c, _d;
     const errors = [];
     if (((_a = tsconfig.compilerOptions) === null || _a === void 0 ? void 0 : _a.allowUnreachableCode) !== false) {
         errors.push('compilerOptions.allowUnreachableCode must be false');
     }
-    if (((_b = tsconfig.compilerOptions) === null || _b === void 0 ? void 0 : _b.noImplicitAny) !== true) {
+    if ((((_b = tsconfig.compilerOptions) === null || _b === void 0 ? void 0 : _b.strict) !== true &&
+        ((_c = tsconfig.compilerOptions) === null || _c === void 0 ? void 0 : _c.noImplicitAny) !== true) ||
+        ((_d = tsconfig.compilerOptions) === null || _d === void 0 ? void 0 : _d.noImplicitAny) === false) {
         errors.push('compilerOptions.noImplicitAny must be true');
     }
     return errors;
