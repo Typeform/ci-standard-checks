@@ -1,5 +1,27 @@
 #!/bin/bash
 
+get_gitleaks_container() {
+    repo_name="zricethezav/gitleaks"
+    mirror_repo_name="mirror/${repo_name}"
+    image_ids="imageTag=${gitleaks_version}"
+    registry_id="567716553783"
+
+    mirrored_gitleaks="${registry_id}.dkr.ecr.us-east-1.amazonaws.com/${mirror_repo_name}"
+    public_gitleaks=${repo_name}
+
+    # Based on https://gist.github.com/outofcoffee/8f40732aefacfded14cce8a45f6e5eb1
+    aws ecr describe-images --repository-name=${mirror_repo_name} --image-ids=${image_ids} --registry-id=${registry_id} &>/dev/null
+    exit_code=$?
+
+    if [ $exit_code -eq 0 ]; then
+        echo $mirrored_gitleaks
+    else
+        echo $public_gitleaks
+    fi
+
+    return
+}
+
 # exit when any command fails
 set -e
 
@@ -30,7 +52,7 @@ local_config=".gitleaks.toml"
 final_config="$tmp_dir/gitleaks_config.toml"
 commits_file="$tmp_dir/commit_list.txt"
 gitleaks_config_container="${DOCKERREGISTRY}/typeform/gitleaks-config"
-gitleaks_container="zricethezav/gitleaks"
+gitleaks_container=$(get_gitleaks_container)
 gitleaks_version="v8.16.1"
 gitleaks_config_cmd="python gitleaks_config_generator.py"
 
@@ -66,7 +88,7 @@ fi
 # Do not exit if the gitleaks run fails. This way we can display some custom messages.
 set +e
 
-echo "Using gitleaks${gitleaks_version}"
+echo "Using the following gitleaks container image: ${gitleaks_container}:${gitleaks_version}"
 
 # Run gitleaks with the generated config
 gitleaks_cmd="detect \
