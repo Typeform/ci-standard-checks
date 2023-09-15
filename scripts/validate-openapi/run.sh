@@ -47,10 +47,6 @@ EOF
 IFS=$'\n' files=($(find . -maxdepth 3 -name openapi.yaml))
 
 for f in ${files[@]}; do
-    npx @redocly/cli@${REDOCLY_CLI_VERSION} validate "$f"
-done
-
-for f in ${files[@]}; do
     npx @redocly/cli@${REDOCLY_CLI_VERSION} lint --extends=minimal "$f"
 done
 
