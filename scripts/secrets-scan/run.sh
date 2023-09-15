@@ -1,9 +1,11 @@
 #!/bin/bash
 
+GITLEAKS_VERSION="v8.16.1"
+
 get_gitleaks_container() {
     repo_name="zricethezav/gitleaks"
     mirror_repo_name="mirror/${repo_name}"
-    image_ids="imageTag=${gitleaks_version}"
+    image_ids="imageTag=${GITLEAKS_VERSION}"
     registry_id="567716553783"
 
     mirrored_gitleaks="${registry_id}.dkr.ecr.us-east-1.amazonaws.com/${mirror_repo_name}"
@@ -53,7 +55,6 @@ final_config="$tmp_dir/gitleaks_config.toml"
 commits_file="$tmp_dir/commit_list.txt"
 gitleaks_config_container="${DOCKERREGISTRY}/typeform/gitleaks-config"
 gitleaks_container=$(get_gitleaks_container)
-gitleaks_version="v8.16.1"
 gitleaks_config_cmd="python gitleaks_config_generator.py"
 
 # Generate the final gitleaks config file. If the repo has a local config, merge both
@@ -88,7 +89,7 @@ fi
 # Do not exit if the gitleaks run fails. This way we can display some custom messages.
 set +e
 
-echo "Using the following gitleaks container image: ${gitleaks_container}:${gitleaks_version}"
+echo "Using the following gitleaks container image: ${gitleaks_container}:${GITLEAKS_VERSION}"
 
 # Run gitleaks with the generated config
 gitleaks_cmd="detect \
@@ -102,7 +103,7 @@ docker container run --rm --name=gitleaks \
     -v $final_config:$final_config \
     -v $commits_file:$commits_file \
     -v $repo_dir:/tmp/$repo_name \
-    $gitleaks_container:$gitleaks_version ${gitleaks_cmd}
+    $gitleaks_container:$GITLEAKS_VERSION ${gitleaks_cmd}
 
 # Keep the exit code of the gitleaks run
 exit_code=$?
