@@ -3,6 +3,8 @@
 # exit when any command fails
 set -e
 
+REDOCLY_CLI_VERSION="1.0.2"
+
 if ! command -v "jq" &> /dev/null
 then
     echo "Unable to find jq. Is it installed and added to your \$PATH?"
@@ -45,9 +47,11 @@ EOF
 IFS=$'\n' files=($(find . -maxdepth 3 -name openapi.yaml))
 
 for f in ${files[@]}; do
-    npx @redocly/cli@1.0.2 lint --extends=minimal "$f"
+    npx @redocly/cli@${REDOCLY_CLI_VERSION} validate "$f"
 done
 
-npx @redocly/cli@1.0.2 bundle --dereferenced --ext json --output openapi.json $(echo ${files})
+for f in ${files[@]}; do
+    npx @redocly/cli@${REDOCLY_CLI_VERSION} lint --extends=minimal "$f"
+done
 
-echo "DONE."
+npx @redocly/cli@${REDOCLY_CLI_VERSION} bundle --dereferenced --ext json --output openapi.json $(echo ${files})
