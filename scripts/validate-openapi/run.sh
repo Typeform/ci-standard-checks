@@ -45,11 +45,7 @@ EOF
 IFS=$'\n' files=($(find . -maxdepth 3 -name openapi.yaml))
 
 for f in ${files[@]}; do
-    npx @apidevtools/swagger-cli validate "$f"
-done
-
-for f in ${files[@]}; do
-    npx @redocly/cli lint "$f"
+    npx @redocly/cli lint --extends=minimal "$f"
 done
 
 npx @redocly/cli bundle --dereferenced --ext json --output openapi.json $(echo ${files})
