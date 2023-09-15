@@ -49,3 +49,5 @@ for f in ${files[@]}; do
 done
 
 npx @redocly/cli bundle --dereferenced --ext json --output openapi.json $(echo ${files})
+
+echo "DONE."
