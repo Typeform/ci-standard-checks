@@ -10,7 +10,8 @@ get_gitleaks_container() {
     public_gitleaks=${repo_name}
 
     # Based on https://gist.github.com/outofcoffee/8f40732aefacfded14cce8a45f6e5eb1
-    aws ecr describe-images --repository-name=${mirror_repo_name} --image-ids=${image_ids} --registry-id=${registry_id} &>/dev/null
+    echo "running aws ecr describe images"
+    aws ecr describe-images --repository-name=${mirror_repo_name} --image-ids=${image_ids} --registry-id=${registry_id}
     exit_code=$?
 
     if [ $exit_code -eq 0 ]; then
