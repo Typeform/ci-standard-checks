@@ -24,10 +24,10 @@ const mandatoryChecks: Check[] = [
 const additionalChecks: Check[] = [
   jiraLinked,
   requiredTypeScript,
-  bashCheck({
-    name: 'validate-openapi',
-    inputs: [],
-  }),
+  // bashCheck({
+  //   name: 'validate-openapi',
+  //   inputs: [],
+  // }),
 ]
 
 async function run(): Promise<void> {

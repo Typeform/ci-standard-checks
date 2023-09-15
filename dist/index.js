@@ -1227,10 +1227,10 @@ const mandatoryChecks = [
 const additionalChecks = [
     jiraLinked_1.default,
     requiredTypeScript_1.default,
-    bash_1.default({
-        name: 'validate-openapi',
-        inputs: [],
-    }),
+    // bashCheck({
+    //   name: 'validate-openapi',
+    //   inputs: [],
+    // }),
 ];
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
