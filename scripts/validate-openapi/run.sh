@@ -44,7 +44,6 @@ EOF
 # Limiting the depth limits the risk of (irrelevant) `openapi.yaml` files being found in eg. `_gomodcache` or `node_modules`
 IFS=$'\n' files=($(find . -maxdepth 3 -name openapi.yaml))
 
-npx @redocly/cli --version
 
 for f in ${files[@]}; do
     npx @redocly/cli lint --extends=minimal "$f"
