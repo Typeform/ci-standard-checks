@@ -3,7 +3,6 @@
 # exit when any command fails
 set -e
 
-
 if ! command -v "jq" &> /dev/null
 then
     echo "Unable to find jq. Is it installed and added to your \$PATH?"
