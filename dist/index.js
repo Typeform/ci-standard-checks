@@ -494,6 +494,9 @@ function checkPullRequest() {
         const filter = getIgnoreFilter();
         const files = yield github_1.github.getPullRequestFiles(pr.number);
         const jsFiles = files.filter((f) => isForbiddenJSFile(f.filename, filter));
+        const renamedJsFiles = files.filter((f) => f.previous_filename &&
+            isForbiddenJSFile(f.previous_filename) &&
+            !jsFiles.includes(f));
         const tsconfigFiles = yield fs.glob({
             patterns: ['**/tsconfig.json'],
             exclude: filter,
@@ -502,7 +505,7 @@ function checkPullRequest() {
         if (jsFiles.length || tsconfigFiles.length) {
             errors.push(...(yield checkJsUsage(jsFiles)), ...(yield checkTsConfig(tsconfigFiles)));
         }
-        if (jsFiles.length || errors.length > 0) {
+        if (jsFiles.length || renamedJsFiles.length || errors.length > 0) {
             const adoption = yield measureTsAdoption(filter);
             const commentId = yield github_1.github.pinComment(pr.number, /## TypeScript adoption/, `## TypeScript adoption
 Current adoption level: **${formatAdoptionPercentage(adoption)}**
