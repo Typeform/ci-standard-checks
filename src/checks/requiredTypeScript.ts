@@ -60,6 +60,12 @@ async function checkPullRequest(): Promise<boolean> {
 
   const files = await github.getPullRequestFiles(pr.number)
   const jsFiles = files.filter((f) => isForbiddenJSFile(f.filename, filter))
+  const renamedJsFiles = files.filter(
+    (f) =>
+      f.previous_filename &&
+      isForbiddenJSFile(f.previous_filename) &&
+      !jsFiles.includes(f)
+  )
   const tsconfigFiles = await fs.glob({
     patterns: ['**/tsconfig.json'],
     exclude: filter,
@@ -74,7 +80,7 @@ async function checkPullRequest(): Promise<boolean> {
     )
   }
 
-  if (jsFiles.length || errors.length > 0) {
+  if (jsFiles.length || renamedJsFiles.length || errors.length > 0) {
     const adoption = await measureTsAdoption(filter)
     const commentId = await github.pinComment(
       pr.number,
