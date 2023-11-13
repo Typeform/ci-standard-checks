@@ -1,14 +1,13 @@
 import * as core from '@actions/core'
 import * as CommentedJSON from 'comment-json'
-
 import { WebhookEventMap } from '@octokit/webhooks-types'
+import ignore, { Ignore as IgnoredFileFilter } from 'ignore'
 
 import { github } from '../infrastructure/github'
 import * as fs from '../infrastructure/fs'
 import { isBot } from '../conditions/triggeredByBot'
 
 import Check from './check'
-import ignore, { Ignore as IgnoredFileFilter } from 'ignore'
 
 type TsConfig = {
   compilerOptions?: {
@@ -59,12 +58,25 @@ async function checkPullRequest(): Promise<boolean> {
   const filter = getIgnoreFilter()
 
   const files = await github.getPullRequestFiles(pr.number)
-  const jsFiles = files.filter((f) => isForbiddenJSFile(f.filename, filter))
+  const filesContent = await Promise.all(
+    files.map((f) => github.downloadContent(f.filename, pr.head.ref))
+  )
+  const forbiddenJsFiles = files.filter((f, index) =>
+    isForbiddenJSFile(
+      f.filename,
+      (filesContent[index].hasOwnProperty('content') &&
+        // @ts-expect-error to fix
+        filesContent[index].content) ||
+        '',
+      filter
+    )
+  )
+
   const renamedJsFiles = files.filter(
     (f) =>
       f.previous_filename &&
       isForbiddenJSFile(f.previous_filename) &&
-      !jsFiles.includes(f)
+      !forbiddenJsFiles.includes(f)
   )
   const tsconfigFiles = await fs.glob({
     patterns: ['**/tsconfig.json'],
@@ -73,14 +85,14 @@ async function checkPullRequest(): Promise<boolean> {
 
   const errors: Error[] = []
 
-  if (jsFiles.length || tsconfigFiles.length) {
+  if (forbiddenJsFiles.length || tsconfigFiles.length) {
     errors.push(
-      ...(await checkJsUsage(jsFiles)),
+      ...(await checkJsUsage(forbiddenJsFiles)),
       ...(await checkTsConfig(tsconfigFiles))
     )
   }
 
-  if (jsFiles.length || renamedJsFiles.length || errors.length > 0) {
+  if (forbiddenJsFiles.length || renamedJsFiles.length || errors.length > 0) {
     const adoption = await measureTsAdoption(filter)
     const commentId = await github.pinComment(
       pr.number,
@@ -151,6 +163,7 @@ export async function measureTsAdoption(
     patterns: ['**/*.js', '**/*.jsx'],
     exclude: filter,
   })
+  // TODO: find JS+TS files and add them to TS list
   const tsFiles = await fs.glob({
     patterns: ['**/*.ts', '**/*.tsx'],
     exclude: filter,
@@ -201,11 +214,15 @@ async function checkTsConfig(files: string[]): Promise<Error[]> {
 
 export function isForbiddenJSFile(
   filename: string,
+  fileContent = '',
   filter: IgnoredFileFilter = getIgnoreFilter()
 ): boolean {
   const jsPattern = /\.jsx?$/i
 
-  return jsPattern.test(filename) && !filter.ignores(filename)
+  const hasJsExtension = jsPattern.test(filename) && !filter.ignores(filename)
+  const appliesTypescriptViaComment = fileContent.startsWith('// @ts-check')
+
+  return hasJsExtension && !appliesTypescriptViaComment
 }
 
 export function missingTsConfigSettings(tsconfig: TsConfig): string[] {

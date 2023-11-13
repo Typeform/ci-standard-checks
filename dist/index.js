@@ -460,10 +460,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.missingTsConfigSettings = exports.isForbiddenJSFile = exports.measureTsAdoption = exports.formatAdoptionPercentage = exports.checkJsUsage = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const CommentedJSON = __importStar(__nccwpck_require__(3165));
+const ignore_1 = __importDefault(__nccwpck_require__(1230));
 const github_1 = __nccwpck_require__(5679);
 const fs = __importStar(__nccwpck_require__(3206));
 const triggeredByBot_1 = __nccwpck_require__(6754);
-const ignore_1 = __importDefault(__nccwpck_require__(1230));
 const requiredTypeScript = {
     name: 'required-typescript',
     optional: false,
@@ -493,19 +493,23 @@ function checkPullRequest() {
         core.info(`Branch: ${pr.head.ref}`);
         const filter = getIgnoreFilter();
         const files = yield github_1.github.getPullRequestFiles(pr.number);
-        const jsFiles = files.filter((f) => isForbiddenJSFile(f.filename, filter));
+        const filesContent = yield Promise.all(files.map((f) => github_1.github.downloadContent(f.filename, pr.head.ref)));
+        const forbiddenJsFiles = files.filter((f, index) => isForbiddenJSFile(f.filename, (filesContent[index].hasOwnProperty('content') &&
+            // @ts-expect-error to fix
+            filesContent[index].content) ||
+            '', filter));
         const renamedJsFiles = files.filter((f) => f.previous_filename &&
             isForbiddenJSFile(f.previous_filename) &&
-            !jsFiles.includes(f));
+            !forbiddenJsFiles.includes(f));
         const tsconfigFiles = yield fs.glob({
             patterns: ['**/tsconfig.json'],
             exclude: filter,
         });
         const errors = [];
-        if (jsFiles.length || tsconfigFiles.length) {
-            errors.push(...(yield checkJsUsage(jsFiles)), ...(yield checkTsConfig(tsconfigFiles)));
+        if (forbiddenJsFiles.length || tsconfigFiles.length) {
+            errors.push(...(yield checkJsUsage(forbiddenJsFiles)), ...(yield checkTsConfig(tsconfigFiles)));
         }
-        if (jsFiles.length || renamedJsFiles.length || errors.length > 0) {
+        if (forbiddenJsFiles.length || renamedJsFiles.length || errors.length > 0) {
             const adoption = yield measureTsAdoption(filter);
             const commentId = yield github_1.github.pinComment(pr.number, /## TypeScript adoption/, `## TypeScript adoption
 Current adoption level: **${formatAdoptionPercentage(adoption)}**
@@ -561,6 +565,7 @@ function measureTsAdoption(filter = getIgnoreFilter()) {
             patterns: ['**/*.js', '**/*.jsx'],
             exclude: filter,
         });
+        // TODO: find JS+TS files and add them to TS list
         const tsFiles = yield fs.glob({
             patterns: ['**/*.ts', '**/*.tsx'],
             exclude: filter,
@@ -602,9 +607,11 @@ function checkTsConfig(files) {
         return errors;
     });
 }
-function isForbiddenJSFile(filename, filter = getIgnoreFilter()) {
+function isForbiddenJSFile(filename, fileContent = '', filter = getIgnoreFilter()) {
     const jsPattern = /\.jsx?$/i;
-    return jsPattern.test(filename) && !filter.ignores(filename);
+    const hasJsExtension = jsPattern.test(filename) && !filter.ignores(filename);
+    const appliesTypescriptViaComment = fileContent.startsWith('// @ts-check');
+    return hasJsExtension && !appliesTypescriptViaComment;
 }
 exports.isForbiddenJSFile = isForbiddenJSFile;
 function missingTsConfigSettings(tsconfig) {
