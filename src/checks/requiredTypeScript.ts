@@ -58,9 +58,11 @@ async function checkPullRequest(): Promise<boolean> {
   const filter = getIgnoreFilter()
 
   const files = await github.getPullRequestFiles(pr.number)
+  core.info(`files ${JSON.stringify(files, null, 2)}`)
   const filesContent = await Promise.all(
     files.map((f) => github.downloadContent(f.filename, pr.head.ref))
   )
+  core.info(`filesContent ${JSON.stringify(filesContent, null, 2)}`)
   const forbiddenJsFiles = files.filter((f, index) =>
     isForbiddenJSFile(
       f.filename,
@@ -71,6 +73,7 @@ async function checkPullRequest(): Promise<boolean> {
       filter
     )
   )
+  core.info(`forbiddenJsFiles ${JSON.stringify(forbiddenJsFiles, null, 2)}`)
 
   const renamedJsFiles = files.filter(
     (f) =>
@@ -78,6 +81,7 @@ async function checkPullRequest(): Promise<boolean> {
       isForbiddenJSFile(f.previous_filename) &&
       !forbiddenJsFiles.includes(f)
   )
+  core.info(`renamedJsFiles ${JSON.stringify(renamedJsFiles, null, 2)}`)
   const tsconfigFiles = await fs.glob({
     patterns: ['**/tsconfig.json'],
     exclude: filter,
