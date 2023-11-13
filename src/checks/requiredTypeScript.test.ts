@@ -438,6 +438,32 @@ describe('measureTsAdoption', () => {
       measureTsAdoption().then((x) => formatAdoptionPercentage(x))
     ).resolves.toBe('66.7%')
   })
+
+  it('correctly calculates and formats adoption % with some typed JS files', async () => {
+    mockGlob.mockImplementation(async ({ patterns }) => {
+      if (patterns[0].includes('js')) {
+        return ['file.js', 'file-2.js']
+      } else if (patterns[0].includes('ts')) {
+        return ['file.ts']
+      }
+      return []
+    })
+    mockReadFile.mockImplementation((path) => {
+      switch (path) {
+        case 'file.js':
+          return 'this\nis a\njs\nfile'
+        case 'file-2.js':
+          return '// @ts-check\nthis\nis a\njs\nfile'
+        case 'file.ts':
+          return 'this\nis a\nlonger\nts\nfile\nso it has\nmore\nadoption'
+      }
+      return ''
+    })
+
+    await expect(
+      measureTsAdoption().then((x) => formatAdoptionPercentage(x))
+    ).resolves.toBe('76.5%')
+  })
 })
 
 describe('missingTsConfigSettings', () => {

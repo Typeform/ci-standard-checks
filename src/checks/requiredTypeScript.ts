@@ -9,6 +9,8 @@ import { isBot } from '../conditions/triggeredByBot'
 
 import Check from './check'
 
+const JS_TS_CHECK_COMMENT = '// @ts-check'
+
 type TsConfig = {
   compilerOptions?: {
     strict?: boolean
@@ -38,6 +40,23 @@ const requiredTypeScript: Check = {
 }
 export default requiredTypeScript
 
+const getFileContent = async (filename: string) => {
+  try {
+    core.info(`github.context.ref, ${github.context.ref}`)
+    const response = await github.downloadContent(filename, github.context.ref)
+    core.info(`response, ${JSON.stringify(response, null, 2)}`)
+    if (!('content' in response)) {
+      throw new Error('No content in response')
+    }
+
+    return response.encoding === 'base64'
+      ? Buffer.from(response.content, 'base64').toString()
+      : response.content
+  } catch (_) {
+    return ''
+  }
+}
+
 async function checkPullRequest(): Promise<boolean> {
   const pullPayload = github.context.payload as WebhookEventMap['pull_request']
   const pr = await github.getPullRequest(pullPayload.pull_request.number)
@@ -58,30 +77,26 @@ async function checkPullRequest(): Promise<boolean> {
   const filter = getIgnoreFilter()
 
   const files = await github.getPullRequestFiles(pr.number)
-  core.info(`files ${JSON.stringify(files, null, 2)}`)
-  const filesContent = await Promise.all(
-    files.map((f) => github.downloadContent(f.filename, pr.head.ref))
-  )
-  core.info(`filesContent ${JSON.stringify(filesContent, null, 2)}`)
-  const forbiddenJsFiles = files.filter((f, index) =>
-    isForbiddenJSFile(
-      f.filename,
-      (filesContent[index].hasOwnProperty('content') &&
-        // @ts-expect-error to fix
-        filesContent[index].content) ||
-        '',
-      filter
+  const filesWithContent = await Promise.all(
+    files.map((f) =>
+      (async () => {
+        const fileContent = await getFileContent(f.filename)
+        return { ...f, fileContent }
+      })()
     )
   )
-  core.info(`forbiddenJsFiles ${JSON.stringify(forbiddenJsFiles, null, 2)}`)
+  const forbiddenJsFiles = filesWithContent.filter((f, index) =>
+    isForbiddenJSFile(f.filename, f.fileContent, filter)
+  )
 
-  const renamedJsFiles = files.filter(
+  core.info(`filesWithContent ${JSON.stringify(filesWithContent, null, 2)}`)
+
+  const renamedJsFiles = filesWithContent.filter(
     (f) =>
       f.previous_filename &&
       isForbiddenJSFile(f.previous_filename) &&
       !forbiddenJsFiles.includes(f)
   )
-  core.info(`renamedJsFiles ${JSON.stringify(renamedJsFiles, null, 2)}`)
   const tsconfigFiles = await fs.glob({
     patterns: ['**/tsconfig.json'],
     exclude: filter,
@@ -167,20 +182,26 @@ export async function measureTsAdoption(
     patterns: ['**/*.js', '**/*.jsx'],
     exclude: filter,
   })
-  // TODO: find JS+TS files and add them to TS list
+  const typedJsFiles = jsFiles.filter((file) => {
+    const fileContent = fs.readFile(file)
+    return fileContent.startsWith(JS_TS_CHECK_COMMENT)
+  })
   const tsFiles = await fs.glob({
     patterns: ['**/*.ts', '**/*.tsx'],
     exclude: filter,
   })
 
-  const jsLines = jsFiles
+  const untypedFiles = jsFiles.filter((f) => !typedJsFiles.includes(f))
+  const typedFiles = [...tsFiles, ...typedJsFiles]
+
+  const untypedLines = untypedFiles
     .map((f) => fs.readFile(f).split('\n').length)
     .reduce((total, lines) => total + lines, 0)
-  const tsLines = tsFiles
+  const typedLines = typedFiles
     .map((f) => fs.readFile(f).split('\n').length)
     .reduce((total, lines) => total + lines, 0)
 
-  return tsLines / (jsLines + tsLines)
+  return typedLines / (untypedLines + typedLines)
 }
 
 async function checkTsConfig(files: string[]): Promise<Error[]> {
@@ -222,9 +243,12 @@ export function isForbiddenJSFile(
   filter: IgnoredFileFilter = getIgnoreFilter()
 ): boolean {
   const jsPattern = /\.jsx?$/i
-
   const hasJsExtension = jsPattern.test(filename) && !filter.ignores(filename)
-  const appliesTypescriptViaComment = fileContent.startsWith('// @ts-check')
+  const appliesTypescriptViaComment =
+    fileContent.startsWith(JS_TS_CHECK_COMMENT)
+  core.info(
+    `${filename} hasJsExtension: ${hasJsExtension}, appliesTypescriptViaComment: ${appliesTypescriptViaComment}`
+  )
 
   return hasJsExtension && !appliesTypescriptViaComment
 }
