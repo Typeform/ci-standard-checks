@@ -460,10 +460,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.missingTsConfigSettings = exports.isForbiddenJSFile = exports.measureTsAdoption = exports.formatAdoptionPercentage = exports.checkJsUsage = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const CommentedJSON = __importStar(__nccwpck_require__(3165));
+const ignore_1 = __importDefault(__nccwpck_require__(1230));
 const github_1 = __nccwpck_require__(5679);
 const fs = __importStar(__nccwpck_require__(3206));
 const triggeredByBot_1 = __nccwpck_require__(6754);
-const ignore_1 = __importDefault(__nccwpck_require__(1230));
+const JS_TS_CHECK_COMMENT = '// @ts-check';
 const requiredTypeScript = {
     name: 'required-typescript',
     optional: false,
@@ -478,6 +479,20 @@ const requiredTypeScript = {
     },
 };
 exports["default"] = requiredTypeScript;
+const getFileContent = (filename) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield github_1.github.downloadContent(filename, github_1.github.context.ref);
+        if (!('content' in response)) {
+            throw new Error('No content in response');
+        }
+        return response.encoding === 'base64'
+            ? Buffer.from(response.content, 'base64').toString()
+            : response.content;
+    }
+    catch (_) {
+        return '';
+    }
+});
 function checkPullRequest() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
@@ -493,19 +508,23 @@ function checkPullRequest() {
         core.info(`Branch: ${pr.head.ref}`);
         const filter = getIgnoreFilter();
         const files = yield github_1.github.getPullRequestFiles(pr.number);
-        const jsFiles = files.filter((f) => isForbiddenJSFile(f.filename, filter));
-        const renamedJsFiles = files.filter((f) => f.previous_filename &&
+        const filesWithContent = yield Promise.all(files.map((f) => (() => __awaiter(this, void 0, void 0, function* () {
+            const fileContent = yield getFileContent(f.filename);
+            return Object.assign(Object.assign({}, f), { fileContent });
+        }))()));
+        const forbiddenJsFiles = filesWithContent.filter((f, index) => isForbiddenJSFile(f.filename, f.fileContent, filter));
+        const renamedJsFiles = filesWithContent.filter((f) => f.previous_filename &&
             isForbiddenJSFile(f.previous_filename) &&
-            !jsFiles.includes(f));
+            !forbiddenJsFiles.includes(f));
         const tsconfigFiles = yield fs.glob({
             patterns: ['**/tsconfig.json'],
             exclude: filter,
         });
         const errors = [];
-        if (jsFiles.length || tsconfigFiles.length) {
-            errors.push(...(yield checkJsUsage(jsFiles)), ...(yield checkTsConfig(tsconfigFiles)));
+        if (forbiddenJsFiles.length || tsconfigFiles.length) {
+            errors.push(...(yield checkJsUsage(forbiddenJsFiles)), ...(yield checkTsConfig(tsconfigFiles)));
         }
-        if (jsFiles.length || renamedJsFiles.length || errors.length > 0) {
+        if (forbiddenJsFiles.length || renamedJsFiles.length || errors.length > 0) {
             const adoption = yield measureTsAdoption(filter);
             const commentId = yield github_1.github.pinComment(pr.number, /## TypeScript adoption/, `## TypeScript adoption
 Current adoption level: **${formatAdoptionPercentage(adoption)}**
@@ -561,17 +580,23 @@ function measureTsAdoption(filter = getIgnoreFilter()) {
             patterns: ['**/*.js', '**/*.jsx'],
             exclude: filter,
         });
+        const typedJsFiles = jsFiles.filter((file) => {
+            const fileContent = fs.readFile(file);
+            return fileContent.startsWith(JS_TS_CHECK_COMMENT);
+        });
         const tsFiles = yield fs.glob({
             patterns: ['**/*.ts', '**/*.tsx'],
             exclude: filter,
         });
-        const jsLines = jsFiles
+        const untypedFiles = jsFiles.filter((f) => !typedJsFiles.includes(f));
+        const typedFiles = [...tsFiles, ...typedJsFiles];
+        const untypedLines = untypedFiles
             .map((f) => fs.readFile(f).split('\n').length)
             .reduce((total, lines) => total + lines, 0);
-        const tsLines = tsFiles
+        const typedLines = typedFiles
             .map((f) => fs.readFile(f).split('\n').length)
             .reduce((total, lines) => total + lines, 0);
-        return tsLines / (jsLines + tsLines);
+        return typedLines / (untypedLines + typedLines);
     });
 }
 exports.measureTsAdoption = measureTsAdoption;
@@ -602,9 +627,11 @@ function checkTsConfig(files) {
         return errors;
     });
 }
-function isForbiddenJSFile(filename, filter = getIgnoreFilter()) {
+function isForbiddenJSFile(filename, fileContent = '', filter = getIgnoreFilter()) {
     const jsPattern = /\.jsx?$/i;
-    return jsPattern.test(filename) && !filter.ignores(filename);
+    const hasJsExtension = jsPattern.test(filename) && !filter.ignores(filename);
+    const appliesTypescriptViaComment = fileContent.startsWith(JS_TS_CHECK_COMMENT);
+    return hasJsExtension && !appliesTypescriptViaComment;
 }
 exports.isForbiddenJSFile = isForbiddenJSFile;
 function missingTsConfigSettings(tsconfig) {

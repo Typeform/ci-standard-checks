@@ -67,8 +67,8 @@ documentation](https://github.com/actions/toolkit/blob/master/README.md#packages
 for the various packages.
 
 We have a wrapper for `@actions/github` in
-`.src/infrasctructure/github` that's meant to hold handy helper
-methods for accesing data from GitHub that the action might care about
+`.src/infrastructure/github` that's meant to hold handy helper
+methods for accessing data from GitHub that the action might care about
 (e.g. info about the PR that triggered the action). They also provide
 an extra abstraction layer that is easier to mock in your tests than
 pure Octokit. If you need more info from GitHub in your check,

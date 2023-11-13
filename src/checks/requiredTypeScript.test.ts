@@ -1,6 +1,7 @@
 import { mocked } from 'ts-jest/utils'
 
 import {
+  Content,
   github,
   PullRequestFiles,
   PullsGetResponse,
@@ -44,6 +45,10 @@ describe('Required TypeScript check', () => {
       mockGithub.getPullRequest.mockResolvedValue(
         pullRequestResponse as PullsGetResponse
       )
+
+      mockGithub.downloadContent.mockResolvedValue({
+        content: 'some js/ts content\nsome more js/ts content',
+      } as Content)
     })
 
     it('returns true for PR without JS changes and good tsconfig', async () => {
@@ -67,6 +72,28 @@ describe('Required TypeScript check', () => {
         { filename: '.env.dist' },
         { filename: 'workflows/test.yaml' },
       ] as PullRequestFiles)
+      mockGlob.mockResolvedValue(['tsconfig.json'])
+      mockReadFile.mockReturnValue(
+        JSON.stringify({
+          compilerOptions: {
+            allowUnreachableCode: false,
+            noImplicitAny: true,
+          },
+        })
+      )
+
+      await expect(requiredTypeScript.run()).resolves.toBeTruthy()
+    })
+
+    it('returns true PR with JS+TS changes and good tsconfig', async () => {
+      pullRequestResponse.user.login = 'regular-user'
+      mockGithub.getPullRequestFiles.mockResolvedValue([
+        { filename: 'filename.js', additions: 100, deletions: 20 },
+      ] as PullRequestFiles)
+      mockGithub.downloadContent.mockResolvedValue({
+        content: '// @ts-check\nsome js/ts content\nsome more js/ts content',
+      } as Content)
+
       mockGlob.mockResolvedValue(['tsconfig.json'])
       mockReadFile.mockReturnValue(
         JSON.stringify({
@@ -366,6 +393,15 @@ describe('isForbiddenJSFile', () => {
     expect(isForbiddenJSFile(filename)).toBeFalsy()
   })
 
+  it.each(['filename.js', 'component.jsx'])(
+    'it returns false with JS/JSX file with TS checks enabled [%s]',
+    (filename) => {
+      expect(
+        isForbiddenJSFile(filename, '// @ts-check\nsome-js-content')
+      ).toBeFalsy()
+    }
+  )
+
   it.each([
     'config.toml',
     'manifest.yaml',
@@ -401,6 +437,32 @@ describe('measureTsAdoption', () => {
     await expect(
       measureTsAdoption().then((x) => formatAdoptionPercentage(x))
     ).resolves.toBe('66.7%')
+  })
+
+  it('correctly calculates and formats adoption % with some typed JS files', async () => {
+    mockGlob.mockImplementation(async ({ patterns }) => {
+      if (patterns[0].includes('js')) {
+        return ['file.js', 'file-2.js']
+      } else if (patterns[0].includes('ts')) {
+        return ['file.ts']
+      }
+      return []
+    })
+    mockReadFile.mockImplementation((path) => {
+      switch (path) {
+        case 'file.js':
+          return 'this\nis a\njs\nfile'
+        case 'file-2.js':
+          return '// @ts-check\nthis\nis a\njs\nfile'
+        case 'file.ts':
+          return 'this\nis a\nlonger\nts\nfile\nso it has\nmore\nadoption'
+      }
+      return ''
+    })
+
+    await expect(
+      measureTsAdoption().then((x) => formatAdoptionPercentage(x))
+    ).resolves.toBe('76.5%')
   })
 })
 
