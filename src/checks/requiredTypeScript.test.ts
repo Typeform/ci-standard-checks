@@ -1,7 +1,6 @@
 import { mocked } from 'ts-jest/utils'
 
 import {
-  Content,
   github,
   PullRequestFiles,
   PullsGetResponse,
@@ -46,9 +45,9 @@ describe('Required TypeScript check', () => {
         pullRequestResponse as PullsGetResponse
       )
 
-      mockGithub.downloadContent.mockResolvedValue({
-        content: 'some js/ts content\nsome more js/ts content',
-      } as Content)
+      mockReadFile.mockReturnValue(
+        'some js/ts content\nsome more js/ts content'
+      )
     })
 
     it('returns true for PR without JS changes and good tsconfig', async () => {
@@ -90,19 +89,22 @@ describe('Required TypeScript check', () => {
       mockGithub.getPullRequestFiles.mockResolvedValue([
         { filename: 'filename.js', additions: 100, deletions: 20 },
       ] as PullRequestFiles)
-      mockGithub.downloadContent.mockResolvedValue({
-        content: '// @ts-check\nsome js/ts content\nsome more js/ts content',
-      } as Content)
 
       mockGlob.mockResolvedValue(['tsconfig.json'])
-      mockReadFile.mockReturnValue(
-        JSON.stringify({
-          compilerOptions: {
-            allowUnreachableCode: false,
-            noImplicitAny: true,
-          },
-        })
-      )
+      mockReadFile.mockImplementation((filename: string) => {
+        switch (filename) {
+          case 'tsconfig.json':
+            return JSON.stringify({
+              compilerOptions: {
+                allowUnreachableCode: false,
+                noImplicitAny: true,
+              },
+            })
+
+          default:
+            return '// @ts-check\nsome js/ts content\nsome more js/ts content'
+        }
+      })
 
       await expect(requiredTypeScript.run()).resolves.toBeTruthy()
     })
@@ -398,6 +400,15 @@ describe('isForbiddenJSFile', () => {
     (filename) => {
       expect(
         isForbiddenJSFile(filename, '// @ts-check\nsome-js-content')
+      ).toBeFalsy()
+    }
+  )
+
+  it.each(['filename.js', 'component.jsx'])(
+    'it returns false with JS/JSX file with TS checks enabled and whitespace around comment [%s]',
+    (filename) => {
+      expect(
+        isForbiddenJSFile(filename, '   //@ts-check\nsome-js-content')
       ).toBeFalsy()
     }
   )

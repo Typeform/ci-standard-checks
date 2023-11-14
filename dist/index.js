@@ -464,7 +464,7 @@ const ignore_1 = __importDefault(__nccwpck_require__(1230));
 const github_1 = __nccwpck_require__(5679);
 const fs = __importStar(__nccwpck_require__(3206));
 const triggeredByBot_1 = __nccwpck_require__(6754);
-const JS_TS_CHECK_COMMENT = '// @ts-check';
+const JS_TS_CHECK_COMMENT_REGEX = /^\s*\/\/\s*@ts-check/gm;
 const requiredTypeScript = {
     name: 'required-typescript',
     optional: false,
@@ -479,20 +479,14 @@ const requiredTypeScript = {
     },
 };
 exports["default"] = requiredTypeScript;
-const getFileContent = (filename) => __awaiter(void 0, void 0, void 0, function* () {
+const getFileContent = (filename) => {
     try {
-        const response = yield github_1.github.downloadContent(filename, github_1.github.context.ref);
-        if (!('content' in response)) {
-            throw new Error('No content in response');
-        }
-        return response.encoding === 'base64'
-            ? Buffer.from(response.content, 'base64').toString()
-            : response.content;
+        return fs.readFile(filename);
     }
     catch (_) {
         return '';
     }
-});
+};
 function checkPullRequest() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
@@ -508,10 +502,7 @@ function checkPullRequest() {
         core.info(`Branch: ${pr.head.ref}`);
         const filter = getIgnoreFilter();
         const files = yield github_1.github.getPullRequestFiles(pr.number);
-        const filesWithContent = yield Promise.all(files.map((f) => (() => __awaiter(this, void 0, void 0, function* () {
-            const fileContent = yield getFileContent(f.filename);
-            return Object.assign(Object.assign({}, f), { fileContent });
-        }))()));
+        const filesWithContent = yield Promise.all(files.map((f) => (Object.assign(Object.assign({}, f), { fileContent: getFileContent(f.filename) }))));
         const forbiddenJsFiles = filesWithContent.filter((f, index) => isForbiddenJSFile(f.filename, f.fileContent, filter));
         const renamedJsFiles = filesWithContent.filter((f) => f.previous_filename &&
             isForbiddenJSFile(f.previous_filename) &&
@@ -582,7 +573,7 @@ function measureTsAdoption(filter = getIgnoreFilter()) {
         });
         const typedJsFiles = jsFiles.filter((file) => {
             const fileContent = fs.readFile(file);
-            return fileContent.startsWith(JS_TS_CHECK_COMMENT);
+            return !!fileContent.match(JS_TS_CHECK_COMMENT_REGEX);
         });
         const tsFiles = yield fs.glob({
             patterns: ['**/*.ts', '**/*.tsx'],
@@ -630,7 +621,7 @@ function checkTsConfig(files) {
 function isForbiddenJSFile(filename, fileContent = '', filter = getIgnoreFilter()) {
     const jsPattern = /\.jsx?$/i;
     const hasJsExtension = jsPattern.test(filename) && !filter.ignores(filename);
-    const appliesTypescriptViaComment = fileContent.startsWith(JS_TS_CHECK_COMMENT);
+    const appliesTypescriptViaComment = !!fileContent.match(JS_TS_CHECK_COMMENT_REGEX);
     return hasJsExtension && !appliesTypescriptViaComment;
 }
 exports.isForbiddenJSFile = isForbiddenJSFile;

@@ -9,7 +9,7 @@ import { isBot } from '../conditions/triggeredByBot'
 
 import Check from './check'
 
-const JS_TS_CHECK_COMMENT = '// @ts-check'
+const JS_TS_CHECK_COMMENT_REGEX = /^\s*\/\/\s*@ts-check/gm
 
 type TsConfig = {
   compilerOptions?: {
@@ -40,16 +40,9 @@ const requiredTypeScript: Check = {
 }
 export default requiredTypeScript
 
-const getFileContent = async (filename: string) => {
+const getFileContent = (filename: string) => {
   try {
-    const response = await github.downloadContent(filename, github.context.ref)
-    if (!('content' in response)) {
-      throw new Error('No content in response')
-    }
-
-    return response.encoding === 'base64'
-      ? Buffer.from(response.content, 'base64').toString()
-      : response.content
+    return fs.readFile(filename)
   } catch (_) {
     return ''
   }
@@ -76,12 +69,7 @@ async function checkPullRequest(): Promise<boolean> {
 
   const files = await github.getPullRequestFiles(pr.number)
   const filesWithContent = await Promise.all(
-    files.map((f) =>
-      (async () => {
-        const fileContent = await getFileContent(f.filename)
-        return { ...f, fileContent }
-      })()
-    )
+    files.map((f) => ({ ...f, fileContent: getFileContent(f.filename) }))
   )
   const forbiddenJsFiles = filesWithContent.filter((f, index) =>
     isForbiddenJSFile(f.filename, f.fileContent, filter)
@@ -180,7 +168,7 @@ export async function measureTsAdoption(
   })
   const typedJsFiles = jsFiles.filter((file) => {
     const fileContent = fs.readFile(file)
-    return fileContent.startsWith(JS_TS_CHECK_COMMENT)
+    return !!fileContent.match(JS_TS_CHECK_COMMENT_REGEX)
   })
   const tsFiles = await fs.glob({
     patterns: ['**/*.ts', '**/*.tsx'],
@@ -240,8 +228,9 @@ export function isForbiddenJSFile(
 ): boolean {
   const jsPattern = /\.jsx?$/i
   const hasJsExtension = jsPattern.test(filename) && !filter.ignores(filename)
-  const appliesTypescriptViaComment =
-    fileContent.startsWith(JS_TS_CHECK_COMMENT)
+  const appliesTypescriptViaComment = !!fileContent.match(
+    JS_TS_CHECK_COMMENT_REGEX
+  )
 
   return hasJsExtension && !appliesTypescriptViaComment
 }
