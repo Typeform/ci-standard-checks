@@ -1,14 +1,15 @@
 import * as core from '@actions/core'
 import * as CommentedJSON from 'comment-json'
-
 import { WebhookEventMap } from '@octokit/webhooks-types'
+import ignore, { Ignore as IgnoredFileFilter } from 'ignore'
 
 import { github } from '../infrastructure/github'
 import * as fs from '../infrastructure/fs'
 import { isBot } from '../conditions/triggeredByBot'
 
 import Check from './check'
-import ignore, { Ignore as IgnoredFileFilter } from 'ignore'
+
+const JS_TS_CHECK_COMMENT_REGEX = /^\s*\/\/\s*@ts-check/gm
 
 type TsConfig = {
   compilerOptions?: {
@@ -39,6 +40,14 @@ const requiredTypeScript: Check = {
 }
 export default requiredTypeScript
 
+const getFileContent = (filename: string) => {
+  try {
+    return fs.readFile(filename)
+  } catch (_) {
+    return ''
+  }
+}
+
 async function checkPullRequest(): Promise<boolean> {
   const pullPayload = github.context.payload as WebhookEventMap['pull_request']
   const pr = await github.getPullRequest(pullPayload.pull_request.number)
@@ -59,12 +68,18 @@ async function checkPullRequest(): Promise<boolean> {
   const filter = getIgnoreFilter()
 
   const files = await github.getPullRequestFiles(pr.number)
-  const jsFiles = files.filter((f) => isForbiddenJSFile(f.filename, filter))
-  const renamedJsFiles = files.filter(
+  const filesWithContent = await Promise.all(
+    files.map((f) => ({ ...f, fileContent: getFileContent(f.filename) }))
+  )
+  const forbiddenJsFiles = filesWithContent.filter((f, index) =>
+    isForbiddenJSFile(f.filename, f.fileContent, filter)
+  )
+
+  const renamedJsFiles = filesWithContent.filter(
     (f) =>
       f.previous_filename &&
       isForbiddenJSFile(f.previous_filename) &&
-      !jsFiles.includes(f)
+      !forbiddenJsFiles.includes(f)
   )
   const tsconfigFiles = await fs.glob({
     patterns: ['**/tsconfig.json'],
@@ -73,14 +88,14 @@ async function checkPullRequest(): Promise<boolean> {
 
   const errors: Error[] = []
 
-  if (jsFiles.length || tsconfigFiles.length) {
+  if (forbiddenJsFiles.length || tsconfigFiles.length) {
     errors.push(
-      ...(await checkJsUsage(jsFiles)),
+      ...(await checkJsUsage(forbiddenJsFiles)),
       ...(await checkTsConfig(tsconfigFiles))
     )
   }
 
-  if (jsFiles.length || renamedJsFiles.length || errors.length > 0) {
+  if (forbiddenJsFiles.length || renamedJsFiles.length || errors.length > 0) {
     const adoption = await measureTsAdoption(filter)
     const commentId = await github.pinComment(
       pr.number,
@@ -151,19 +166,26 @@ export async function measureTsAdoption(
     patterns: ['**/*.js', '**/*.jsx'],
     exclude: filter,
   })
+  const typedJsFiles = jsFiles.filter((file) => {
+    const fileContent = fs.readFile(file)
+    return !!fileContent.match(JS_TS_CHECK_COMMENT_REGEX)
+  })
   const tsFiles = await fs.glob({
     patterns: ['**/*.ts', '**/*.tsx'],
     exclude: filter,
   })
 
-  const jsLines = jsFiles
+  const untypedFiles = jsFiles.filter((f) => !typedJsFiles.includes(f))
+  const typedFiles = [...tsFiles, ...typedJsFiles]
+
+  const untypedLines = untypedFiles
     .map((f) => fs.readFile(f).split('\n').length)
     .reduce((total, lines) => total + lines, 0)
-  const tsLines = tsFiles
+  const typedLines = typedFiles
     .map((f) => fs.readFile(f).split('\n').length)
     .reduce((total, lines) => total + lines, 0)
 
-  return tsLines / (jsLines + tsLines)
+  return typedLines / (untypedLines + typedLines)
 }
 
 async function checkTsConfig(files: string[]): Promise<Error[]> {
@@ -201,11 +223,16 @@ async function checkTsConfig(files: string[]): Promise<Error[]> {
 
 export function isForbiddenJSFile(
   filename: string,
+  fileContent = '',
   filter: IgnoredFileFilter = getIgnoreFilter()
 ): boolean {
   const jsPattern = /\.jsx?$/i
+  const hasJsExtension = jsPattern.test(filename) && !filter.ignores(filename)
+  const appliesTypescriptViaComment = !!fileContent.match(
+    JS_TS_CHECK_COMMENT_REGEX
+  )
 
-  return jsPattern.test(filename) && !filter.ignores(filename)
+  return hasJsExtension && !appliesTypescriptViaComment
 }
 
 export function missingTsConfigSettings(tsconfig: TsConfig): string[] {
