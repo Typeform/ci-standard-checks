@@ -9,7 +9,6 @@ export const BOT_USERS = [
   'dependabot-preview[bot]',
   'tf-security',
   'seti-tf',
-  'tf-seti',
   'Jenkins user',
   'tf-IT',
 ]
