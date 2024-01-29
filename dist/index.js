@@ -854,7 +854,8 @@ exports.BOT_USERS = [
     'dependabot-preview[bot]',
     'tf-security',
     'seti-tf',
-    'tf-IT'
+    'Jenkins user',
+    'tf-IT',
 ];
 function triggeredByBot() {
     return __awaiter(this, void 0, void 0, function* () {

@@ -9,7 +9,8 @@ export const BOT_USERS = [
   'dependabot-preview[bot]',
   'tf-security',
   'seti-tf',
-  'tf-IT'
+  'Jenkins user',
+  'tf-IT',
 ]
 
 export async function triggeredByBot(): Promise<boolean> {
