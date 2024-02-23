@@ -57,9 +57,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
       - name: Semantic Release
         id: semantic
         uses: codfish/semantic-release-action@4e9fa8ec064813465dfeccac8ae70f1348fb5dec
