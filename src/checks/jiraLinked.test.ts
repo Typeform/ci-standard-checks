@@ -65,6 +65,15 @@ describe('Jira Linked check', () => {
 
       await expect(jiraLinked.run()).rejects.toThrow()
     })
+
+    it('returns true for reverts', async () => {
+      pullRequestResponse.title =
+        'Revert "fix(dependabot): bump @somedependency from stable to broken"'
+      pullRequestResponse.head.ref =
+        'revert-4242-dependabot/npm_and_yarn/typeform/dependency-version'
+
+      await expect(jiraLinked.run()).resolves.toBeTruthy()
+    })
   })
 
   describe('push event', () => {
@@ -185,6 +194,24 @@ describe('Jira Linked check', () => {
 
       await expect(jiraLinked.run()).rejects.toThrow()
     })
+  })
+
+  it('returns true for reverts', async () => {
+    mockGithub.context.eventName = 'push'
+    mockGithub.context.payload.commits = [
+      {
+        id: 'revert',
+        message:
+          'Revert "fix(dependabot): bump @typeform/dependency from stable to broken"',
+        author: { username: 'typeformer' },
+      },
+    ]
+    const pullRequestsAssociatedWithCommitResponse = [{ state: 'open' }]
+    mockGithub.getPullRequestsAssociatedWithCommit.mockResolvedValueOnce(
+      pullRequestsAssociatedWithCommitResponse as PullRequestsAssociatedWithCommitResponse
+    )
+
+    await expect(jiraLinked.run()).resolves.toBeTruthy()
   })
 })
 

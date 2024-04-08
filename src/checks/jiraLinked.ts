@@ -38,6 +38,13 @@ async function checkPullRequest(): Promise<boolean> {
   core.info(`Title: ${pr.title}`)
   core.info(`Branch: ${pr.head.ref}`)
 
+  const isRevert = pr.head.ref.startsWith('revert-')
+
+  if (isRevert) {
+    core.info('PR is a revert, ignoring check')
+    return true
+  }
+
   const isJiraLinked = hasJiraIssueKey(pr.title) || hasJiraIssueKey(pr.head.ref)
 
   if (!isJiraLinked)
@@ -59,6 +66,7 @@ async function checkPush(): Promise<boolean> {
     .filter(
       (c) =>
         !hasJiraIssueKey(c.message) &&
+        !isRevertCommit(c.message) &&
         !isBot(c.author.name) &&
         !isBot(c.author.username || '')
     )
@@ -93,4 +101,8 @@ export function hasJiraIssueKey(text: string): boolean {
     !zeroedJiraKeys.some((issueKey) => matchedText.includes(issueKey))
 
   return !!isMatch && !!noZeroKeyIssue
+}
+
+function isRevertCommit(commitMessage: string) {
+  return commitMessage.startsWith('Revert "')
 }

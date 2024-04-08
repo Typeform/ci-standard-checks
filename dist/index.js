@@ -132,6 +132,11 @@ function checkPullRequest() {
         core.info('Scanning PR Title and Branch Name for Jira Key Reference');
         core.info(`Title: ${pr.title}`);
         core.info(`Branch: ${pr.head.ref}`);
+        const isRevert = pr.head.ref.startsWith('revert-');
+        if (isRevert) {
+            core.info('PR is a revert, ignoring check');
+            return true;
+        }
         const isJiraLinked = hasJiraIssueKey(pr.title) || hasJiraIssueKey(pr.head.ref);
         if (!isJiraLinked)
             throw new Error('Jira Issue key not present in PR title or branch name!');
@@ -149,6 +154,7 @@ function checkPush() {
         }
         const errors = pushPayload.commits
             .filter((c) => !hasJiraIssueKey(c.message) &&
+            !isRevertCommit(c.message) &&
             !triggeredByBot_1.isBot(c.author.name) &&
             !triggeredByBot_1.isBot(c.author.username || ''))
             .map((c) => `Commit ${c.id} is missing Jira Issue key`);
@@ -177,6 +183,9 @@ function hasJiraIssueKey(text) {
     return !!isMatch && !!noZeroKeyIssue;
 }
 exports.hasJiraIssueKey = hasJiraIssueKey;
+function isRevertCommit(commitMessage) {
+    return commitMessage.startsWith('Revert "');
+}
 
 
 /***/ }),
