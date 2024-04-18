@@ -39,13 +39,15 @@ extends:
 rules:
   operation-4xx-response: off
   security-defined: warn
+  no-identical-paths: warn
+  operation-parameters-unique: warn
 EOF
 
 # Limiting the depth limits the risk of (irrelevant) `openapi.yaml` files being found in eg. `_gomodcache` or `node_modules`
 IFS=$'\n' files=($(find . -maxdepth 3 -name openapi.yaml))
 
 for f in ${files[@]}; do
-    npx @redocly/cli@1.0.2 lint --extends=minimal "$f"
+    npx @redocly/cli lint "$f"
 done
 
-npx @redocly/cli@1.0.2 bundle --dereferenced --ext json --output openapi.json $(echo ${files})
+npx @redocly/cli bundle --dereferenced --ext json --output openapi.json $(echo ${files})
