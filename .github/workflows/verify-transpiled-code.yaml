@@ -15,6 +15,10 @@ jobs:
           node-version: 20
 
       - run: |
+          npm config set '//npm.pkg.github.com/:_authToken' ${{ secrets.GH_TOKEN }}
+          npm config set @typeform:registry https://npm.pkg.github.com/
+
+      - run: |
           yarn install
           mv dist/ source-dist
           yarn run all
