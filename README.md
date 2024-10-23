@@ -11,8 +11,6 @@ easier time rolling out new checks to teams. Win-win!
 
 ## Included Checks
 
-- `jira-linked`: never forget a Jira Issue key in your commits or PRs
-  again!
 - `secrets-scan`: make sure you're never ever ever commiting a secret to
   your repo. _Shhh, it's a secret_ :shushing_face:
 - `pii-detection`: make sure you're not uploading files with Personal Identifiable
@@ -40,7 +38,7 @@ commas:
 ```yaml
 ---
 with:
-  skipChecks: 'jira-linked,secret-scan'
+  skipChecks: 'secret-scan,required-typescript'
 ```
 
 Refer to the [list of checks](#included-checks) for the proper names

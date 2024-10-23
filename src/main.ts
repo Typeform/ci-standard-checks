@@ -2,7 +2,6 @@ import * as core from '@actions/core'
 
 import Check from './checks/check'
 import bashCheck from './checks/bash'
-import jiraLinked from './checks/jiraLinked'
 import piiDetection from './checks/piiDetection'
 import requiredTypeScript from './checks/requiredTypeScript'
 import {
@@ -22,7 +21,6 @@ const mandatoryChecks: Check[] = [
 ]
 
 const additionalChecks: Check[] = [
-  jiraLinked,
   requiredTypeScript,
   bashCheck({
     name: 'validate-openapi',

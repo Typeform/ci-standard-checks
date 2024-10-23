@@ -41,7 +41,7 @@ jobs:
       - name: Test skipping checks
         uses: ./
         with:
-          skipChecks: 'jira-linked,secrets-scan'
+          skipChecks: 'secrets-scan'
           githubToken: ${{ secrets.GITHUB_TOKEN  }}
           dockerUsername: ${{ secrets.GITLEAKS_DOCKER_USERNAME }}
           dockerPassword: ${{ secrets.GITLEAKS_DOCKER_PASSWORD }}

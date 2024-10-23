@@ -12,7 +12,7 @@ inputs:
     description: 'Optional checks to enable'
   githubToken:
     required: true
-    description: 'The github token to get PR info when checking for Jira Issue key'
+    description: 'Required for checks that need access to Github'
 runs:
   using: 'node20'
   main: 'dist/index.js'
