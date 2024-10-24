@@ -65,122 +65,6 @@ exports["default"] = bashCheck;
 
 /***/ }),
 
-/***/ 9496:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.hasJiraIssueKey = void 0;
-const core = __importStar(__nccwpck_require__(2186));
-const github_1 = __nccwpck_require__(5679);
-const triggeredByBot_1 = __nccwpck_require__(6754);
-const jiraLinked = {
-    name: 'jira-linked',
-    run() {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (github_1.github.context.eventName === 'pull_request') {
-                return checkPullRequest();
-            }
-            else if (github_1.github.context.eventName === 'push') {
-                return checkPush();
-            }
-            core.info('Jira linked will only run on "push" and "pull_request" events. Skipping...');
-            return true;
-        });
-    },
-};
-exports["default"] = jiraLinked;
-function checkPullRequest() {
-    var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        const pullPayload = github_1.github.context.payload;
-        const pr = yield github_1.github.getPullRequest(pullPayload.pull_request.number);
-        const prUser = ((_a = pr.user) === null || _a === void 0 ? void 0 : _a.login) || '';
-        if (triggeredByBot_1.isBot(prUser)) {
-            core.info(`PR is from bot user ${prUser}. Skipping check`);
-            return true;
-        }
-        core.info('Scanning PR Title and Branch Name for Jira Key Reference');
-        core.info(`Title: ${pr.title}`);
-        core.info(`Branch: ${pr.head.ref}`);
-        const isJiraLinked = hasJiraIssueKey(pr.title) || hasJiraIssueKey(pr.head.ref);
-        if (!isJiraLinked)
-            throw new Error('Jira Issue key not present in PR title or branch name!');
-        return true;
-    });
-}
-function checkPush() {
-    var _a, _b;
-    return __awaiter(this, void 0, void 0, function* () {
-        const pushPayload = github_1.github.context.payload;
-        const prs = yield github_1.github.getPullRequestsAssociatedWithCommit();
-        if (prs.length === 1 && ((_a = prs[0]) === null || _a === void 0 ? void 0 : _a.state) === 'closed' && ((_b = prs[0]) === null || _b === void 0 ? void 0 : _b.merged_at)) {
-            core.info('A merged Pull Request associated with commit has been found. Skipping...');
-            return true;
-        }
-        const errors = pushPayload.commits
-            .filter((c) => !hasJiraIssueKey(c.message) &&
-            !triggeredByBot_1.isBot(c.author.name) &&
-            !triggeredByBot_1.isBot(c.author.username || ''))
-            .map((c) => `Commit ${c.id} is missing Jira Issue key`);
-        if (errors.length > 0) {
-            throw new Error(errors.join('\n'));
-        }
-        core.info('OK! All commits in push have a Jira Issue key');
-        return true;
-    });
-}
-function hasJiraIssueKey(text) {
-    var _a, _b;
-    if (!text) {
-        return false;
-    }
-    const jiraInvalidIssueNumberPrefix = '0'; // JIRA issue numbers can't start with 0, but the Regex doesn't catch it
-    // https://confluence.atlassian.com/stashkb/integrating-with-custom-jira-issue-key-313460921.html
-    const jiraMatcher = /((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)/g;
-    const matchedText = (_b = (_a = text.match(jiraMatcher)) === null || _a === void 0 ? void 0 : _a.shift()) !== null && _b !== void 0 ? _b : '';
-    const isMatch = !!matchedText;
-    const zeroedJiraKeys = Array(10)
-        .fill(1)
-        .map((_, i) => `-${jiraInvalidIssueNumberPrefix.repeat(i + 1)}`);
-    const noZeroKeyIssue = matchedText &&
-        !zeroedJiraKeys.some((issueKey) => matchedText.includes(issueKey));
-    return !!isMatch && !!noZeroKeyIssue;
-}
-exports.hasJiraIssueKey = hasJiraIssueKey;
-
-
-/***/ }),
-
 /***/ 5246:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -1069,19 +953,6 @@ class GitHub {
             return response.data;
         });
     }
-    getPullRequestsAssociatedWithCommit() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const response = yield this.octokit.rest.repos.listPullRequestsAssociatedWithCommit({
-                owner: this.context.repo.owner,
-                repo: this.context.repo.repo,
-                commit_sha: this.context.sha,
-                mediaType: {
-                    previews: ['groot'],
-                },
-            });
-            return response.data;
-        });
-    }
     getPullRequestFiles(pull_number) {
         return __awaiter(this, void 0, void 0, function* () {
             const response = yield this.octokit.rest.pulls.listFiles({
@@ -1237,7 +1108,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const bash_1 = __importDefault(__nccwpck_require__(2888));
-const jiraLinked_1 = __importDefault(__nccwpck_require__(9496));
 const piiDetection_1 = __importDefault(__nccwpck_require__(5246));
 const requiredTypeScript_1 = __importDefault(__nccwpck_require__(8471));
 const conditions_1 = __nccwpck_require__(383);
@@ -1249,7 +1119,6 @@ const mandatoryChecks = [
     piiDetection_1.default,
 ];
 const additionalChecks = [
-    jiraLinked_1.default,
     requiredTypeScript_1.default,
     bash_1.default({
         name: 'validate-openapi',
