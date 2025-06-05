@@ -50,4 +50,4 @@ for f in ${files[@]}; do
     npx @redocly/cli lint "$f"
 done
 
-npx @redocly/cli bundle --dereferenced --ext json --output openapi.json $(echo ${files})
+npx @redocly/cli bundle --dereferenced --ext yaml --output openapi.json $(echo ${files})
