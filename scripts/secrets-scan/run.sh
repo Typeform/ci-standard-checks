@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GITLEAKS_VERSION="v8.16.1"
+GITLEAKS_VERSION="v8.28.0"
 
 get_gitleaks_container() {
     repo_name="zricethezav/gitleaks"
