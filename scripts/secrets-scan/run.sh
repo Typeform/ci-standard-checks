@@ -24,6 +24,27 @@ get_gitleaks_container() {
     return
 }
 
+get_gitleaks_config_image() {
+    image_name="gitleaks-config"
+    image_ids="imageTag=latest"
+    registry_id="567716553783"
+
+    mirrored_gitleaks="${registry_id}.dkr.ecr.us-east-1.amazonaws.com/${image_name}"
+    public_gitleaks="public.ecr.aws/typeform/${image_name}"
+
+    # Based on https://gist.github.com/outofcoffee/8f40732aefacfded14cce8a45f6e5eb1
+    aws ecr describe-images --repository-name=${mirrored_gitleaks} --image-ids=${image_ids} --registry-id=${registry_id} &>/dev/null
+    exit_code=$?
+
+    if [ $exit_code -eq 0 ]; then
+        echo $mirrored_gitleaks
+    else
+        echo $public_gitleaks
+    fi
+
+    return
+}
+
 # exit when any command fails, output commands
 set -ex
 
@@ -34,14 +55,8 @@ then
     exit 1
 fi
 
-DOCKERREGISTRY=public.ecr.aws
-docker pull ${DOCKERREGISTRY}/typeform/gitleaks-config
-exit_code=$?
-
-if [ ! $exit_code -eq 0 ]; then
-    echo "Unable to pull gitleaks container image from ${DOCKERREGISTRY}"
-    exit 1
-fi
+GITLEAKS_CONFIG_IMAGE=$(get_gitleaks_config_image)
+docker pull ${GITLEAKS_CONFIG_IMAGE}
 
 repo_dir=$GITHUB_WORKSPACE
 repo_name="$(basename "$repo_dir")"
@@ -53,7 +68,7 @@ mkdir -p $tmp_dir
 local_config=".gitleaks.toml"
 final_config="$tmp_dir/gitleaks_config.toml"
 commits_file="$tmp_dir/commit_list.txt"
-gitleaks_config_container="${DOCKERREGISTRY}/typeform/gitleaks-config"
+gitleaks_config_container="${GITLEAKS_CONFIG_IMAGE}"
 gitleaks_container=$(get_gitleaks_container)
 gitleaks_config_cmd="python gitleaks_config_generator.py"
 
