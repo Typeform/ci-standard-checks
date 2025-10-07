@@ -56,13 +56,29 @@ then
 fi
 
 GITLEAKS_CONFIG_IMAGE=$(get_gitleaks_config_image)
-remaining_attemps=5
+# Configuration
+MAX_RETRIES=5      # Set the maximum number of attempts (including the first one)
+RETRY_DELAY=5      # Delay in seconds between retries
+COMMAND="docker pull ${GITLEAKS_CONFIG_IMAGE}"
+ATTEMPTS=1
 
-while (( remaining_attemps-- > 0 ))
-do
-    [[ $(docker pull ${GITLEAKS_CONFIG_IMAGE}) == 0 ]] && exit
-    sleep 10
+# Loop while the command fails AND we haven't exceeded the max attempts
+until $COMMAND; do
+    # Check if we have exceeded the limit
+    if [ $ATTEMPTS -ge $MAX_RETRIES ]; then
+        echo "Command failed after $ATTEMPTS attempts. Giving up." >&2
+        exit 1 # Exit with an error status
+    fi
+
+    # Log the failure and prepare for the next attempt
+    EXIT_STATUS=$?
+    echo "Command failed (status: $EXIT_STATUS). Retrying in $RETRY_DELAY seconds... (Attempt $ATTEMPTS of $MAX_RETRIES)"
+
+    sleep $RETRY_DELAY
+    ATTEMPTS=$((ATTEMPTS + 1)) # Increment the counter
 done
+
+echo "Command succeeded on attempt $ATTEMPTS."
 
 repo_dir=$GITHUB_WORKSPACE
 repo_name="$(basename "$repo_dir")"
