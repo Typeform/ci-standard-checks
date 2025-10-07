@@ -13,5 +13,5 @@ on:
     branches:
       - main
 jobs:
-  ci-standard-checks:
+  ci-standard-checks: # bump2
     uses: Typeform/.github/.github/workflows/ci-standard-checks-workflow.yaml@v1
