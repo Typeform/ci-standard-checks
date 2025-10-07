@@ -56,7 +56,13 @@ then
 fi
 
 GITLEAKS_CONFIG_IMAGE=$(get_gitleaks_config_image)
-docker pull ${GITLEAKS_CONFIG_IMAGE}
+remaining_attemps=5
+
+while (( remaining_attemps-- > 0 ))
+do
+    [[ $(docker pull ${GITLEAKS_CONFIG_IMAGE}) == 0 ]] && exit
+    sleep 10
+done
 
 repo_dir=$GITHUB_WORKSPACE
 repo_name="$(basename "$repo_dir")"
