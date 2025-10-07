@@ -24,8 +24,8 @@ get_gitleaks_container() {
     return
 }
 
-# exit when any command fails
-set -e
+# exit when any command fails, output commands
+set -ex
 
 # Check if docker is installed
 if ! command -v "docker" &> /dev/null
