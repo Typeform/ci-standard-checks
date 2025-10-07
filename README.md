@@ -1,3 +1,4 @@
+<a href=https://engineering-metrics.typeform.tf/standards-adoption-tool/reports/ci-standard-checks/><img src=https://api.typeform.com/repositories/ci-standard-checks/badges.svg /></a>
 <p align="center">
   <a href="https://github.com/Typeform/ci-standard-checks/actions"><img alt="ci-standard-checks status" src="https://github.com/Typeform/ci-standard-checks/workflows/build-test/badge.svg"></a>
 </p>
