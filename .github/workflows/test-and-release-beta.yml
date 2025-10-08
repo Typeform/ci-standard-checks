@@ -4,7 +4,7 @@ on: # rebuild any PRs and main branch changes
   push:
     branches:
       - main
-      - 'releases/*'
+      - beta
 
 jobs:
   build: # make sure build/ci work properly
@@ -62,6 +62,14 @@ jobs:
         uses: codfish/semantic-release-action@4e9fa8ec064813465dfeccac8ae70f1348fb5dec
         with:
           repository_url: https://github.com/Typeform/ci-standard-checks.git
+          branches: |
+            [
+              'main',
+              {
+                name: 'beta',
+                prerelease: true
+              }
+            ]
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: Update beta version tag
