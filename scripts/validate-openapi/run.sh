@@ -32,8 +32,9 @@ then
     exit 1
 fi
 
-# Create redocly config file
-cat > .redocly.yaml << EOF
+# Create redocly config file in the action's directory
+CONFIG_FILE="$(pwd)/.redocly.yaml"
+cat > "$CONFIG_FILE" << EOF
 extends:
   - recommended
 rules:
@@ -47,7 +48,9 @@ EOF
 IFS=$'\n' files=($(find . -maxdepth 3 -name openapi.yaml))
 
 for f in ${files[@]}; do
-    npx @redocly/cli lint "$f"
+    # Use --config flag to explicitly specify the config file path
+    # This ensures Redocly uses our custom config regardless of where the openapi.yaml is located
+    npx @redocly/cli lint --config "$CONFIG_FILE" "$f"
 done
 
 npx @redocly/cli bundle --dereferenced --ext yaml --output openapi.json $(echo ${files})
