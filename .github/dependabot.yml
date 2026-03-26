@@ -1,0 +1,28 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    schedule:
+      interval: weekly
+      day: sunday
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+    directories:
+      - "/"
+    commit-message:
+      prefix: fix(dependabot)
+
+  - package-ecosystem: github-actions
+    schedule:
+      interval: weekly
+      day: sunday
+    groups:
+      github-actions-dependencies:
+        patterns:
+          - "*"
+    directories:
+      - "/"
+    commit-message:
+      prefix: build(dependabot)

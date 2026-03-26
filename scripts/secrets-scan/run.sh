@@ -45,6 +45,28 @@ get_gitleaks_config_image() {
     return
 }
 
+# Retry a command up to N times with a delay between attempts.
+# Usage: retry_command <max_retries> <delay_seconds> <command...>
+retry_command() {
+    local max_retries=$1
+    local delay=$2
+    shift 2
+    local attempt=1
+
+    until "$@"; do
+        local status=$?
+        if [ $attempt -ge $max_retries ]; then
+            echo "Command failed after $attempt attempts. Giving up." >&2
+            return $status
+        fi
+        echo "Command failed (status: $status). Retrying in $delay seconds... (Attempt $attempt of $max_retries)"
+        sleep $delay
+        attempt=$((attempt + 1))
+    done
+
+    echo "Command succeeded on attempt $attempt."
+}
+
 # exit when any command fails, output commands
 set -ex
 
@@ -56,29 +78,9 @@ then
 fi
 
 GITLEAKS_CONFIG_IMAGE=$(get_gitleaks_config_image)
-# Configuration
-MAX_RETRIES=5      # Set the maximum number of attempts (including the first one)
-RETRY_DELAY=5      # Delay in seconds between retries
-COMMAND="docker pull ${GITLEAKS_CONFIG_IMAGE}"
-ATTEMPTS=1
 
-# Loop while the command fails AND we haven't exceeded the max attempts
-until $COMMAND; do
-    # Check if we have exceeded the limit
-    if [ $ATTEMPTS -ge $MAX_RETRIES ]; then
-        echo "Command failed after $ATTEMPTS attempts. Giving up." >&2
-        exit 1 # Exit with an error status
-    fi
-
-    # Log the failure and prepare for the next attempt
-    EXIT_STATUS=$?
-    echo "Command failed (status: $EXIT_STATUS). Retrying in $RETRY_DELAY seconds... (Attempt $ATTEMPTS of $MAX_RETRIES)"
-
-    sleep $RETRY_DELAY
-    ATTEMPTS=$((ATTEMPTS + 1)) # Increment the counter
-done
-
-echo "Command succeeded on attempt $ATTEMPTS."
+# Pull gitleaks-config image with retry
+retry_command 5 5 docker pull "${GITLEAKS_CONFIG_IMAGE}"
 
 repo_dir=$GITHUB_WORKSPACE
 repo_name="$(basename "$repo_dir")"
@@ -128,6 +130,9 @@ set +e
 
 echo "Using the following gitleaks container image: ${gitleaks_container}:${GITLEAKS_VERSION}"
 
+# Pre-pull gitleaks image with retry to handle transient Docker Hub errors
+retry_command 5 5 docker pull "${gitleaks_container}:${GITLEAKS_VERSION}"
+
 # Run gitleaks with the generated config
 gitleaks_cmd="detect \
     --config=${final_config} \
@@ -136,14 +141,34 @@ gitleaks_cmd="detect \
     --log-opts=${log_opts} \
     --verbose"
 echo "${gitleaks_cmd}"
-docker container run --rm --name=gitleaks \
-    -v $final_config:$final_config \
-    -v $commits_file:$commits_file \
-    -v $repo_dir:/tmp/$repo_name \
-    $gitleaks_container:$GITLEAKS_VERSION ${gitleaks_cmd}
 
-# Keep the exit code of the gitleaks run
-exit_code=$?
+# Retry the scan on Docker infrastructure errors (exit code 125).
+# Exit codes 0 (no secrets) and 1 (secrets found) are final results.
+SCAN_MAX_RETRIES=3
+SCAN_RETRY_DELAY=10
+scan_attempt=1
+
+while true; do
+    docker container run --rm --name=gitleaks \
+        -v $final_config:$final_config \
+        -v $commits_file:$commits_file \
+        -v $repo_dir:/tmp/$repo_name \
+        $gitleaks_container:$GITLEAKS_VERSION ${gitleaks_cmd}
+
+    exit_code=$?
+
+    if [ $exit_code -eq 0 ] || [ $exit_code -eq 1 ]; then
+        # Scan completed successfully (0 = clean, 1 = secrets found)
+        break
+    elif [ $exit_code -eq 125 ] && [ $scan_attempt -lt $SCAN_MAX_RETRIES ]; then
+        echo "Docker infrastructure error (exit code 125). Retrying in $SCAN_RETRY_DELAY seconds... (Attempt $scan_attempt of $SCAN_MAX_RETRIES)"
+        sleep $SCAN_RETRY_DELAY
+        scan_attempt=$((scan_attempt + 1))
+    else
+        # Non-retryable error or retries exhausted
+        break
+    fi
+done
 
 # If a secret was detected show what to do next
 notion_page='https://www.notion.so/typeform/Detecting-Secrets-and-Keeping-Them-Secret-c2c427bf1ded4b908ce9b2746ffcde88'
