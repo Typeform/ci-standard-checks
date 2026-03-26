@@ -21,7 +21,7 @@ export type FileData = {
   raw_url?: string
   blob_url?: string
   patch?: string
-  sha?: string
+  sha?: string | null
   contents_url?: string
   previous_filename?: string
 }
@@ -51,7 +51,7 @@ const piiData: piiDataType[] = [
   {
     type: 'us-phone-number',
     regexp: new RegExp(
-      /^\+?(\d+)?[ .-]?\(?(\d{3})\)?[ .-]?(\d{3})[ .-]?(\d{4})$/i
+      /^\+?(\d+)?[ .-]?\(?(\d{3})\)?[ .-]?(\d{3})[ .-]?(\d{4})$/i,
     ), // source https://gist.github.com/charles-rumley/e13b314662a203e5172a298bc66544b3
   },
   {
@@ -61,13 +61,13 @@ const piiData: piiDataType[] = [
   {
     type: 'ssn',
     regexp: new RegExp(
-      /^(?!0{3})(?!6{3})[0-8]\d{2}-(?!0{2})\d{2}-(?!0{4})\d{4}$/
+      /^(?!0{3})(?!6{3})[0-8]\d{2}-(?!0{2})\d{2}-(?!0{4})\d{4}$/,
     ), // source https://ihateregex.io/expr/ssn/
   },
   {
     type: 'credit-card-number',
     regexp: new RegExp(
-      /^(^4[0-9]{12}(?:[0-9]{3})?$)|(^(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}$)|(3[47][0-9]{13})|(^3(?:0[0-5]|[68][0-9])[0-9]{11}$)|(^6(?:011|5[0-9]{2})[0-9]{12}$)|(^(?:2131|1800|35\d{3})\d{11}$)$/
+      /^(^4[0-9]{12}(?:[0-9]{3})?$)|(^(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}$)|(3[47][0-9]{13})|(^3(?:0[0-5]|[68][0-9])[0-9]{11}$)|(^6(?:011|5[0-9]{2})[0-9]{12}$)|(^(?:2131|1800|35\d{3})\d{11}$)$/,
     ), // source https://ihateregex.io/expr/credit-card/
   },
 ]
@@ -83,7 +83,7 @@ const piiDetection: Check = {
   async run(): Promise<boolean> {
     if (!['push', 'pull_request'].includes(github.context.eventName)) {
       core.info(
-        'PII detection will only run on "push" and "pull_request" events. Skipping...'
+        'PII detection will only run on "push" and "pull_request" events. Skipping...',
       )
       return true
     }
@@ -150,7 +150,7 @@ export async function processFile(fileData: FileData): Promise<Prediction> {
 
 export function scanCsvForPii(
   content: string,
-  threshold: number
+  threshold: number,
 ): Promise<Prediction> {
   let linesTotal = 0
   const lineMatches: { [matchType: string]: number } = {}
@@ -195,7 +195,7 @@ export function scanCsvForPii(
 
 export async function downloadFileContent(
   filepath: string,
-  ref?: string | undefined
+  ref?: string | undefined,
 ): Promise<string> {
   const response = await github.downloadContent(filepath, ref)
   if (!('content' in response)) {
@@ -208,16 +208,20 @@ export async function downloadFileContent(
 }
 
 export async function getFilesToIgnore(
-  ignoreFile: string
+  ignoreFile: string,
 ): Promise<Array<string>> {
   let ignoreFiles: Array<string> = []
 
   try {
     const content = await downloadFileContent(ignoreFile, github.context.ref)
     ignoreFiles = content.split('\n').filter((line) => line.length > 0)
-  } catch (e) {
+  } catch (e: unknown) {
     // Skipping error if the file added in the ignorefile doesn't exist (HTTP 404)
-    if (!e.status || (e.status && e.status !== 404)) {
+    const status =
+      e && typeof e === 'object' && 'status' in e
+        ? (e as { status: number }).status
+        : undefined
+    if (!status || status !== 404) {
       throw e
     }
   }
@@ -227,14 +231,14 @@ export async function getFilesToIgnore(
 
 export function getCandidateFiles(
   files: FilesData,
-  ignoreFiles: Array<string>
+  ignoreFiles: Array<string>,
 ): FilesData {
   if (!files) throw new Error('files is undefined')
 
   const candidates = files.filter(
     (f) =>
       !(f.filename && ignoreFiles.includes(f.filename)) &&
-      isFileExtensionToBeScanned(f.filename || '')
+      isFileExtensionToBeScanned(f.filename || ''),
   )
 
   return candidates

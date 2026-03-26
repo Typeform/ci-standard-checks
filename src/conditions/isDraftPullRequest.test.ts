@@ -1,11 +1,11 @@
-import { mocked } from 'ts-jest/utils'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { github, PullsGetResponse } from '../infrastructure/github'
 
 import { isDraftPullRequest } from './isDraftPullRequest'
 
-const mockGithub = mocked(github, true)
+const mockGithub = vi.mocked(github, true)
 
-jest.mock('../infrastructure/github')
+vi.mock('../infrastructure/github')
 
 describe('isDraftPullRequest', () => {
   describe('pul_request event', () => {
@@ -17,7 +17,7 @@ describe('isDraftPullRequest', () => {
       mockGithub.context.eventName = 'pull_request'
 
       mockGithub.getPullRequest.mockResolvedValue(
-        pullRequestResponse as PullsGetResponse
+        pullRequestResponse as PullsGetResponse,
       )
     })
 

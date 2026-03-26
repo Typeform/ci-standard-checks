@@ -1,4 +1,4 @@
-import { mocked } from 'ts-jest/utils'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { Content, github } from '../infrastructure/github'
 
@@ -16,9 +16,9 @@ import {
   FileData,
 } from './piiDetection'
 
-const mockGithub = mocked(github, true)
+const mockGithub = vi.mocked(github, true)
 
-jest.mock('../infrastructure/github')
+vi.mock('../infrastructure/github')
 
 class HTTPError extends Error {
   status: number
@@ -106,7 +106,7 @@ data,data,data,+1 800 444 4444,data
 
     const actualPrediction = await scanCsvForPii(
       sampleData,
-      CsvDetectionThreshold
+      CsvDetectionThreshold,
     )
 
     expect(actualPrediction).toEqual(expectedPrediction)
@@ -131,7 +131,7 @@ data,data,data,data,data
 
     const actualPrediction = await scanCsvForPii(
       sampleData,
-      CsvDetectionThreshold
+      CsvDetectionThreshold,
     )
 
     expect(actualPrediction).toEqual(expectedPrediction)
@@ -149,7 +149,7 @@ data,690-05-5315,data,my@personal.mail,data
 
     const actualPrediction = await scanCsvForPii(
       sampleData,
-      CsvDetectionThreshold
+      CsvDetectionThreshold,
     )
 
     expect(actualPrediction).toEqual(expectedPrediction)
@@ -158,7 +158,7 @@ data,690-05-5315,data,my@personal.mail,data
 
 describe('getFilesToIgnore', () => {
   it('returns an empty string array if there is no .piidetectionignore file', async () => {
-    github.downloadContent = jest.fn(() => {
+    github.downloadContent = vi.fn(() => {
       throw new HTTPError(404, 'Not Found')
     })
     const result = await getFilesToIgnore(Ignorefile)
@@ -166,7 +166,7 @@ describe('getFilesToIgnore', () => {
   })
 
   it('throws an error if there was an error different than a 404 downloading the file', async () => {
-    github.downloadContent = jest.fn(() => {
+    github.downloadContent = vi.fn(() => {
       throw new HTTPError(403, 'Forbidden')
     })
     await expect(getFilesToIgnore(Ignorefile)).rejects.toThrow()
@@ -224,7 +224,7 @@ describe('isFileExtensionToBeScanned', () => {
 
   it('returns true if the file has an extension to be scanned', () => {
     expect(isFileExtensionToBeScanned('another/longer/path/results.csv')).toBe(
-      true
+      true,
     )
   })
 })

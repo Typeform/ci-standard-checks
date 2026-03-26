@@ -33,7 +33,7 @@ const requiredTypeScript: Check = {
     }
 
     core.info(
-      'Required TypeScript only runs on "pull_request" events. Skipping...'
+      'Required TypeScript only runs on "pull_request" events. Skipping...',
     )
     return true
   },
@@ -43,7 +43,7 @@ export default requiredTypeScript
 const getFileContent = (filename: string) => {
   try {
     return fs.readFile(filename)
-  } catch (_) {
+  } catch {
     return ''
   }
 }
@@ -60,7 +60,7 @@ async function checkPullRequest(): Promise<boolean> {
   }
 
   core.info(
-    'Scanning PR files for forbidden JS additions/changes or missing "tsconfig.json" settings'
+    'Scanning PR files for forbidden JS additions/changes or missing "tsconfig.json" settings',
   )
   core.info(`Title: ${pr.title}`)
   core.info(`Branch: ${pr.head.ref}`)
@@ -69,17 +69,17 @@ async function checkPullRequest(): Promise<boolean> {
 
   const files = await github.getPullRequestFiles(pr.number)
   const filesWithContent = await Promise.all(
-    files.map((f) => ({ ...f, fileContent: getFileContent(f.filename) }))
+    files.map((f) => ({ ...f, fileContent: getFileContent(f.filename) })),
   )
-  const forbiddenJsFiles = filesWithContent.filter((f, index) =>
-    isForbiddenJSFile(f.filename, f.fileContent, filter)
+  const forbiddenJsFiles = filesWithContent.filter((f) =>
+    isForbiddenJSFile(f.filename, f.fileContent, filter),
   )
 
   const renamedJsFiles = filesWithContent.filter(
     (f) =>
       f.previous_filename &&
       isForbiddenJSFile(f.previous_filename) &&
-      !forbiddenJsFiles.includes(f)
+      !forbiddenJsFiles.includes(f),
   )
   const tsconfigFiles = await fs.glob({
     patterns: ['**/tsconfig.json'],
@@ -91,7 +91,7 @@ async function checkPullRequest(): Promise<boolean> {
   if (forbiddenJsFiles.length || tsconfigFiles.length) {
     errors.push(
       ...(await checkJsUsage(forbiddenJsFiles)),
-      ...(await checkTsConfig(tsconfigFiles))
+      ...(await checkTsConfig(tsconfigFiles)),
     )
   }
 
@@ -102,7 +102,7 @@ async function checkPullRequest(): Promise<boolean> {
       /## TypeScript adoption/,
       `## TypeScript adoption
 Current adoption level: **${formatAdoptionPercentage(adoption)}**
-`
+`,
     )
 
     core.info(`Pinned adoption % comment: #${commentId}`)
@@ -117,19 +117,19 @@ Current adoption level: **${formatAdoptionPercentage(adoption)}**
 
     throw new Error(
       'One or more files do not meet the Required TypeScript standard; check error annotations for more information.\n' +
-        'If you think this is incorrect, you can ignore files and folders using ".eslintignore" or ".gitignore".'
+        'If you think this is incorrect, you can ignore files and folders using ".eslintignore" or ".gitignore".',
     )
   }
 
   core.info(
-    'OK! JS adoption not increasing, and no missing "tsconfig.json" settings'
+    'OK! JS adoption not increasing, and no missing "tsconfig.json" settings',
   )
 
   return true
 }
 
 export async function checkJsUsage(
-  files: { filename: string; additions: number; deletions: number }[]
+  files: { filename: string; additions: number; deletions: number }[],
 ): Promise<Error[]> {
   const overallJsAdditions = files.reduce((additions, f) => {
     return additions + (f.additions ?? 0) - (f.deletions ?? 0)
@@ -160,7 +160,7 @@ export function formatAdoptionPercentage(adoption: number): string {
 }
 
 export async function measureTsAdoption(
-  filter: IgnoredFileFilter = getIgnoreFilter()
+  filter: IgnoredFileFilter = getIgnoreFilter(),
 ): Promise<number> {
   const jsFiles = await fs.glob({
     patterns: ['**/*.js', '**/*.jsx'],
@@ -214,7 +214,7 @@ async function checkTsConfig(files: string[]): Promise<Error[]> {
       ...missingSettings.map((err) => ({
         file: filename,
         message: `Minimum requirements not met: ${err}`,
-      }))
+      })),
     )
   }
 
@@ -224,12 +224,12 @@ async function checkTsConfig(files: string[]): Promise<Error[]> {
 export function isForbiddenJSFile(
   filename: string,
   fileContent = '',
-  filter: IgnoredFileFilter = getIgnoreFilter()
+  filter: IgnoredFileFilter = getIgnoreFilter(),
 ): boolean {
   const jsPattern = /\.jsx?$/i
   const hasJsExtension = jsPattern.test(filename) && !filter.ignores(filename)
   const appliesTypescriptViaComment = !!fileContent.match(
-    JS_TS_CHECK_COMMENT_REGEX
+    JS_TS_CHECK_COMMENT_REGEX,
   )
 
   return hasJsExtension && !appliesTypescriptViaComment

@@ -1,9 +1,9 @@
 import * as core from '@actions/core'
 import * as actionsGithub from '@actions/github'
 import { Endpoints } from '@octokit/types'
-import { Context } from '@actions/github/lib/context'
 import { GitHub as ActionsGitHub } from '@actions/github/lib/utils'
 
+export type Context = typeof actionsGithub.context
 export type Octokit = InstanceType<typeof ActionsGitHub>
 export type PullsGetResponse =
   Endpoints['GET /repos/{owner}/{repo}/pulls/{pull_number}']['response']['data']
@@ -76,7 +76,7 @@ export class GitHub {
         repo: this.context.repo.repo,
         issue_number: pull_number,
         per_page: 100,
-      }
+      },
     )) {
       if (!comments.length) break
 
@@ -97,7 +97,7 @@ export class GitHub {
   async pinComment(
     pull_number: number,
     match: RegExp,
-    content: string
+    content: string,
   ): Promise<Comment['id']> {
     for await (const comment of this.listComments(pull_number)) {
       if (comment.body && comment.body.match(match)) {
@@ -125,7 +125,7 @@ export class GitHub {
 
 function createGitHub(): GitHub {
   const octokit: Octokit = actionsGithub.getOctokit(
-    core.getInput('githubToken')
+    core.getInput('githubToken'),
   )
   return new GitHub(actionsGithub.context, octokit)
 }

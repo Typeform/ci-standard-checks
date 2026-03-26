@@ -1,11 +1,11 @@
-import { mocked } from 'ts-jest/utils'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { github, PullsGetResponse } from '../infrastructure/github'
 
 import { BOT_USERS, triggeredByBot } from './triggeredByBot'
 
-const mockGithub = mocked(github, true)
+const mockGithub = vi.mocked(github, true)
 
-jest.mock('../infrastructure/github')
+vi.mock('../infrastructure/github')
 
 describe('triggeredByBot', () => {
   describe('pul_request event', () => {
@@ -26,7 +26,7 @@ describe('triggeredByBot', () => {
       }
 
       mockGithub.getPullRequest.mockResolvedValue(
-        pullRequestResponse as PullsGetResponse
+        pullRequestResponse as PullsGetResponse,
       )
     })
 
@@ -55,7 +55,7 @@ describe('triggeredByBot', () => {
         ]
 
         await expect(triggeredByBot()).resolves.toBeTruthy()
-      }
+      },
     )
 
     it.each(BOT_USERS)(
@@ -71,7 +71,7 @@ describe('triggeredByBot', () => {
         ]
 
         await expect(triggeredByBot()).resolves.toBeFalsy()
-      }
+      },
     )
 
     it.each(BOT_USERS)(
@@ -87,7 +87,7 @@ describe('triggeredByBot', () => {
         ]
 
         await expect(triggeredByBot()).resolves.toBeTruthy()
-      }
+      },
     )
 
     it.each(BOT_USERS)(
@@ -103,7 +103,7 @@ describe('triggeredByBot', () => {
         ]
 
         await expect(triggeredByBot()).resolves.toBeFalsy()
-      }
+      },
     )
   })
 })
