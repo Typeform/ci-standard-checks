@@ -9,13 +9,16 @@ on: # rebuild any PRs and main branch changes
 jobs:
   build: # make sure build/ci work properly
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - name: Set GitHub packages registry
         run: |
           npm config set '//npm.pkg.github.com/:_authToken' ${{ secrets.GITHUB_TOKEN }}
           npm config set @typeform:registry https://npm.pkg.github.com/
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
       - run: |
@@ -25,10 +28,10 @@ jobs:
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
       - name: Test all checks
@@ -54,14 +57,16 @@ jobs:
   release: # this releases in beta
     needs: [build, test]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Semantic Release
         id: semantic
-        uses: codfish/semantic-release-action@4e9fa8ec064813465dfeccac8ae70f1348fb5dec
+        uses: codfish/semantic-release-action@v5
         with:
-          repository_url: https://github.com/Typeform/ci-standard-checks.git
           branches: |
             [
               'main',
@@ -71,7 +76,7 @@ jobs:
               }
             ]
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Update beta version tag
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
