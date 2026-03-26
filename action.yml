@@ -14,5 +14,5 @@ inputs:
     required: true
     description: 'Required for checks that need access to Github'
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/index.js'

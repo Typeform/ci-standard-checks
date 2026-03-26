@@ -1,3 +1,5 @@
+import { vi } from 'vitest'
+
 export const github = {
   context: {
     eventName: '',
@@ -7,10 +9,10 @@ export const github = {
       },
     },
   },
-  getPullRequest: jest.fn(),
-  getPullRequestFiles: jest.fn(),
-  getPullRequestsAssociatedWithCommit: jest.fn(),
-  downloadContent: jest.fn(),
-  listComments: jest.fn(),
-  pinComment: jest.fn(),
+  getPullRequest: vi.fn(),
+  getPullRequestFiles: vi.fn(),
+  getCommit: vi.fn(),
+  downloadContent: vi.fn(),
+  listComments: vi.fn(),
+  pinComment: vi.fn(),
 }

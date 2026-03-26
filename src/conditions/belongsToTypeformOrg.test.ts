@@ -1,14 +1,14 @@
-import { Context } from '@actions/github/lib/context'
-import { mocked } from 'ts-jest/utils'
+import { describe, it, expect, vi } from 'vitest'
 
-import { github, PullsGetResponse } from '../infrastructure/github'
+import { github } from '../infrastructure/github'
 
 import { belongsToTypeformOrg } from './belongsToTypeformOrg'
 
-const mockGithub = mocked(github, true)
+const mockGithub = vi.mocked(github, true)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockContext = mockGithub.context as any
 
-jest.mock('../infrastructure/github')
+vi.mock('../infrastructure/github')
 
 describe('outsideTypeformOrg', () => {
   it('returns true when repo owned by Typeform', async () => {

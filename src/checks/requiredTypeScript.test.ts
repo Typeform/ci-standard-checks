@@ -1,4 +1,4 @@
-import { mocked } from 'ts-jest/utils'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import {
   github,
@@ -15,12 +15,12 @@ import requiredTypeScript, {
   missingTsConfigSettings,
 } from './requiredTypeScript'
 
-const mockGithub = mocked(github, true)
-const mockGlob = mocked(glob, true)
-const mockReadFile = mocked(readFile, true)
+const mockGithub = vi.mocked(github, true)
+const mockGlob = vi.mocked(glob, true)
+const mockReadFile = vi.mocked(readFile, true)
 
-jest.mock('../infrastructure/github')
-jest.mock('../infrastructure/fs')
+vi.mock('../infrastructure/github')
+vi.mock('../infrastructure/fs')
 
 describe('Required TypeScript check', () => {
   describe('pull_request event', () => {
@@ -42,11 +42,11 @@ describe('Required TypeScript check', () => {
       }
 
       mockGithub.getPullRequest.mockResolvedValue(
-        pullRequestResponse as PullsGetResponse
+        pullRequestResponse as PullsGetResponse,
       )
 
       mockReadFile.mockReturnValue(
-        'some js/ts content\nsome more js/ts content'
+        'some js/ts content\nsome more js/ts content',
       )
     })
 
@@ -78,7 +78,7 @@ describe('Required TypeScript check', () => {
             allowUnreachableCode: false,
             noImplicitAny: true,
           },
-        })
+        }),
       )
 
       await expect(requiredTypeScript.run()).resolves.toBeTruthy()
@@ -121,7 +121,7 @@ describe('Required TypeScript check', () => {
             allowUnreachableCode: false,
             noImplicitAny: true,
           },
-        })
+        }),
       )
 
       await expect(requiredTypeScript.run()).rejects.toThrow()
@@ -139,7 +139,7 @@ describe('Required TypeScript check', () => {
             allowUnreachableCode: false,
             noImplicitAny: true,
           },
-        })
+        }),
       )
 
       await expect(requiredTypeScript.run()).resolves.toBeTruthy()
@@ -157,7 +157,7 @@ describe('Required TypeScript check', () => {
             allowUnreachableCode: false,
             noImplicitAny: true,
           },
-        })
+        }),
       )
 
       await expect(requiredTypeScript.run()).resolves.toBeTruthy()
@@ -174,7 +174,7 @@ describe('Required TypeScript check', () => {
           compilerOptions: {
             noImplicitAny: false,
           },
-        })
+        }),
       )
 
       await expect(requiredTypeScript.run()).rejects.toThrow()
@@ -191,7 +191,7 @@ describe('Required TypeScript check', () => {
           compilerOptions: {
             noImplicitAny: false,
           },
-        })
+        }),
       )
 
       await expect(requiredTypeScript.run()).rejects.toThrow()
@@ -240,7 +240,7 @@ describe('Required TypeScript check', () => {
       expect(mockGithub.pinComment).toHaveBeenCalledWith(
         5,
         /## TypeScript adoption/,
-        '## TypeScript adoption\nCurrent adoption level: **66.7%**\n'
+        '## TypeScript adoption\nCurrent adoption level: **66.7%**\n',
       )
     })
 
@@ -278,7 +278,7 @@ describe('Required TypeScript check', () => {
       expect(mockGithub.pinComment).toHaveBeenCalledWith(
         5,
         /## TypeScript adoption/,
-        '## TypeScript adoption\nCurrent adoption level: **66.7%**\n'
+        '## TypeScript adoption\nCurrent adoption level: **66.7%**\n',
       )
     })
 
@@ -399,18 +399,18 @@ describe('isForbiddenJSFile', () => {
     'it returns false with JS/JSX file with TS checks enabled [%s]',
     (filename) => {
       expect(
-        isForbiddenJSFile(filename, '// @ts-check\nsome-js-content')
+        isForbiddenJSFile(filename, '// @ts-check\nsome-js-content'),
       ).toBeFalsy()
-    }
+    },
   )
 
   it.each(['filename.js', 'component.jsx'])(
     'it returns false with JS/JSX file with TS checks enabled and whitespace around comment [%s]',
     (filename) => {
       expect(
-        isForbiddenJSFile(filename, '   //@ts-check\nsome-js-content')
+        isForbiddenJSFile(filename, '   //@ts-check\nsome-js-content'),
       ).toBeFalsy()
-    }
+    },
   )
 
   it.each([
@@ -446,7 +446,7 @@ describe('measureTsAdoption', () => {
     })
 
     await expect(
-      measureTsAdoption().then((x) => formatAdoptionPercentage(x))
+      measureTsAdoption().then((x) => formatAdoptionPercentage(x)),
     ).resolves.toBe('66.7%')
   })
 
@@ -472,7 +472,7 @@ describe('measureTsAdoption', () => {
     })
 
     await expect(
-      measureTsAdoption().then((x) => formatAdoptionPercentage(x))
+      measureTsAdoption().then((x) => formatAdoptionPercentage(x)),
     ).resolves.toBe('76.5%')
   })
 })
@@ -482,40 +482,40 @@ describe('missingTsConfigSettings', () => {
     expect(
       missingTsConfigSettings({
         compilerOptions: { allowUnreachableCode: true },
-      })
+      }),
     ).toContainEqual(
-      expect.stringMatching(/compilerOptions.allowUnreachableCode/)
+      expect.stringMatching(/compilerOptions.allowUnreachableCode/),
     )
     expect(
       missingTsConfigSettings({
         compilerOptions: {},
-      })
+      }),
     ).toContainEqual(
-      expect.stringMatching(/compilerOptions.allowUnreachableCode/)
+      expect.stringMatching(/compilerOptions.allowUnreachableCode/),
     )
     expect(
       missingTsConfigSettings({
         compilerOptions: { allowUnreachableCode: false },
-      })
+      }),
     ).not.toContainEqual(
-      expect.stringMatching(/compilerOptions.allowUnreachableCode/)
+      expect.stringMatching(/compilerOptions.allowUnreachableCode/),
     )
   })
   it('requires compilerOptions.noImplicitAny = true', () => {
     expect(
       missingTsConfigSettings({
         compilerOptions: { noImplicitAny: false },
-      })
+      }),
     ).toContainEqual(expect.stringMatching(/compilerOptions.noImplicitAny/))
     expect(
       missingTsConfigSettings({
         compilerOptions: {},
-      })
+      }),
     ).toContainEqual(expect.stringMatching(/compilerOptions.noImplicitAny/))
     expect(
       missingTsConfigSettings({
         compilerOptions: { noImplicitAny: true },
-      })
+      }),
     ).not.toContainEqual(expect.stringMatching(/compilerOptions.noImplicitAny/))
   })
   it('considers compilerOptions.noImplicitAny = true if compilerOptions.strict = true', () => {
@@ -525,7 +525,7 @@ describe('missingTsConfigSettings', () => {
           strict: true,
           allowUnreachableCode: false,
         },
-      })
+      }),
     ).not.toContainEqual(expect.stringMatching(/compilerOptions.noImplicitAny/))
   })
   it('requires not setting compilerOptions.noImplicitAny = false if compilerOptions.strict = true', () => {
@@ -536,7 +536,7 @@ describe('missingTsConfigSettings', () => {
           noImplicitAny: false,
           allowUnreachableCode: false,
         },
-      })
+      }),
     ).toContainEqual(expect.stringMatching(/compilerOptions.noImplicitAny/))
   })
 })

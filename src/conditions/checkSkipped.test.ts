@@ -1,13 +1,13 @@
+import { describe, it, expect, vi } from 'vitest'
 import * as core from '@actions/core'
-import { mocked } from 'ts-jest/utils'
 
 import Check from '../checks/check'
 
 import { checkSkipped } from './checkSkipped'
 
-jest.mock('@actions/core')
+vi.mock('@actions/core')
 
-const mockCore = mocked(core, true)
+const mockCore = vi.mocked(core, true)
 
 describe('checkSkipped', () => {
   it('does not skip any checks with empty input', () => {

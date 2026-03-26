@@ -57,7 +57,11 @@ async function run(): Promise<void> {
         core.endGroup()
       }
     } catch (error) {
-      core.setFailed(error.message)
+      if (error instanceof Error) {
+        core.setFailed(error.message)
+      } else {
+        core.setFailed(String(error))
+      }
     }
   }
 }
