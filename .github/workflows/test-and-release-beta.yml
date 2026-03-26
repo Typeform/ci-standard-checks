@@ -9,6 +9,9 @@ on: # rebuild any PRs and main branch changes
 jobs:
   build: # make sure build/ci work properly
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - name: Set GitHub packages registry
         run: |
@@ -54,14 +57,16 @@ jobs:
   release: # this releases in beta
     needs: [build, test]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Semantic Release
         id: semantic
-        uses: codfish/semantic-release-action@6abd188d2458e2fd6c99073454f6cc49196362e8
+        uses: codfish/semantic-release-action@v5
         with:
-          repository_url: https://github.com/Typeform/ci-standard-checks.git
           branches: |
             [
               'main',
@@ -71,7 +76,7 @@ jobs:
               }
             ]
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Update beta version tag
         if: steps.semantic.outputs.new-release-published == 'true'
         run: |
