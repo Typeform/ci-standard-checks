@@ -14,8 +14,8 @@ jobs:
         run: |
           npm config set '//npm.pkg.github.com/:_authToken' ${{ secrets.GITHUB_TOKEN }}
           npm config set @typeform:registry https://npm.pkg.github.com/
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
       - run: |
@@ -25,10 +25,10 @@ jobs:
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
       - name: Test all checks
@@ -56,10 +56,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Semantic Release
         id: semantic
-        uses: codfish/semantic-release-action@4e9fa8ec064813465dfeccac8ae70f1348fb5dec
+        uses: codfish/semantic-release-action@6abd188d2458e2fd6c99073454f6cc49196362e8
         with:
           repository_url: https://github.com/Typeform/ci-standard-checks.git
           branches: |
