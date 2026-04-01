@@ -1,5 +1,4 @@
 version: 2
-
 updates:
   - package-ecosystem: npm
     schedule:
@@ -13,7 +12,11 @@ updates:
       - "/"
     commit-message:
       prefix: fix(dependabot)
-
+    cooldown:
+      default:
+        days: 7
+      exclude-patterns:
+        - "@typeform/*"
   - package-ecosystem: github-actions
     schedule:
       interval: weekly
