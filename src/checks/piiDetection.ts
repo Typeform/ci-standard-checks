@@ -1,7 +1,7 @@
 import { Readable } from 'stream'
 
 import * as core from '@actions/core'
-import { WebhookEventMap } from '@octokit/webhooks-types'
+import { EmitterWebhookEvent } from '@octokit/webhooks'
 import { Endpoints } from '@octokit/types'
 import CsvReadableStream from 'csv-reader'
 
@@ -129,7 +129,8 @@ async function downloadFilesDataFromPush(): Promise<FilesData> {
 }
 
 async function downloadFilesDataFromPullRequest(): Promise<FilesData> {
-  const pullPayload = github.context.payload as WebhookEventMap['pull_request']
+  const pullPayload = github.context
+    .payload as EmitterWebhookEvent<'pull_request'>['payload']
   return github.getPullRequestFiles(pullPayload.pull_request.number)
 }
 
