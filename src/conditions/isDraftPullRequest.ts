@@ -1,4 +1,4 @@
-import { WebhookEventMap } from '@octokit/webhooks-types'
+import { EmitterWebhookEvent } from '@octokit/webhooks'
 
 import { github } from '../infrastructure/github'
 
@@ -10,7 +10,8 @@ export async function isDraftPullRequest(): Promise<boolean> {
 }
 
 async function checkPullRequest(): Promise<boolean> {
-  const pullPayload = github.context.payload as WebhookEventMap['pull_request']
+  const pullPayload = github.context
+    .payload as EmitterWebhookEvent<'pull_request'>['payload']
   const pr = await github.getPullRequest(pullPayload.pull_request.number)
 
   return !!pr.draft

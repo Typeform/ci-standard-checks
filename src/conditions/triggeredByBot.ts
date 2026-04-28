@@ -1,4 +1,4 @@
-import { WebhookEventMap } from '@octokit/webhooks-types'
+import { EmitterWebhookEvent } from '@octokit/webhooks'
 
 import { github } from '../infrastructure/github'
 
@@ -25,7 +25,8 @@ export async function triggeredByBot(): Promise<boolean> {
 }
 
 async function checkPullRequest(): Promise<boolean> {
-  const pullPayload = github.context.payload as WebhookEventMap['pull_request']
+  const pullPayload = github.context
+    .payload as EmitterWebhookEvent<'pull_request'>['payload']
   const pr = await github.getPullRequest(pullPayload.pull_request.number)
 
   const prUser = pr.user?.login || ''
@@ -34,7 +35,8 @@ async function checkPullRequest(): Promise<boolean> {
 }
 
 async function checkPush(): Promise<boolean> {
-  const pushPayload = github.context.payload as WebhookEventMap['push']
+  const pushPayload = github.context
+    .payload as EmitterWebhookEvent<'push'>['payload']
   return pushPayload.commits
     .map((c) => isBot(c.author.name) || isBot(c.author.username || ''))
     .reduce((a, b) => a && b, true)

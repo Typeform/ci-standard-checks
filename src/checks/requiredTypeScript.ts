@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as CommentedJSON from 'comment-json'
-import { WebhookEventMap } from '@octokit/webhooks-types'
+import { EmitterWebhookEvent } from '@octokit/webhooks'
 import ignore, { Ignore as IgnoredFileFilter } from 'ignore'
 
 import { github } from '../infrastructure/github'
@@ -49,7 +49,8 @@ const getFileContent = (filename: string) => {
 }
 
 async function checkPullRequest(): Promise<boolean> {
-  const pullPayload = github.context.payload as WebhookEventMap['pull_request']
+  const pullPayload = github.context
+    .payload as EmitterWebhookEvent<'pull_request'>['payload']
   const pr = await github.getPullRequest(pullPayload.pull_request.number)
 
   const prUser = pr.user?.login || ''
