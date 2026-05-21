@@ -1430,10 +1430,10 @@
   dependencies:
     tslib "^2.4.0"
 
-"@typeform/eslint-config@7.0.11":
-  version "7.0.11"
-  resolved "https://registry.yarnpkg.com/@typeform/eslint-config/-/eslint-config-7.0.11.tgz#9562c54f191da4e4d6eb46c5ed014e37f3ece6b2"
-  integrity sha512-yLAn0tjlpcyzELqAVIGNF+SkOauXEy5IrAczHYBr7nt1ZbesRC5tNtFLFrjD0aQM6eXsMUjTpNLj9L/LIghdMQ==
+"@typeform/eslint-config@7.0.13":
+  version "7.0.13"
+  resolved "https://registry.yarnpkg.com/@typeform/eslint-config/-/eslint-config-7.0.13.tgz#dedbe0f39dc567eab504d52fa3b54ee4bea90e2a"
+  integrity sha512-L4WhHUmfxxKnsaQFz7gn23lO+/2TzUtT0B65Fyx3q6SUPC9yw+K0UtOyUN45ZbEeD7FiJQMJIbY9Hr5xIO3+aA==
   dependencies:
     "@eslint/js" "^10.0.1"
     "@typescript-eslint/eslint-plugin" "^8.18.1"
@@ -1442,7 +1442,7 @@
     eslint-plugin-import "^2.31.0"
     eslint-plugin-jest "^29.15.0"
     eslint-plugin-jsx-a11y "^6.10.2"
-    eslint-plugin-n "^17.14.0"
+    eslint-plugin-n "^18.0.1"
     eslint-plugin-promise "^7.2.1"
     eslint-plugin-react "^7.37.2"
     eslint-plugin-react-hooks "^7.0.1"
@@ -3095,10 +3095,10 @@ eslint-plugin-jsx-a11y@^6.10.2:
     safe-regex-test "^1.0.3"
     string.prototype.includes "^2.0.1"
 
-eslint-plugin-n@^17.14.0:
-  version "17.24.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-n/-/eslint-plugin-n-17.24.0.tgz#b66fa05f7a6c1ba16768f0921b8974147dddd060"
-  integrity sha512-/gC7/KAYmfNnPNOb3eu8vw+TdVnV0zhdQwexsw6FLXbhzroVj20vRn2qL8lDWDGnAQ2J8DhdfvXxX9EoxvERvw==
+eslint-plugin-n@^18.0.1:
+  version "18.0.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-n/-/eslint-plugin-n-18.0.1.tgz#f21f6848648d0fcf11e6d9260ebf1c80994b99f7"
+  integrity sha512-q3ARhk+eZRc7myR0KHx+R3/GJeOHF+Ir6PK95Pu2tEX8Sl/4BIpmmVLva2kPrjC2gCmn6WHlHm+3yeo6Rxhycw==
   dependencies:
     "@eslint-community/eslint-utils" "^4.5.0"
     enhanced-resolve "^5.17.1"
@@ -3108,7 +3108,6 @@ eslint-plugin-n@^17.14.0:
     globrex "^0.1.2"
     ignore "^5.3.2"
     semver "^7.6.3"
-    ts-declaration-location "^1.0.6"
 
 eslint-plugin-promise@^7.2.1:
   version "7.2.1"
@@ -5798,7 +5797,7 @@ picomatch@^2.2.3:
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.0.tgz#f1f061de8f6a4bf022892e2d128234fb98302972"
   integrity sha512-lY1Q/PiJGC2zOv/z391WOTD+Z02bCgsFfvxoXXf6h7kv9o+WmsmzYqrAwY63sNgOxE4xEdq0WyUnXfKeBrSvYw==
 
-picomatch@^4.0.2, picomatch@^4.0.3, picomatch@^4.0.4:
+picomatch@^4.0.3, picomatch@^4.0.4:
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.4.tgz#fd6f5e00a143086e074dffe4c924b8fb293b0589"
   integrity sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==
@@ -7075,13 +7074,6 @@ ts-api-utils@^2.4.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/ts-api-utils/-/ts-api-utils-2.5.0.tgz#4acd4a155e22734990a5ed1fe9e97f113bcb37c1"
   integrity sha512-OJ/ibxhPlqrMM0UiNHJ/0CKQkoKF243/AEmplt3qpRgkW8VG7IfOS41h7V8TjITqdByHzrjcS/2si+y4lIh8NA==
-
-ts-declaration-location@^1.0.6:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/ts-declaration-location/-/ts-declaration-location-1.0.7.tgz#d4068fe9975828b3b453b3ab112b4711d8267688"
-  integrity sha512-EDyGAwH1gO0Ausm9gV6T2nUvBgXT5kGoCMJPllOaooZ+4VvJiKBdZE7wK18N1deEowhcUptS+5GXZK8U/fvpwA==
-  dependencies:
-    picomatch "^4.0.2"
 
 tsconfig-paths@^3.15.0:
   version "3.15.0"
