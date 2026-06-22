@@ -262,6 +262,7 @@ function getIgnoreFilter(): IgnoredFileFilter {
     '*.test.jsx',
     'mock*',
     'node_modules/',
+    '.github/',
   ])
 
   try {
