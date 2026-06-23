@@ -36230,7 +36230,8 @@ function getIgnoreFilter() {
     "*.test.js",
     "*.test.jsx",
     "mock*",
-    "node_modules/"
+    "node_modules/",
+    ".github/"
   ]);
   try {
     filter2.add(readFile(".gitignore"));
