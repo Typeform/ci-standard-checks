@@ -43,23 +43,23 @@
     "@actions/glob": "0.7.0",
     "@octokit/types": "16.0.0",
     "@octokit/webhooks": "14.2.0",
-    "@redocly/cli": "2.31.6",
+    "@redocly/cli": "2.34.0",
     "comment-json": "5.0.0",
     "csv-reader": "1.0.12",
     "ignore": "7.0.5"
   },
   "devDependencies": {
-    "@typeform/eslint-config": "7.0.16",
-    "@types/node": "25.9.2",
-    "esbuild": "^0.28.0",
-    "eslint": "10.4.1",
+    "@typeform/eslint-config": "7.0.17",
+    "@types/node": "26.0.0",
+    "esbuild": "^0.28.1",
+    "eslint": "10.5.0",
     "husky": "9.1.7",
-    "js-yaml": "4.2.0",
-    "lint-staged": "17.0.7",
-    "prettier": "3.8.3",
+    "js-yaml": "5.0.0",
+    "lint-staged": "17.0.8",
+    "prettier": "3.8.4",
     "semantic-release": "25.0.3",
     "typescript": "6.0.3",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.9"
   },
   "prettier": "@typeform/eslint-config/prettier",
   "lint-staged": {
