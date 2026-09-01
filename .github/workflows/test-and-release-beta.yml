@@ -86,4 +86,4 @@ jobs:
           git push origin v${TAG}-beta --force
         env:
           TAG: ${{ steps.semantic.outputs.release-major }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.JENKINS_PAT_TOKEN }}
