@@ -46,7 +46,8 @@
     "@redocly/cli": "2.34.0",
     "comment-json": "5.0.0",
     "csv-reader": "1.0.12",
-    "ignore": "7.0.5"
+    "ignore": "7.0.5",
+    "undici": "^7.0.0"
   },
   "devDependencies": {
     "@typeform/eslint-config": "7.0.17",
