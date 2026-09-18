@@ -16,10 +16,6 @@ updates:
       default-days: 7
       exclude:
         - '@typeform/*'
-    ignore:
-      - dependency-name: semantic-release
-        versions:
-          - '>=25.0.0'
   - package-ecosystem: github-actions
     schedule:
       interval: weekly
