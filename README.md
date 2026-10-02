@@ -16,6 +16,10 @@ easier time rolling out new checks to teams. Win-win!
 - `validate-openapi`: perform a validation and linting of the openapi.yaml if exists
 - `required-typescript`: in JS/TS repositories, make sure only TypeScript is allowed
   for new code and `tsconfig.json` meets minimum typing requirements.
+- `custom-rules` (optional, beta): run Typeform's own code rules in [`rules/`](./rules)
+  with [Opengrep](https://github.com/opengrep/opengrep). On pull requests only
+  findings the PR introduces are reported. Findings show up as annotations; the
+  check fails only on rules with severity `ERROR`. See [Custom rules](#custom-rules).
 
 ## How to use it
 
@@ -55,6 +59,30 @@ with:
 
 Refer to the [list of checks](#included-checks) for the proper names
 to use.
+
+## Custom rules
+
+`custom-rules` runs every rule in [`rules/`](./rules) with
+[Opengrep](https://github.com/opengrep/opengrep), the open-source fork of Semgrep.
+Rules use the [Semgrep rule syntax](https://semgrep.dev/docs/writing-rules/rule-syntax),
+including taint mode (`--taint-intrafile`, so taint is followed across functions
+within a file), and Opengrep's languages: Go, TypeScript/JavaScript, Bash,
+Dockerfile, YAML, JSON, Terraform and more, plus a `generic` mode for any text.
+
+- **Adding a rule**: add `rules/<language>/<rule-id>.yaml` and a test file next to
+  it with the same name and the language's extension (e.g. `<rule-id>.go`). In the
+  test file, put `// ruleid: <rule-id>` above every line that must match and
+  `// ok: <rule-id>` above lines that must not. CI runs
+  `bash scripts/custom-rules/run.sh test`.
+- **Severity**: start new rules at `WARNING` (annotation only). Raise them to
+  `ERROR` (fails the check) once existing code has been fixed, e.g. after a
+  Modernizer campaign.
+- **Only new findings on pull requests**: the scan uses the merge base with the
+  PR's base branch as a baseline, so existing violations never fail an unrelated
+  PR, even in files it touches.
+- **Ignoring a finding**: add a `// nosemgrep: <rule-id>` comment on the line, with
+  a reason. To skip the whole check, use `skipChecks: 'custom-rules'`.
+- **Running locally**: `OPENGREP_BIN=$(which opengrep) GITHUB_WORKSPACE=<repo> bash scripts/custom-rules/run.sh`.
 
 ## Adding new Checks
 
