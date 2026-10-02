@@ -1,0 +1,2 @@
+# Rule test files contain deliberate violations; keep them out of this repo's own custom-rules scan.
+rules/
