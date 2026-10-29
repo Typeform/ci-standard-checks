@@ -122,7 +122,17 @@ else
     head_ref=$(tail -n1 $commits_file)
     # not including --first-parent and --no-merges until https://github.com/zricethezav/gitleaks/issues/964 is fixed
     #log_opts="--first-parent --no-merges ${base_ref}^..${head_ref}"
-    log_opts="${base_ref}^..${head_ref}"
+    if git -C "$repo_dir" rev-parse --verify --quiet "${base_ref}^" > /dev/null; then
+        log_opts="${base_ref}^..${head_ref}"
+    else
+        # The PR's first commit is a root commit (e.g. a repository merged in with
+        # --allow-unrelated-histories), so "${base_ref}^" does not exist and git log fails.
+        # Scan everything the PR adds on top of its base branch instead.
+        pr_base_sha=$(jq --raw-output .pull_request.base.sha "$GITHUB_EVENT_PATH")
+        pr_head_sha=$(jq --raw-output .pull_request.head.sha "$GITHUB_EVENT_PATH")
+        echo "First PR commit ${base_ref} has no parent; scanning ${pr_base_sha}..${pr_head_sha}"
+        log_opts="${pr_base_sha}..${pr_head_sha}"
+    fi
 fi
 
 # Do not exit if the gitleaks run fails. This way we can display some custom messages.
