@@ -1,0 +1,74 @@
+rules:
+  - id: launchdarkly-init-error-aborts
+    languages: [go]
+    severity: WARNING
+    message: >-
+      $LD.$MAKE returns a usable client even when it also returns an error (for
+      example an initialization timeout), so aborting on any error puts the service
+      into a crash loop whenever LaunchDarkly is slow or down. Abort only when the
+      returned client is nil, and log a non-nil error at warn level otherwise.
+      See https://github.com/Typeform/autonomous-coding-workflows/issues/86
+    metadata:
+      campaign: https://github.com/Typeform/autonomous-coding-workflows/issues/86
+    patterns:
+      # The error check that follows a LaunchDarkly client constructor...
+      - pattern-either:
+          - pattern-inside: |
+              $C, $ERR := $LD.$MAKE(...)
+              ...
+          - pattern-inside: |
+              $C, $ERR = $LD.$MAKE(...)
+              ...
+      - metavariable-regex:
+          metavariable: $MAKE
+          regex: ^Make(Custom)?Client$
+      - pattern: |
+          if $ERR != nil { ... }
+      # ...unless the nil-client check already came first (the fixed shape).
+      - pattern-not-inside: |
+          if $C == nil { ... }
+          ...
+      # ...and only when that check aborts: return, panic, fatal log or exit.
+      - pattern-either:
+          - pattern: |
+              if $ERR != nil {
+                ...
+                return ...
+                ...
+              }
+          - pattern: |
+              if $ERR != nil {
+                ...
+                panic(...)
+                ...
+              }
+          - pattern: |
+              if $ERR != nil {
+                ...
+                os.Exit(...)
+                ...
+              }
+          - pattern: |
+              if $ERR != nil {
+                ...
+                $LOG.Fatal(...)
+                ...
+              }
+          - pattern: |
+              if $ERR != nil {
+                ...
+                $LOG.Fatalf(...)
+                ...
+              }
+          - pattern: |
+              if $ERR != nil {
+                ...
+                $LOG.Fatalln(...)
+                ...
+              }
+          - pattern: |
+              if $ERR != nil {
+                ...
+                $LOG.Log($CTX, $X.LevelFatal, ...)
+                ...
+              }

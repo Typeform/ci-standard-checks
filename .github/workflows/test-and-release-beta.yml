@@ -52,8 +52,11 @@ jobs:
       - name: Test enabling optional checks
         uses: ./
         with:
-          enableChecks: 'required-typescript'
+          enableChecks: 'required-typescript,custom-rules'
           githubToken: ${{ secrets.GITHUB_TOKEN  }}
+
+      - name: Test custom rules
+        run: bash scripts/custom-rules/run.sh test
   release: # this releases in beta
     needs: [build, test]
     runs-on: ubuntu-latest

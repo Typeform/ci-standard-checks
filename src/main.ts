@@ -18,6 +18,13 @@ const mandatoryChecks: Check[] = [
     inputs: ['githubToken'],
   }),
   piiDetection,
+  // Optional for now: enable with `enableChecks: custom-rules`. In this list so
+  // it also runs on draft PRs (e.g. the Modernizer's).
+  bashCheck({
+    name: 'custom-rules',
+    optional: true,
+    inputs: [],
+  }),
 ]
 
 const additionalChecks: Check[] = [

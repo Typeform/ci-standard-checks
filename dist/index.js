@@ -36284,7 +36284,14 @@ var mandatoryChecks = [
     name: "secrets-scan",
     inputs: ["githubToken"]
   }),
-  piiDetection_default
+  piiDetection_default,
+  // Optional for now: enable with `enableChecks: custom-rules`. In this list so
+  // it also runs on draft PRs (e.g. the Modernizer's).
+  bashCheck({
+    name: "custom-rules",
+    optional: true,
+    inputs: []
+  })
 ];
 var additionalChecks = [
   requiredTypeScript_default,
