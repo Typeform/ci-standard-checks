@@ -11,9 +11,9 @@
     "lint": "eslint src/**/*.ts",
     "package": "esbuild src/main.ts --bundle --platform=node --target=node24 --outfile=dist/index.js --sourcemap --legal-comments=linked",
     "test": "vitest run",
-    "all": "yarn run build && yarn run format && yarn run lint && yarn run package && yarn test",
+    "all": "pnpm run build && pnpm run format && pnpm run lint && pnpm run package && pnpm test",
     "prepare": "husky install",
-    "release": "yarn semantic-release"
+    "release": "pnpm semantic-release"
   },
   "repository": {
     "type": "git",
@@ -67,6 +67,7 @@
     "*.ts": "prettier --write"
   },
   "engines": {
-    "node": "24"
+    "node": "24",
+    "pnpm": ">=11"
   }
 }

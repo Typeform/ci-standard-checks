@@ -14,14 +14,17 @@ jobs:
         with:
           node-version-file: 'package.json'
 
+      - name: Install pnpm
+        run: npm install --global pnpm@11
+
       - run: |
           npm config set '//npm.pkg.github.com/:_authToken' ${{ secrets.JENKINS_PAT_TOKEN }}
           npm config set @typeform:registry https://npm.pkg.github.com/
 
       - run: |
-          yarn install
+          pnpm install --frozen-lockfile
           mv dist/ source-dist
-          yarn run all
+          pnpm run all
 
       - name: Run integrity check
         run: |
