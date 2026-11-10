@@ -134,19 +134,19 @@ cut of new major releases when the time comes.
 Install the dependencies
 
 ```bash
-$ yarn
+$ pnpm install
 ```
 
 Build the typescript and package it for distribution
 
 ```bash
-$ yarn run build && yarn run package
+$ pnpm run build && pnpm run package
 ```
 
 Run the tests :heavy_check_mark:
 
 ```bash
-$ yarn test
+$ pnpm test
 ...
 ```
 
@@ -157,7 +157,7 @@ Actions are run from GitHub repos so we will checkin the packed dist folder.
 Run the following and add the results to your commit:
 
 ```bash
-$ yarn all
+$ pnpm run all
 $ git add .
 $ git commit -a -m "feat(JIRA-123): New fancy stuff"
 $ git push origin JIRA-123-my-branch
