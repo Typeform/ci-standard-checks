@@ -1,0 +1,9 @@
+[allowlist]
+description = "d"
+
+  # about stopwords
+stopwords = ["s"]
+
+[[rules]]
+id = "x"
+

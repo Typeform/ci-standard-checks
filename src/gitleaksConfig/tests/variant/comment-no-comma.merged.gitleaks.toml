@@ -1,0 +1,8 @@
+[allowlist]
+paths = [
+	'''a\.txt''', # first
+	'''b\.txt''', # last, no comma
+    '''z'''
+]
+regexes = ['r']
+

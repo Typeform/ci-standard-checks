@@ -1,0 +1,15 @@
+title = "variant"
+
+[allowlist]
+description = "x"
+paths = [
+  '''a\.txt''',
+  '''b\.txt''',
+    '''c\.txt''',
+    '''d\.txt'''
+]
+stopwords = ["s"]
+
+[[rules]]
+id = "r"
+

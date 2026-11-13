@@ -11,6 +11,10 @@ easier time rolling out new checks to teams. Win-win!
 
 - `secrets-scan`: make sure you're never ever ever commiting a secret to
   your repo. _Shhh, it's a secret_ :shushing_face:
+  The gitleaks config (`scripts/secrets-scan/global_config.toml`, a vendored copy of
+  Typeform/gitleaks-config, plus the repo's `.gitleaks.toml` allowlist) is merged by
+  the action itself (`src/gitleaksConfig`), no container involved. Check the copy for
+  drift with `scripts/check-global-config-drift.sh`.
 - `pii-detection`: make sure you're not uploading files with Personal Identifiable
   Information to your repo.
 - `validate-openapi`: perform a validation and linting of the openapi.yaml if exists

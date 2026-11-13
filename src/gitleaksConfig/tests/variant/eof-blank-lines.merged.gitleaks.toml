@@ -1,0 +1,9 @@
+[allowlist]
+paths = [
+  '''a''',
+    '''q'''
+]
+regexes = ['r']
+
+
+

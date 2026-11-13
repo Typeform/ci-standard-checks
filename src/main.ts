@@ -4,6 +4,7 @@ import Check from './checks/check'
 import bashCheck from './checks/bash'
 import piiDetection from './checks/piiDetection'
 import requiredTypeScript from './checks/requiredTypeScript'
+import { gitleaksConfigEnv } from './gitleaksConfig/generateGitleaksConfig'
 import {
   triggeredByBot,
   belongsToTypeformOrg,
@@ -16,6 +17,7 @@ const mandatoryChecks: Check[] = [
   bashCheck({
     name: 'secrets-scan',
     inputs: ['githubToken'],
+    extraEnv: gitleaksConfigEnv,
   }),
   piiDetection,
 ]

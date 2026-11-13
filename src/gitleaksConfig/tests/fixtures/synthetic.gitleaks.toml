@@ -1,0 +1,15 @@
+# Synthetic edge cases: duplicates, comments, all string flavours, empty arrays
+[allowlist]
+description = "ignored"   # description is never merged
+paths = [
+  '''\.gitleaks\.toml$''',   # already in the global config
+  '''my_new_path\.txt''', # comment after item
+  # comment line inside the array
+  "double\\.quoted",
+  '''my_new_path\.txt''',
+]
+stopwords = ["dup", 'dup', """multi
+line""", "esc\"apedé"]
+regexes = []
+commits = [ 'abc123' ]
+targetRules = ['''a''', """b""", '''c''']

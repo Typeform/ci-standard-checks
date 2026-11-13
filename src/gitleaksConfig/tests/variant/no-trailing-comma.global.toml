@@ -1,0 +1,11 @@
+title = "variant"
+
+[allowlist]
+description = "x"
+paths = [
+  '''a\.txt''',
+  '''b\.txt'''
+]
+
+[[rules]]
+id = "r"

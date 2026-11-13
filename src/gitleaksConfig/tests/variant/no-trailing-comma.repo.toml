@@ -1,0 +1,3 @@
+[allowlist]
+paths = ['''b\.txt''', '''c\.txt''', '''d\.txt''']
+stopwords = ["s"]
