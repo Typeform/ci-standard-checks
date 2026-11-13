@@ -11,25 +11,32 @@ interface BashCheckParams {
   name: string
   optional?: boolean
   inputs: string[]
+  /** extra env vars for the script, computed right before it runs */
+  extraEnv?: () => Promise<{ [key: string]: string }>
 }
 
 export default function bashCheck({
   name,
   optional,
   inputs,
+  extraEnv,
 }: BashCheckParams): Check {
   return {
     name,
     optional,
     async run(): Promise<number> {
-      const envInputs = inputs.reduce((result, input) => {
-        result[input.toUpperCase()] = core.getInput(input)
-        return result
-      }, {} as { [key: string]: string })
+      const envInputs = inputs.reduce(
+        (result, input) => {
+          result[input.toUpperCase()] = core.getInput(input)
+          return result
+        },
+        {} as { [key: string]: string },
+      )
 
       const env = {
         ...process.env,
         ...envInputs,
+        ...(extraEnv ? await extraEnv() : {}),
       } as { [key: string]: string }
 
       return exec.exec('bash', [path.join(getScriptsDir(), name, 'run.sh')], {

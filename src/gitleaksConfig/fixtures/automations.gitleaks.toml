@@ -1,0 +1,12 @@
+[allowlist]
+regexes = [
+'workflows\.delete-action-skip-confirmation',
+'DELETE_ACTION_SKIP_CONFIRMATION_LOCALSTORAGE_KEY',
+'workflows\.update-to-automation-skip-confirmation',
+'UPDATE_TO_AUTOMATION_SKIP_CONFIRMATION_LOCALSTORAGE_KEY',
+'OPEN_FROM_FORMS_KEY',
+'workflows:typeform-ai-action-run-feedback',
+]
+paths = [
+  '^(.*)workflows-empty-state-svg\.tsx$'
+]

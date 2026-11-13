@@ -1,0 +1,187 @@
+title = "Global gitleaks config"
+
+[extend]
+# useDefault will extend the base configuration with the default gitleaks config:
+# https://github.com/zricethezav/gitleaks/blob/master/config/gitleaks.toml
+useDefault = true
+
+[allowlist]
+description = "Global allowlisted paths, files, and stopwords"
+regexTarget = "line" # gitleaks defaults to matching the Secret, let's change it to match the entire line (added in gitleaks v8.16.0)
+paths = [
+  '''\.gitleaks\.toml$''', # Ignoring the generated configuration file
+  '''(.*?)(jpg|gif|doc|pdf|bin)$''', # Ignoring common binaries
+  '''(.*?)_test\.go$''', # Ignoring Go test files
+  '''(.*?)\.(spec|test)\.(j|t)s$''', # Ignoring JavaScript and TypeScript test files
+  '''go\.(mod|sum)$''', # Ignoring Go manifests
+  '''vendor\.json''',
+  '''Gopkg\.(lock|toml)''',
+  '''package-lock\.json''', # Ignoring Node/JS manifests
+  '''package\.json''',
+  '''composer\.json''',
+  '''composer\.lock''', #Ignoring PHP manifests
+  '''yarn\.lock''',
+  '''Pipfile''', # Ignoring Python manifests
+  '''Pipfile\.lock''',
+  '''poetry\.lock''',
+  '''node_modules\/''', # Ignoring Node dependencies
+  '''vendor\/''', # Ignoring Go dependencies
+  '''test(|s)\/''', # Ignoring test directories
+]
+
+# A more precise rule to detect Typeform API tokens
+[[rules]]
+description = "Typeform API token"
+id = "typeform-api-token-custom"
+regex = '''(?i)tfp_[a-zA-Z1-9]{40,50}_[a-zA-Z1-9]{8,16}'''
+tags = [
+  "typeform",
+]
+
+# A rule to detect hardcoded tokens in HTTP Bearer authentication, like "Bearer: <token>"
+[[rules]]
+description = "Authorization Bearer tokens"
+id = "authorization-bearer-token"
+regex = '''(?i)Bearer(?:\s)+(\S{8,})'''
+secretGroup = 1
+entropy = 3.8
+tags = [
+  "key",
+  "HTTP",
+  "bearer"
+]
+
+# The following rules look for credentials assigned to variables that its value has an entropy of more than 3 bits.
+# To achieve this there\x27s a regexp for each language. The regexp checks for a variable with a suspicious name followed
+# by a value assignation (for example, := in Go, = in JS, etc.). Then, looks for a group of non-space characters enclosed
+# between quotes. If that group has an entropy higher than 3 bits the rule will trigger.
+
+[[rules]]
+description = "Hardcoded credentials in Go files"
+id = "credentials-go"
+path = '''(.*?)\.go$'''
+regex = '''(?i)(?:secret|key|password|pwd|pass|token)(?:\w|\s*?)(?:=|:=)(?:\s*?)[\"\x27\x60](.{4,120}?)[\"\x27\x60]'''
+secretGroup = 1
+entropy = 3
+tags = [
+  "credentials",
+  "hardcoded",
+  "go",
+]
+
+[[rules]]
+description = "Hardcoded credentials in JavaScript or TypeScript files"
+id = "credentials-javascript"
+path = '''(.*?)\.(?:j|t)s$'''
+regex = '''(?i)(?:secret|key|password|pwd|pass|token)(?:\w|\s*?)(?:=){1}(?:\s{0,10})[\"\x27`](.*?)[\"\x27`]'''
+secretGroup = 1
+entropy = 3
+tags = [
+  "credentials",
+  "hardcoded",
+  "js",
+]
+
+[[rules]]
+description = "Hardcoded credentials in PHP files"
+id = "credentials-php"
+path = '''(.*?)\.php$'''
+regex = '''(?i)(?:secret|key|password|pwd|pass|token)(?:.{0,20})(?:=){1}(?:.{0,10})[\"\x27`](.{4,120})[\"\x27`]'''
+secretGroup = 1
+entropy = 3
+tags = [
+  "credentials",
+  "hardcoded",
+  "php",
+]
+
+[[rules]]
+description = "Hardcoded credentials in YAML files as quoted strings"
+id = "credentials-yaml-quoted"
+path = '''(.*?)\.y(a|)ml$'''
+regex = '''(?i)(?:secret|key|password|pwd|pass|token)(?:.{0,20})(?::){1}(?:\s{0,10})(?:[\"\x27](.{4,120})[\"\x27])'''
+secretGroup = 1
+entropy = 3
+tags = [
+  "credentials",
+  "hardcoded",
+  "yaml",
+]
+[rules.allowlist]
+description = "Skip YAML Serverless variables, grabbed and concatenated values, encrypted secrets, and values with jinja2 placeholders"
+regexes = [
+  '''\${(?:.)+}''', # Serverless variables
+  '''(?i)\(\((?:\s)*?(?:grab|concat)(?:.)*?(?:\s)*?\)\)''', # Grabbed and concatenated values
+  '''(?i)!!enveloped:''', # Encrypted secrets
+  '''(?:.)*?{{(?:.)*?}}''', # jinja2 placeholders
+  '''ENC\[AES256_GCM,data:''', # sops secrets
+]
+
+[[rules]]
+description = "Hardcoded credentials in YAML files as unquoted strings"
+id = "credentials-yaml-unquoted"
+path = '''(.*?)\.y(a|)ml$'''
+#regex = '''(?i)(?:secret|key|password|pwd|pass|token)(?:\w|\s*?)(?::){1}(?:\s*?)((?:\w|\S)+)(?:|(?:\s*?#.*))$'''
+regex = '''(?i)(?:secret|key|password|pwd|pass|token)(?:\w|\s*?)(?::){1}(?:\s*?)((?:\w|\S)+)'''
+secretGroup = 1
+entropy = 3.5 # A higher entropy is required for this type of match, as unquoted can trigger many false positives
+tags = [
+  "credentials",
+  "hardcoded",
+  "yaml",
+]
+[rules.allowlist]
+description = "Skip YAML Serverless variables, grabbed and concated values, encrypted secrets, and values with jinja2 placeholders"
+regexes = [
+  ''':$''', # It's a YAML key (as in key: value)
+  '''\${(?:.)+}''', # Serverless variables
+  '''(?i)\(\((?:\s)*?(?:grab|concat)(?:.)*?(?:\s)*?\)\)''', # Grabbed and concatenated values
+  '''(?i)!!enveloped:''', # Encrypted secrets
+  '''(?:.)*?{{(?:.)*?}}''', # jinja2 placeholders
+  '''={{$''', # jinja2 variable assignation
+  '''ENC\[AES256_GCM,data:''', # sops secrets
+]
+
+[[rules]]
+description = "Hardcoded credentials in YAML files as multiline strings"
+id = "credentials-yaml-multiline"
+path = '''(.*?)\.y(a|)ml$'''
+regex = '''(?i)(?:secret|key|password|pwd|pass|token)(?:.{0,20})(?::){1}(?:\s{0,10})(?:\|(?:-|))\n(?:\s{0,10})(\S{4,120})'''
+secretGroup = 1
+entropy = 4
+tags = [
+  "credentials",
+  "hardcoded",
+  "yaml",
+]
+
+[[rules]]
+description = "Hardcoded credentials in HCL files (*.tf)"
+id = "credentials-terraform"
+path = '''(.*?)\.tf$'''
+regex = '''(?i)(?:secret|key|password|pwd|pass|token)(?:.{0,20})(?:=){1}(?:\s)*?"(.{4,120})"'''
+secretGroup = 1
+entropy = 3
+tags = [
+  "credentials",
+  "hardcoded",
+  "hcl",
+]
+[rules.allowlist]
+description = "Skip variable substitution"
+regexes = [
+  '''\${(?:.)*?}''',
+]
+
+[[rules]]
+description = "Hardcoded credentials in Python files (*.py)"
+id = "credentials-python"
+path = '''(.*?)\.py$'''
+regex = '''(?i)(?:secret|key|password|pwd|pass|token)(?:.{0,20})(?:=){1}(?:\s)*?["\x27](.{4,120})["\x27]'''
+secretGroup = 1
+entropy = 3
+tags = [
+  "credentials",
+  "hardcoded",
+  "hcl",
+]

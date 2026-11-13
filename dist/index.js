@@ -963,7 +963,7 @@ var require_util = __commonJS({
     var net = require("node:net");
     var { Blob: Blob2 } = require("node:buffer");
     var nodeUtil = require("node:util");
-    var { stringify } = require("node:querystring");
+    var { stringify: stringify2 } = require("node:querystring");
     var { EventEmitter: EE } = require("node:events");
     var { InvalidArgumentError } = require_errors();
     var { headerNameLowerCasedRecord } = require_constants();
@@ -1023,7 +1023,7 @@ var require_util = __commonJS({
       if (url.includes("?") || url.includes("#")) {
         throw new Error('Query params cannot be passed when url already contains "?" or "#".');
       }
-      const stringified = stringify(queryParams);
+      const stringified = stringify2(queryParams);
       if (stringified) {
         url += "?" + stringified;
       }
@@ -1068,14 +1068,14 @@ var require_util = __commonJS({
         }
         const port = url.port != null ? url.port : url.protocol === "https:" ? 443 : 80;
         let origin = url.origin != null ? url.origin : `${url.protocol || ""}//${url.hostname || ""}:${port}`;
-        let path12 = url.path != null ? url.path : `${url.pathname || ""}${url.search || ""}`;
+        let path13 = url.path != null ? url.path : `${url.pathname || ""}${url.search || ""}`;
         if (origin[origin.length - 1] === "/") {
           origin = origin.slice(0, origin.length - 1);
         }
-        if (path12 && path12[0] !== "/") {
-          path12 = `/${path12}`;
+        if (path13 && path13[0] !== "/") {
+          path13 = `/${path13}`;
         }
-        return new URL(`${origin}${path12}`);
+        return new URL(`${origin}${path13}`);
       }
       if (!isHttpOrHttpsPrefixed(url.origin || url.protocol)) {
         throw new InvalidArgumentError("Invalid URL protocol: the URL must start with `http:` or `https:`.");
@@ -1526,39 +1526,39 @@ var require_diagnostics = __commonJS({
       });
       diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
         const {
-          request: { method, path: path12, origin }
+          request: { method, path: path13, origin }
         } = evt;
-        debuglog("sending request to %s %s/%s", method, origin, path12);
+        debuglog("sending request to %s %s/%s", method, origin, path13);
       });
       diagnosticsChannel.channel("undici:request:headers").subscribe((evt) => {
         const {
-          request: { method, path: path12, origin },
+          request: { method, path: path13, origin },
           response: { statusCode }
         } = evt;
         debuglog(
           "received response to %s %s/%s - HTTP %d",
           method,
           origin,
-          path12,
+          path13,
           statusCode
         );
       });
       diagnosticsChannel.channel("undici:request:trailers").subscribe((evt) => {
         const {
-          request: { method, path: path12, origin }
+          request: { method, path: path13, origin }
         } = evt;
-        debuglog("trailers received from %s %s/%s", method, origin, path12);
+        debuglog("trailers received from %s %s/%s", method, origin, path13);
       });
       diagnosticsChannel.channel("undici:request:error").subscribe((evt) => {
         const {
-          request: { method, path: path12, origin },
+          request: { method, path: path13, origin },
           error: error2
         } = evt;
         debuglog(
           "request to %s %s/%s errored - %s",
           method,
           origin,
-          path12,
+          path13,
           error2.message
         );
       });
@@ -1607,9 +1607,9 @@ var require_diagnostics = __commonJS({
         });
         diagnosticsChannel.channel("undici:client:sendHeaders").subscribe((evt) => {
           const {
-            request: { method, path: path12, origin }
+            request: { method, path: path13, origin }
           } = evt;
-          debuglog("sending request to %s %s/%s", method, origin, path12);
+          debuglog("sending request to %s %s/%s", method, origin, path13);
         });
       }
       diagnosticsChannel.channel("undici:websocket:open").subscribe((evt) => {
@@ -1672,7 +1672,7 @@ var require_request = __commonJS({
     var kHandler = /* @__PURE__ */ Symbol("handler");
     var Request = class {
       constructor(origin, {
-        path: path12,
+        path: path13,
         method,
         body,
         headers,
@@ -1687,11 +1687,11 @@ var require_request = __commonJS({
         expectContinue,
         servername
       }, handler2) {
-        if (typeof path12 !== "string") {
+        if (typeof path13 !== "string") {
           throw new InvalidArgumentError("path must be a string");
-        } else if (path12[0] !== "/" && !(path12.startsWith("http://") || path12.startsWith("https://")) && method !== "CONNECT") {
+        } else if (path13[0] !== "/" && !(path13.startsWith("http://") || path13.startsWith("https://")) && method !== "CONNECT") {
           throw new InvalidArgumentError("path must be an absolute URL or start with a slash");
-        } else if (invalidPathRegex.test(path12)) {
+        } else if (invalidPathRegex.test(path13)) {
           throw new InvalidArgumentError("invalid request path");
         }
         if (typeof method !== "string") {
@@ -1757,7 +1757,7 @@ var require_request = __commonJS({
         this.completed = false;
         this.aborted = false;
         this.upgrade = upgrade || null;
-        this.path = query ? buildURL(path12, query) : path12;
+        this.path = query ? buildURL(path13, query) : path13;
         this.origin = origin;
         this.idempotent = idempotent == null ? method === "HEAD" || method === "GET" : idempotent;
         this.blocking = blocking == null ? false : blocking;
@@ -3425,7 +3425,7 @@ var require_data_url = __commonJS({
       const buffer = Buffer.from(data, "base64");
       return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
     }
-    function collectAnHTTPQuotedString(input, position, extractValue) {
+    function collectAnHTTPQuotedString(input, position, extractValue2) {
       const positionStart = position.position;
       let value = "";
       assert4(input[position.position] === '"');
@@ -3453,7 +3453,7 @@ var require_data_url = __commonJS({
           break;
         }
       }
-      if (extractValue) {
+      if (extractValue2) {
         return value;
       }
       return input.slice(positionStart, position.position);
@@ -6276,7 +6276,7 @@ var require_client_h1 = __commonJS({
       return method !== "GET" && method !== "HEAD" && method !== "OPTIONS" && method !== "TRACE" && method !== "CONNECT";
     }
     function writeH1(client, request2) {
-      const { method, path: path12, host, upgrade, blocking, reset } = request2;
+      const { method, path: path13, host, upgrade, blocking, reset } = request2;
       let { body, headers, contentLength } = request2;
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH" || method === "QUERY" || method === "PROPFIND" || method === "PROPPATCH";
       if (util.isFormDataLike(body)) {
@@ -6342,7 +6342,7 @@ var require_client_h1 = __commonJS({
       if (blocking) {
         socket[kBlocking] = true;
       }
-      let header = `${method} ${path12} HTTP/1.1\r
+      let header = `${method} ${path13} HTTP/1.1\r
 `;
       if (typeof host === "string") {
         header += `host: ${host}\r
@@ -6868,7 +6868,7 @@ var require_client_h2 = __commonJS({
     }
     function writeH2(client, request2) {
       const session = client[kHTTP2Session];
-      const { method, path: path12, host, upgrade, expectContinue, signal, headers: reqHeaders } = request2;
+      const { method, path: path13, host, upgrade, expectContinue, signal, headers: reqHeaders } = request2;
       let { body } = request2;
       if (upgrade) {
         util.errorRequest(client, request2, new Error("Upgrade not supported for H2"));
@@ -6935,7 +6935,7 @@ var require_client_h2 = __commonJS({
         });
         return true;
       }
-      headers[HTTP2_HEADER_PATH] = path12;
+      headers[HTTP2_HEADER_PATH] = path13;
       headers[HTTP2_HEADER_SCHEME] = "https";
       const expectsPayload = method === "PUT" || method === "POST" || method === "PATCH";
       if (body && typeof body.read === "function") {
@@ -7288,9 +7288,9 @@ var require_redirect_handler = __commonJS({
           return this.handler.onHeaders(statusCode, headers, resume, statusText);
         }
         const { origin, pathname, search } = util.parseURL(new URL(this.location, this.opts.origin && new URL(this.opts.path, this.opts.origin)));
-        const path12 = search ? `${pathname}${search}` : pathname;
+        const path13 = search ? `${pathname}${search}` : pathname;
         this.opts.headers = cleanRequestHeaders(this.opts.headers, statusCode === 303, this.opts.origin !== origin);
-        this.opts.path = path12;
+        this.opts.path = path13;
         this.opts.origin = origin;
         this.opts.maxRedirections = 0;
         this.opts.query = null;
@@ -8524,10 +8524,10 @@ var require_proxy_agent = __commonJS({
         };
         const {
           origin,
-          path: path12 = "/",
+          path: path13 = "/",
           headers = {}
         } = opts;
-        opts.path = origin + path12;
+        opts.path = origin + path13;
         if (!("host" in headers) && !("Host" in headers)) {
           const { host } = new URL2(origin);
           headers.host = host;
@@ -10448,20 +10448,20 @@ var require_mock_utils = __commonJS({
       }
       return true;
     }
-    function safeUrl(path12) {
-      if (typeof path12 !== "string") {
-        return path12;
+    function safeUrl(path13) {
+      if (typeof path13 !== "string") {
+        return path13;
       }
-      const pathSegments = path12.split("?");
+      const pathSegments = path13.split("?");
       if (pathSegments.length !== 2) {
-        return path12;
+        return path13;
       }
       const qp = new URLSearchParams(pathSegments.pop());
       qp.sort();
       return [...pathSegments, qp.toString()].join("?");
     }
-    function matchKey(mockDispatch2, { path: path12, method, body, headers }) {
-      const pathMatch = matchValue(mockDispatch2.path, path12);
+    function matchKey(mockDispatch2, { path: path13, method, body, headers }) {
+      const pathMatch = matchValue(mockDispatch2.path, path13);
       const methodMatch = matchValue(mockDispatch2.method, method);
       const bodyMatch = typeof mockDispatch2.body !== "undefined" ? matchValue(mockDispatch2.body, body) : true;
       const headersMatch = matchHeaders(mockDispatch2, headers);
@@ -10483,7 +10483,7 @@ var require_mock_utils = __commonJS({
     function getMockDispatch(mockDispatches, key) {
       const basePath = key.query ? buildURL(key.path, key.query) : key.path;
       const resolvedPath = typeof basePath === "string" ? safeUrl(basePath) : basePath;
-      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path12 }) => matchValue(safeUrl(path12), resolvedPath));
+      let matchedMockDispatches = mockDispatches.filter(({ consumed }) => !consumed).filter(({ path: path13 }) => matchValue(safeUrl(path13), resolvedPath));
       if (matchedMockDispatches.length === 0) {
         throw new MockNotMatchedError(`Mock dispatch not matched for path '${resolvedPath}'`);
       }
@@ -10521,9 +10521,9 @@ var require_mock_utils = __commonJS({
       }
     }
     function buildKey(opts) {
-      const { path: path12, method, body, headers, query } = opts;
+      const { path: path13, method, body, headers, query } = opts;
       return {
-        path: path12,
+        path: path13,
         method,
         body,
         headers,
@@ -10986,10 +10986,10 @@ var require_pending_interceptors_formatter = __commonJS({
       }
       format(pendingInterceptors) {
         const withPrettyHeaders = pendingInterceptors.map(
-          ({ method, path: path12, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
+          ({ method, path: path13, data: { statusCode }, persist, times, timesInvoked, origin }) => ({
             Method: method,
             Origin: origin,
-            Path: path12,
+            Path: path13,
             "Status code": statusCode,
             Persistent: persist ? PERSISTENT : NOT_PERSISTENT,
             Invocations: timesInvoked,
@@ -15870,9 +15870,9 @@ var require_util6 = __commonJS({
         }
       }
     }
-    function validateCookiePath(path12) {
-      for (let i = 0; i < path12.length; ++i) {
-        const code = path12.charCodeAt(i);
+    function validateCookiePath(path13) {
+      for (let i = 0; i < path13.length; ++i) {
+        const code = path13.charCodeAt(i);
         if (code < 32 || // exclude CTLs (0-31)
         code === 127 || // DEL
         code === 59) {
@@ -15920,7 +15920,7 @@ var require_util6 = __commonJS({
         throw new Error("Invalid cookie max-age");
       }
     }
-    function stringify(cookie) {
+    function stringify2(cookie) {
       if (cookie.name.length === 0) {
         return null;
       }
@@ -15974,7 +15974,7 @@ var require_util6 = __commonJS({
       validateCookiePath,
       validateCookieValue,
       toIMFDate,
-      stringify
+      stringify: stringify2
     };
   }
 });
@@ -16124,7 +16124,7 @@ var require_cookies = __commonJS({
   "node_modules/undici/lib/web/cookies/index.js"(exports2, module2) {
     "use strict";
     var { parseSetCookie } = require_parse();
-    var { stringify } = require_util6();
+    var { stringify: stringify2 } = require_util6();
     var { webidl } = require_webidl();
     var { Headers: Headers2 } = require_headers();
     function getCookies(headers) {
@@ -16167,7 +16167,7 @@ var require_cookies = __commonJS({
       webidl.argumentLengthCheck(arguments, 2, "setCookie");
       webidl.brandCheck(headers, Headers2, { strict: false });
       cookie = webidl.converters.Cookie(cookie);
-      const str = stringify(cookie);
+      const str = stringify2(cookie);
       if (str) {
         headers.append("Set-Cookie", str);
       }
@@ -18512,11 +18512,11 @@ var require_undici = __commonJS({
           if (typeof opts.path !== "string") {
             throw new InvalidArgumentError("invalid opts.path");
           }
-          let path12 = opts.path;
+          let path13 = opts.path;
           if (!opts.path.startsWith("/")) {
-            path12 = `/${path12}`;
+            path13 = `/${path13}`;
           }
-          url = new URL(util.parseOrigin(url).origin + path12);
+          url = new URL(util.parseOrigin(url).origin + path13);
         } else {
           if (!opts) {
             opts = typeof url === "object" ? url : {};
@@ -19550,7 +19550,7 @@ var require_fast_content_type_parse = __commonJS({
     var defaultContentType = { type: "", parameters: new NullObject() };
     Object.freeze(defaultContentType.parameters);
     Object.freeze(defaultContentType);
-    function parse3(header) {
+    function parse4(header) {
       if (typeof header !== "string") {
         throw new TypeError("argument header is required and must be a string");
       }
@@ -19626,8 +19626,8 @@ var require_fast_content_type_parse = __commonJS({
       }
       return result;
     }
-    module2.exports.default = { parse: parse3, safeParse: safeParse2 };
-    module2.exports.parse = parse3;
+    module2.exports.default = { parse: parse4, safeParse: safeParse2 };
+    module2.exports.parse = parse4;
     module2.exports.safeParse = safeParse2;
     module2.exports.defaultContentType = defaultContentType;
   }
@@ -19680,7 +19680,7 @@ var require_esprima = __commonJS({
             var jsx_parser_1 = __webpack_require__(3);
             var parser_1 = __webpack_require__(8);
             var tokenizer_1 = __webpack_require__(15);
-            function parse3(code, options, delegate) {
+            function parse4(code, options, delegate) {
               var commentHandler = null;
               var proxyDelegate = function(node, metadata) {
                 if (delegate) {
@@ -19725,17 +19725,17 @@ var require_esprima = __commonJS({
               }
               return ast;
             }
-            exports3.parse = parse3;
+            exports3.parse = parse4;
             function parseModule(code, options, delegate) {
               var parsingOptions = options || {};
               parsingOptions.sourceType = "module";
-              return parse3(code, parsingOptions, delegate);
+              return parse4(code, parsingOptions, delegate);
             }
             exports3.parseModule = parseModule;
             function parseScript(code, options, delegate) {
               var parsingOptions = options || {};
               parsingOptions.sourceType = "script";
-              return parse3(code, parsingOptions, delegate);
+              return parse4(code, parsingOptions, delegate);
             }
             exports3.parseScript = parseScript;
             function tokenize(code, options, delegate) {
@@ -27497,7 +27497,7 @@ var require_parse2 = __commonJS({
           return {};
       }
     }
-    var parse3 = (code, rev, options) => {
+    var parse4 = (code, rev, options) => {
       clean();
       const {
         no_comments,
@@ -27533,7 +27533,7 @@ var require_parse2 = __commonJS({
       return result;
     };
     module2.exports = {
-      parse: parse3,
+      parse: parse4,
       tokenize
     };
   }
@@ -27667,7 +27667,7 @@ var require_stringify = __commonJS({
           deeper_gap
         );
         inside += before || LF + deeper_gap;
-        inside += stringify(i, value, deeper_gap) || STR_NULL;
+        inside += stringify2(i, value, deeper_gap) || STR_NULL;
         inside += process_comments(value, AFTER_VALUE(i), deeper_gap);
         after_comma = process_comments(value, AFTER(i), deeper_gap);
       }
@@ -27688,7 +27688,7 @@ var require_stringify = __commonJS({
       let first = true;
       const keys = Array.isArray(replacer) ? replacer : Object.keys(value);
       const iteratee = (key) => {
-        const sv = stringify(key, value, deeper_gap);
+        const sv = stringify2(key, value, deeper_gap);
         if (sv === UNDEFINED) {
           return;
         }
@@ -27713,7 +27713,7 @@ var require_stringify = __commonJS({
       );
       return CURLY_BRACKET_OPEN + join_content(inside, value, gap) + CURLY_BRACKET_CLOSE;
     };
-    function stringify(key, holder, gap) {
+    function stringify2(key, holder, gap) {
       let value = holder[key];
       if (is_object(value) && typeof value.toJSON === "function") {
         value = value.toJSON(key);
@@ -27765,7 +27765,7 @@ var require_stringify = __commonJS({
       }
       replacer = replacer_;
       indent = indent_;
-      const str = is_primitive_object(value) ? JSON.stringify(value) : stringify("", { "": value }, EMPTY);
+      const str = is_primitive_object(value) ? JSON.stringify(value) : stringify2("", { "": value }, EMPTY);
       clean();
       const output = is_object(value) ? process_comments(value, PREFIX_BEFORE_ALL, EMPTY, true).trimLeft() + str + process_comments(value, PREFIX_AFTER_ALL, EMPTY).trimRight() : str;
       return normalize_blank_lines(output);
@@ -27776,8 +27776,8 @@ var require_stringify = __commonJS({
 // node_modules/comment-json/src/index.js
 var require_src2 = __commonJS({
   "node_modules/comment-json/src/index.js"(exports2, module2) {
-    var { parse: parse3, tokenize } = require_parse2();
-    var stringify = require_stringify();
+    var { parse: parse4, tokenize } = require_parse2();
+    var stringify2 = require_stringify();
     var { CommentArray } = require_array();
     var {
       PREFIX_BEFORE,
@@ -27800,8 +27800,8 @@ var require_src2 = __commonJS({
       PREFIX_AFTER,
       PREFIX_BEFORE_ALL,
       PREFIX_AFTER_ALL,
-      parse: parse3,
-      stringify,
+      parse: parse4,
+      stringify: stringify2,
       tokenize,
       CommentArray,
       assign,
@@ -28109,7 +28109,7 @@ var require_ignore = __commonJS({
       //   path matching.
       // - check `string` either `MODE_IGNORE` or `MODE_CHECK_IGNORE`
       // @returns {TestResult} true if a file is ignored
-      test(path12, checkUnignored, mode) {
+      test(path13, checkUnignored, mode) {
         let ignored = false;
         let unignored = false;
         let matchedRule;
@@ -28118,7 +28118,7 @@ var require_ignore = __commonJS({
           if (unignored === negative && ignored !== unignored || negative && !ignored && !unignored && !checkUnignored) {
             return;
           }
-          const matched = rule[mode].test(path12);
+          const matched = rule[mode].test(path13);
           if (!matched) {
             return;
           }
@@ -28139,17 +28139,17 @@ var require_ignore = __commonJS({
     var throwError = (message, Ctor) => {
       throw new Ctor(message);
     };
-    var checkPath = (path12, originalPath, doThrow) => {
-      if (!isString(path12)) {
+    var checkPath = (path13, originalPath, doThrow) => {
+      if (!isString(path13)) {
         return doThrow(
           `path must be a string, but got \`${originalPath}\``,
           TypeError
         );
       }
-      if (!path12) {
+      if (!path13) {
         return doThrow(`path must not be empty`, TypeError);
       }
-      if (checkPath.isNotRelative(path12)) {
+      if (checkPath.isNotRelative(path13)) {
         const r = "`path.relative()`d";
         return doThrow(
           `path should be a ${r} string, but got "${originalPath}"`,
@@ -28158,7 +28158,7 @@ var require_ignore = __commonJS({
       }
       return true;
     };
-    var isNotRelative = (path12) => REGEX_TEST_INVALID_PATH.test(path12);
+    var isNotRelative = (path13) => REGEX_TEST_INVALID_PATH.test(path13);
     checkPath.isNotRelative = isNotRelative;
     checkPath.convert = (p) => p;
     var Ignore = class {
@@ -28188,19 +28188,19 @@ var require_ignore = __commonJS({
       }
       // @returns {TestResult}
       _test(originalPath, cache, checkUnignored, slices) {
-        const path12 = originalPath && checkPath.convert(originalPath);
+        const path13 = originalPath && checkPath.convert(originalPath);
         checkPath(
-          path12,
+          path13,
           originalPath,
           this._strictPathCheck ? throwError : RETURN_FALSE
         );
-        return this._t(path12, cache, checkUnignored, slices);
+        return this._t(path13, cache, checkUnignored, slices);
       }
-      checkIgnore(path12) {
-        if (!REGEX_TEST_TRAILING_SLASH.test(path12)) {
-          return this.test(path12);
+      checkIgnore(path13) {
+        if (!REGEX_TEST_TRAILING_SLASH.test(path13)) {
+          return this.test(path13);
         }
-        const slices = path12.split(SLASH).filter(Boolean);
+        const slices = path13.split(SLASH).filter(Boolean);
         slices.pop();
         if (slices.length) {
           const parent = this._t(
@@ -28213,18 +28213,18 @@ var require_ignore = __commonJS({
             return parent;
           }
         }
-        return this._rules.test(path12, false, MODE_CHECK_IGNORE);
+        return this._rules.test(path13, false, MODE_CHECK_IGNORE);
       }
-      _t(path12, cache, checkUnignored, slices) {
-        if (path12 in cache) {
-          return cache[path12];
+      _t(path13, cache, checkUnignored, slices) {
+        if (path13 in cache) {
+          return cache[path13];
         }
         if (!slices) {
-          slices = path12.split(SLASH).filter(Boolean);
+          slices = path13.split(SLASH).filter(Boolean);
         }
         slices.pop();
         if (!slices.length) {
-          return cache[path12] = this._rules.test(path12, checkUnignored, MODE_IGNORE);
+          return cache[path13] = this._rules.test(path13, checkUnignored, MODE_IGNORE);
         }
         const parent = this._t(
           slices.join(SLASH) + SLASH,
@@ -28232,29 +28232,29 @@ var require_ignore = __commonJS({
           checkUnignored,
           slices
         );
-        return cache[path12] = parent.ignored ? parent : this._rules.test(path12, checkUnignored, MODE_IGNORE);
+        return cache[path13] = parent.ignored ? parent : this._rules.test(path13, checkUnignored, MODE_IGNORE);
       }
-      ignores(path12) {
-        return this._test(path12, this._ignoreCache, false).ignored;
+      ignores(path13) {
+        return this._test(path13, this._ignoreCache, false).ignored;
       }
       createFilter() {
-        return (path12) => !this.ignores(path12);
+        return (path13) => !this.ignores(path13);
       }
       filter(paths) {
         return makeArray(paths).filter(this.createFilter());
       }
       // @returns {TestResult}
-      test(path12) {
-        return this._test(path12, this._testCache, true);
+      test(path13) {
+        return this._test(path13, this._testCache, true);
       }
     };
     var factory = (options) => new Ignore(options);
-    var isPathValid = (path12) => checkPath(path12 && checkPath.convert(path12), path12, RETURN_FALSE);
+    var isPathValid = (path13) => checkPath(path13 && checkPath.convert(path13), path13, RETURN_FALSE);
     var setupWindows = () => {
       const makePosix = (str) => /^\\\\\?\\/.test(str) || /["<>|\u0000-\u001F]+/u.test(str) ? str : str.replace(/\\/g, "/");
       checkPath.convert = makePosix;
       const REGEX_TEST_WINDOWS_PATH_ABSOLUTE = /^[a-z]:\//i;
-      checkPath.isNotRelative = (path12) => REGEX_TEST_WINDOWS_PATH_ABSOLUTE.test(path12) || isNotRelative(path12);
+      checkPath.isNotRelative = (path13) => REGEX_TEST_WINDOWS_PATH_ABSOLUTE.test(path13) || isNotRelative(path13);
     };
     if (
       // Detect `process` so that it can run in browsers.
@@ -29456,7 +29456,8 @@ function getScriptsDir() {
 function bashCheck({
   name,
   optional,
-  inputs
+  inputs,
+  extraEnv
 }) {
   return {
     name,
@@ -29468,7 +29469,8 @@ function bashCheck({
       }, {});
       const env = {
         ...process.env,
-        ...envInputs
+        ...envInputs,
+        ...extraEnv ? await extraEnv() : {}
       };
       return exec("bash", [path5.join(getScriptsDir(), name, "run.sh")], {
         env
@@ -29495,8 +29497,8 @@ var Context = class {
       if ((0, import_fs2.existsSync)(process.env.GITHUB_EVENT_PATH)) {
         this.payload = JSON.parse((0, import_fs2.readFileSync)(process.env.GITHUB_EVENT_PATH, { encoding: "utf8" }));
       } else {
-        const path12 = process.env.GITHUB_EVENT_PATH;
-        process.stdout.write(`GITHUB_EVENT_PATH ${path12} does not exist${import_os3.EOL}`);
+        const path13 = process.env.GITHUB_EVENT_PATH;
+        process.stdout.write(`GITHUB_EVENT_PATH ${path13} does not exist${import_os3.EOL}`);
       }
     }
     this.eventName = process.env.GITHUB_EVENT_NAME;
@@ -33258,11 +33260,11 @@ var GitHub2 = class {
     });
     return response.data;
   }
-  async downloadContent(path12, ref) {
+  async downloadContent(path13, ref) {
     const response = await this.octokit.rest.repos.getContent({
       owner: this.context.repo.owner,
       repo: this.context.repo.repo,
-      path: path12,
+      path: path13,
       ref
     });
     return response.data;
@@ -35733,8 +35735,8 @@ var Pattern = class _Pattern {
 
 // node_modules/@actions/glob/lib/internal-search-state.js
 var SearchState = class {
-  constructor(path12, level) {
-    this.path = path12;
+  constructor(path13, level) {
+    this.path = path13;
     this.level = level;
   }
 };
@@ -36023,8 +36025,8 @@ async function glob({
   const files = (await globber.glob()).map((f) => import_path.default.relative(import_process.default.cwd(), f)).filter(isNotExcluded);
   return files;
 }
-function readFile(path12) {
-  return import_fs3.default.readFileSync(path12, { encoding: "utf-8" });
+function readFile(path13) {
+  return import_fs3.default.readFileSync(path13, { encoding: "utf-8" });
 }
 
 // src/conditions/triggeredByBot.ts
@@ -36248,6 +36250,991 @@ function getIgnoreFilter() {
   return filter2;
 }
 
+// src/gitleaksConfig/gitleaksConfig.ts
+var import_fs4 = __toESM(require("fs"));
+var import_path2 = __toESM(require("path"));
+var import_util3 = require("util");
+
+// node_modules/smol-toml/dist/error.js
+function getLineColFromPtr(string, ptr) {
+  let lines = string.slice(0, ptr).split(/\r?\n/);
+  return [lines.length, lines.pop().length + 1];
+}
+function makeCodeBlock(string, line, column) {
+  let lines = string.split(/\r?\n/);
+  let codeblock = "";
+  let numberLen = (Math.log10(line + 1) | 0) + 1;
+  for (let i = line - 1; i <= line + 1; i++) {
+    let l = lines[i - 1];
+    if (!l)
+      continue;
+    codeblock += i.toString().padEnd(numberLen, " ");
+    codeblock += ":  ";
+    codeblock += l;
+    codeblock += "\n";
+    if (i === line) {
+      codeblock += " ".repeat(numberLen + column + 2);
+      codeblock += "^\n";
+    }
+  }
+  return codeblock;
+}
+var TomlError = class _TomlError extends Error {
+  line;
+  column;
+  codeblock;
+  constructor(message, options) {
+    const [line, column] = getLineColFromPtr(options.toml, options.ptr);
+    const codeblock = makeCodeBlock(options.toml, line, column);
+    super(`Invalid TOML document: ${message}
+
+${codeblock}`, options);
+    this.line = line;
+    this.column = column;
+    this.codeblock = codeblock;
+  }
+  /** @internal */
+  static x(message, ctx, ptr) {
+    throw new _TomlError(message, { toml: ctx.s, ptr: ptr ?? ctx.p });
+  }
+};
+
+// node_modules/smol-toml/dist/primitive.js
+function parseString(ctx) {
+  let startPtr = ctx.p;
+  let c = ctx.s.charCodeAt(ctx.p++);
+  let first = c;
+  let isLiteral = c === 39;
+  let isMultiline = c === ctx.s.charCodeAt(ctx.p) && c === ctx.s.charCodeAt(ctx.p + 1);
+  if (isMultiline) {
+    if ((c = ctx.s.charCodeAt(ctx.p += 2)) === 10)
+      ctx.p++;
+    else if (c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10)
+      ctx.p += 2;
+  }
+  let parsed = "";
+  let sliceStart = ctx.p;
+  let state = 0;
+  for (; ctx.p < ctx.s.length; ctx.p++) {
+    c = ctx.s.charCodeAt(ctx.p);
+    if (isMultiline && (c === 10 || c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10)) {
+      state = state && 3;
+    } else if (c < 32 && c !== 9 || c === 127) {
+      TomlError.x("control characters are not allowed in strings", ctx);
+    } else if ((!state || state === 3) && c === first && (!isMultiline || ctx.s.charCodeAt(ctx.p + 1) === first && ctx.s.charCodeAt(ctx.p + 2) === first)) {
+      if (isMultiline) {
+        if (ctx.s.charCodeAt(ctx.p + 3) === first)
+          ctx.p++;
+        if (ctx.s.charCodeAt(ctx.p + 3) === first)
+          ctx.p++;
+      }
+      if (!state) {
+        let s = ctx.s.slice(sliceStart, ctx.p);
+        parsed = parsed ? parsed + s : s;
+      }
+      ctx.p += isMultiline ? 3 : 1;
+      return parsed;
+    } else if (!state) {
+      if (!isLiteral && c === 92) {
+        parsed += ctx.s.slice(sliceStart, sliceStart = ctx.p);
+        state = 1;
+      }
+    } else if (state === 1) {
+      if (c === 120 || c === 117 || c === 85) {
+        let errPtr = ctx.p++ - 1;
+        let value = 0;
+        let len = c === 120 ? 2 : c === 117 ? 4 : 8;
+        for (let j = 0; j < len; j++, ctx.p++) {
+          let hex = ctx.s.charCodeAt(ctx.p);
+          let digit = (
+            /* 0-9 */
+            hex >= 48 && hex <= 57 ? hex - 48 : (
+              /* A-F */
+              hex >= 65 && hex <= 70 ? hex - 65 + 10 : (
+                /* a-f */
+                hex >= 97 && hex <= 102 ? hex - 97 + 10 : -1
+              )
+            )
+          );
+          if (digit < 0)
+            TomlError.x("invalid non-hex character in unicode escape", ctx);
+          value = value << 4 | digit;
+        }
+        if (value < 0 || value > 1114111 || value >= 55296 && value <= 57343) {
+          TomlError.x("invalid unicode escape", ctx, errPtr);
+        }
+        parsed += String.fromCodePoint(value);
+        sliceStart = ctx.p--;
+        state = 0;
+      } else if (isMultiline && (c === 32 || c === 9)) {
+        state = 2;
+      } else {
+        if (c === 98)
+          parsed += "\b";
+        else if (c === 116)
+          parsed += "	";
+        else if (c === 110)
+          parsed += "\n";
+        else if (c === 102)
+          parsed += "\f";
+        else if (c === 114)
+          parsed += "\r";
+        else if (c === 101)
+          parsed += "\x1B";
+        else if (c === 34)
+          parsed += '"';
+        else if (c === 92)
+          parsed += "\\";
+        else
+          TomlError.x("unrecognised escape sequence", ctx);
+        sliceStart = ctx.p + 1;
+        state = 0;
+      }
+    } else if (c !== 32 && c !== 9) {
+      if (state === 2)
+        TomlError.x("invalid escape: only line-ending whitespace may be escaped", ctx, sliceStart);
+      state = !isLiteral && c === 92 ? 1 : 0;
+      sliceStart = ctx.p;
+    }
+  }
+  TomlError.x("unfinished string", ctx, startPtr);
+}
+
+// node_modules/smol-toml/dist/date.js
+var DATE_TIME_RE = /^(\d{4}-\d{2}-\d{2})?[Tt ]?(?:(\d{2}):\d{2}(?::\d{2}(?:\.\d+)?)?)?(Z|z|[-+]\d{2}:\d{2})?$/i;
+var TomlDate = class _TomlDate extends Date {
+  #hasDate = false;
+  #hasTime = false;
+  #offset = null;
+  constructor(date, fasttype, unsafeDelim) {
+    let hasDate = true;
+    let hasTime = true;
+    let offset = "Z";
+    let c;
+    if (typeof date === "string") {
+      if (fasttype)
+        prep: {
+          if (fasttype < 3) {
+            if (+date.slice(11, 13) > 23) {
+              date = "";
+              break prep;
+            }
+            if (fasttype === 2) {
+              offset = null;
+              date += "Z";
+            } else if ((c = date.charCodeAt(date.length - 1)) !== 90 && c !== 122) {
+              offset = date.slice(date.length - 6);
+            }
+            if (unsafeDelim)
+              date = date.slice(0, 10) + "T" + date.slice(11);
+          } else if (fasttype === 4) {
+            date = +date.slice(0, 2) > 23 ? "" : `0000-01-01T${date}Z`;
+          }
+          hasDate = fasttype !== 4;
+          hasTime = fasttype !== 3;
+        }
+      else {
+        let match3 = date.match(DATE_TIME_RE);
+        if (match3) {
+          if (!match3[1]) {
+            hasDate = false;
+            date = `0000-01-01T${date}`;
+          }
+          hasTime = !!match3[2];
+          hasTime && date[10] === " " && (date = date.replace(" ", "T"));
+          if (match3[2] && +match3[2] > 23) {
+            date = "";
+          } else {
+            offset = match3[3] || null;
+            if (!offset && hasTime)
+              date += "Z";
+          }
+        } else {
+          date = "";
+        }
+      }
+    }
+    super(date);
+    if (!isNaN(this.getTime())) {
+      this.#hasDate = hasDate;
+      this.#hasTime = hasTime;
+      this.#offset = offset;
+    }
+  }
+  isDateTime() {
+    return this.#hasDate && this.#hasTime;
+  }
+  isLocal() {
+    return !this.#hasDate || !this.#hasTime || !this.#offset;
+  }
+  isDate() {
+    return this.#hasDate && !this.#hasTime;
+  }
+  isTime() {
+    return this.#hasTime && !this.#hasDate;
+  }
+  isValid() {
+    return this.#hasDate || this.#hasTime;
+  }
+  toISOString() {
+    let iso = super.toISOString();
+    if (this.isDate())
+      return iso.slice(0, 10);
+    if (this.isTime())
+      return iso.slice(11, 23);
+    if (this.#offset === null)
+      return iso.slice(0, -1);
+    if (this.#offset === "Z" || this.#offset === "z")
+      return iso;
+    let offset = +this.#offset.slice(1, 3) * 60 + +this.#offset.slice(4, 6);
+    offset = this.#offset[0] === "-" ? offset : -offset;
+    let offsetDate = new Date(this.getTime() - offset * 6e4);
+    return offsetDate.toISOString().slice(0, -1) + this.#offset;
+  }
+  static wrapAsOffsetDateTime(jsDate, offset = "Z") {
+    let date = new _TomlDate(jsDate);
+    date.#offset = offset;
+    return date;
+  }
+  static wrapAsLocalDateTime(jsDate) {
+    let date = new _TomlDate(jsDate);
+    date.#offset = null;
+    return date;
+  }
+  static wrapAsLocalDate(jsDate) {
+    let date = new _TomlDate(jsDate);
+    date.#hasTime = false;
+    date.#offset = null;
+    return date;
+  }
+  static wrapAsLocalTime(jsDate) {
+    let date = new _TomlDate(jsDate);
+    date.#hasDate = false;
+    date.#offset = null;
+    return date;
+  }
+};
+
+// node_modules/smol-toml/dist/extract.js
+function isDigit(char, base = 10) {
+  return base === 16 ? char > 47 && char < 58 || char > 64 && char < 71 || char > 96 && char < 103 : char > 47 && char < 48 + base;
+}
+function isEndOfValue(char, delim) {
+  return char === 32 || char === 9 || char === 10 || char === 13 || // Structure end or next value delimiter
+  delim && (char === delim || char === 44) || // Comment
+  char === 35;
+}
+function extractValue(ctx, end) {
+  let errPtr = ctx.p;
+  let c = ctx.s.charCodeAt(ctx.p);
+  if (c === 91 || c === 123) {
+    ctx.d-- || TomlError.x("document contains excessively nested structures. aborting.", ctx);
+    let value = c === 91 ? parseArray(ctx) : parseInlineTable(ctx);
+    ctx.d++;
+    return value;
+  }
+  if (c === 34 || c === 39) {
+    return parseString(ctx);
+  }
+  if (c === 116) {
+    if (ctx.s.charCodeAt(++ctx.p) !== 114 || ctx.s.charCodeAt(++ctx.p) !== 117 || ctx.s.charCodeAt(++ctx.p) !== 101)
+      TomlError.x("invalid value", ctx, errPtr);
+    return ctx.p++, true;
+  }
+  if (c === 102) {
+    if (ctx.s.charCodeAt(++ctx.p) !== 97 || ctx.s.charCodeAt(++ctx.p) !== 108 || ctx.s.charCodeAt(++ctx.p) !== 115 || ctx.s.charCodeAt(++ctx.p) !== 101)
+      TomlError.x("invalid value", ctx, errPtr);
+    return ctx.p++, false;
+  }
+  if (c === 43 || c === 45) {
+    return parseNumber(ctx, ctx.p, ctx.s.charCodeAt(++ctx.p), 44 - c, end);
+  }
+  if (ctx.s.charCodeAt(ctx.p + 4) === 45 && ctx.s.charCodeAt(ctx.p + 7) === 45) {
+    return parseDate(ctx, c, end);
+  }
+  if (ctx.s.charCodeAt(ctx.p + 2) === 58) {
+    return parseTime(ctx, c, end);
+  }
+  return parseNumber(ctx, ctx.p, c, 0, end);
+}
+function parseNumber(ctx, startPtr, startChr, sign, endChr) {
+  let c = startChr;
+  let state = 0;
+  let hasUnderscores = false;
+  if (c === 105) {
+    if (ctx.s.charCodeAt(++ctx.p) !== 110 || ctx.s.charCodeAt(++ctx.p) !== 102)
+      TomlError.x("invalid value", ctx, startPtr);
+    return ctx.p++, (sign || 1) / 0;
+  }
+  if (c === 110) {
+    if (ctx.s.charCodeAt(++ctx.p) !== 97 || ctx.s.charCodeAt(++ctx.p) !== 110)
+      TomlError.x("invalid value", ctx, startPtr);
+    return ctx.p++, NaN;
+  }
+  if (c === 48) {
+    if (++ctx.p >= ctx.s.length || isEndOfValue(c = ctx.s.charCodeAt(ctx.p), endChr))
+      return ctx.bi === true ? 0n : 0;
+    if (!sign) {
+      if (c === 120)
+        return parseIntegerBaseN(ctx, startPtr, 16, endChr);
+      else if (c === 98)
+        return parseIntegerBaseN(ctx, startPtr, 2, endChr);
+      else if (c === 111)
+        return parseIntegerBaseN(ctx, startPtr, 8, endChr);
+    }
+    if (c === 46)
+      state = 2;
+    else if (c === 101 || c === 69)
+      state = 4;
+    else
+      TomlError.x("illegal leading zero", ctx, startPtr);
+  } else if (!isDigit(c))
+    TomlError.x("invalid value", ctx, startPtr);
+  while (++ctx.p < ctx.s.length && (c = ctx.s.charCodeAt(ctx.p), !isEndOfValue(c, endChr))) {
+    if (!state)
+      state = 1;
+    if (c === 95) {
+      if (!(state & 1))
+        TomlError.x("illegal underscore", ctx);
+      state += 11;
+      hasUnderscores = true;
+    } else if (state === 1 && c === 46)
+      state = 2;
+    else if ((state === 1 || state === 3) && (c === 101 || c === 69))
+      state = 4;
+    else if (state === 4 && (c === 43 || c === 45)) {
+      state = 6;
+    } else if (!isDigit(c))
+      TomlError.x(`illegal character in numeric literal`, ctx);
+    else if (state > 9)
+      state -= 11;
+    else if (!(state & 1))
+      state++;
+  }
+  if (!state) {
+    let val = (startChr - 48) * (sign || 1);
+    return ctx.bi === true ? BigInt(val) : val;
+  }
+  if (!(state & 1))
+    TomlError.x("unfinished numeric value", ctx, startPtr);
+  let str = ctx.s.slice(startPtr, ctx.p);
+  if (hasUnderscores)
+    str = str.replaceAll("_", "");
+  return state > 1 ? parseFloat(str) : parseInteger(ctx, str, 10, startPtr);
+}
+function parseIntegerBaseN(ctx, startPtr, base, endChr) {
+  let c, underscore = 1;
+  while (++ctx.p < ctx.s.length && (c = ctx.s.charCodeAt(ctx.p), !isEndOfValue(c, endChr))) {
+    if (c === 95) {
+      if (underscore & 1)
+        TomlError.x("illegal underscore", ctx);
+      underscore = 3;
+    } else if (!isDigit(c, base))
+      TomlError.x(`illegal character in numeric literal`, ctx);
+    else if (underscore & 1)
+      underscore--;
+  }
+  if (underscore & 1)
+    TomlError.x("unfinished numeric value", ctx);
+  let str = ctx.s.slice(startPtr + 2, ctx.p);
+  if (underscore)
+    str = str.replaceAll("_", "");
+  return parseInteger(ctx, str, base, startPtr);
+}
+function parseInteger(ctx, str, base, startPtr) {
+  if (ctx.bi !== true)
+    int: {
+      let val = parseInt(str, base);
+      if (!Number.isSafeInteger(val)) {
+        if (ctx.bi)
+          break int;
+        TomlError.x("integer value cannot be represented losslessly", ctx, startPtr);
+      }
+      return val;
+    }
+  return base === 10 ? BigInt(str) : BigInt((base === 2 ? "0b" : base === 8 ? "0o" : "0x") + str);
+}
+function parseDate(ctx, c, endChr) {
+  let startPtr = ctx.p++, unsafeSeparator;
+  if (!isDigit(c) || !isDigit(ctx.s.charCodeAt(ctx.p++)) || !isDigit(ctx.s.charCodeAt(ctx.p++)) || !isDigit(ctx.s.charCodeAt(ctx.p++))) {
+    return parseNumber(ctx, ctx.p = startPtr, c, 0, endChr);
+  }
+  ctx.p += 5;
+  if (!isDigit(ctx.s.charCodeAt(ctx.p++)))
+    TomlError.x("invalid date-time: date part is malformed", ctx, startPtr);
+  if (ctx.p >= ctx.s.length || ((c = ctx.s.charCodeAt(ctx.p)) !== 32 || (unsafeSeparator = true, !isDigit(ctx.s.charCodeAt(ctx.p + 1)))) && c !== 84 && c !== 116) {
+    let t2 = ctx.s.slice(startPtr, ctx.p);
+    return readDate(ctx, t2, 3, false, startPtr);
+  }
+  if (ctx.s.charCodeAt(ctx.p += 3) !== 58)
+    TomlError.x("invalid date-time: time part is malformed", ctx, startPtr);
+  if (ctx.s.charCodeAt(ctx.p += 3) === 58)
+    ctx.p += 3;
+  if (ctx.s.charCodeAt(ctx.p) === 46)
+    while (isDigit(ctx.s.charCodeAt(++ctx.p)))
+      ;
+  if (c = ctx.s.charCodeAt(ctx.p)) {
+    if (c === 90 || c === 122) {
+      let t2 = ctx.s.slice(startPtr, ++ctx.p);
+      return readDate(ctx, t2, 1, unsafeSeparator, startPtr, "[+00:00]");
+    }
+    if (c === 43 || c === 45) {
+      let t2 = ctx.s.slice(startPtr, ctx.p += 6);
+      return readDate(ctx, t2, 1, unsafeSeparator, startPtr, !ctx.ld && "[" + ctx.s.slice(ctx.p - 6, ctx.p) + "]");
+    }
+  }
+  let t = ctx.s.slice(startPtr, ctx.p);
+  return readDate(ctx, t, 2, unsafeSeparator, startPtr);
+}
+function parseTime(ctx, c, endChr) {
+  let start = ctx.p;
+  if (!isDigit(c) || !isDigit(ctx.s.charCodeAt(++ctx.p))) {
+    return parseNumber(ctx, --ctx.p, c, 0, endChr);
+  }
+  if (ctx.s.charCodeAt(ctx.p += 4) === 58)
+    ctx.p += 3;
+  if (ctx.s.charCodeAt(ctx.p) === 46)
+    while (isDigit(ctx.s.charCodeAt(++ctx.p)))
+      ;
+  let t = ctx.s.slice(start, ctx.p);
+  return readDate(ctx, t, 4, false, start);
+}
+function readDate(ctx, str, type, unsafeDelim, errPtr, temporalSuffix) {
+  if (ctx.ld) {
+    let date = new TomlDate(str, type, unsafeDelim);
+    if (!date.isValid())
+      TomlError.x("invalid date", ctx, errPtr);
+    return date;
+  }
+  try {
+    if (temporalSuffix)
+      str += temporalSuffix;
+    switch (type) {
+      case 1:
+        return Temporal.ZonedDateTime.from(str);
+      case 2:
+        return Temporal.PlainDateTime.from(str);
+      case 3:
+        return Temporal.PlainDate.from(str);
+      case 4:
+        return Temporal.PlainTime.from(str);
+    }
+  } catch (e) {
+    TomlError.x(e instanceof Error ? e.message : "" + e, ctx, errPtr);
+  }
+}
+
+// node_modules/smol-toml/dist/util.js
+function skipComment(ctx) {
+  for (; ctx.p < ctx.s.length; ctx.p++) {
+    let c = ctx.s.charCodeAt(ctx.p);
+    if (c === 10)
+      break;
+    if (c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10) {
+      ctx.p++;
+      break;
+    }
+    if (c < 32 && c !== 9 || c === 127) {
+      TomlError.x("control characters are not allowed in comments", ctx);
+    }
+  }
+}
+function skipVoid(ctx, banNewLines, banComments) {
+  let c;
+  while (ctx.p < ctx.s.length) {
+    while (ctx.p < ctx.s.length && ((c = ctx.s.charCodeAt(ctx.p)) === 32 || c === 9 || !banNewLines && (c === 10 || c === 13 && ctx.s.charCodeAt(ctx.p + 1) === 10)))
+      ctx.p++;
+    if (banComments || c !== 35)
+      break;
+    skipComment(ctx);
+  }
+}
+
+// node_modules/smol-toml/dist/struct.js
+function parseKey(ctx, end = 61) {
+  let startPtr;
+  let state = 0;
+  let parsed = [];
+  let sliceStart;
+  let c = ctx.s.charCodeAt(startPtr = ctx.p);
+  do {
+    if (c === end) {
+      if (!state)
+        TomlError.x("unexpected end of key", ctx);
+      if (state === 1)
+        parsed.push(ctx.s.slice(sliceStart, ctx.p));
+      return ctx.p++, parsed;
+    } else if (c === 46) {
+      if (!state)
+        TomlError.x("illegal empty bare key", ctx);
+      if (state === 1)
+        parsed.push(ctx.s.slice(sliceStart, ctx.p));
+      state = 0;
+    } else if (!state && (c === 34 || c === 39)) {
+      if (c === ctx.s.charCodeAt(ctx.p + 1) && c === ctx.s.charCodeAt(ctx.p + 2))
+        TomlError.x("illegal quoted key: multiline strings are not allowed", ctx);
+      parsed.push(parseString(ctx));
+      state = 2;
+      ctx.p--;
+    } else if (c === 32 || c === 9) {
+      if (state === 1) {
+        parsed.push(ctx.s.slice(sliceStart, ctx.p));
+        state = 2;
+      }
+    } else if (state === 2 || c < 48 && c !== 45 || c > 57 && c < 65 || c > 90 && c < 97 && c !== 95 || c > 122) {
+      TomlError.x("illegal character in key", ctx);
+    } else if (!state) {
+      state = 1;
+      sliceStart = ctx.p;
+    }
+  } while (c = ctx.s.charCodeAt(++ctx.p));
+  TomlError.x("incomplete key-value: cannot find end of key", ctx, startPtr);
+}
+function parseInlineTable(ctx) {
+  let startPtr = ctx.p++;
+  let res = /* @__PURE__ */ Object.create(null);
+  let seen = /* @__PURE__ */ new Set();
+  let c;
+  while (ctx.p < ctx.s.length) {
+    skipVoid(ctx);
+    if ((c = ctx.s.charCodeAt(ctx.p)) === 125) {
+      ctx.p++;
+      return res;
+    }
+    let k;
+    let t = res;
+    let hasOwn = false;
+    let errPtr = ctx.p;
+    let key = parseKey(ctx);
+    for (let i = 0; i < key.length; i++) {
+      if (i)
+        t = hasOwn ? t[k] : t[k] = /* @__PURE__ */ Object.create(null);
+      k = key[i];
+      if ((hasOwn = Object.hasOwn(t, k)) && (typeof t[k] !== "object" || seen.has(t[k]))) {
+        TomlError.x("trying to redefine an already defined value", ctx, errPtr);
+      }
+      let unsafe = k === "__proto__";
+      if (ctx.uk && (unsafe || k === "constructor")) {
+        t = ctx.uk !== 1 && TomlError.x("document contains an unsafe property", ctx, errPtr);
+        break;
+      }
+      if (!hasOwn && unsafe) {
+        Object.defineProperty(t, k, { enumerable: true, configurable: true, writable: true });
+      }
+    }
+    if (hasOwn) {
+      TomlError.x("trying to redefine an already defined value", ctx, errPtr);
+    }
+    skipVoid(ctx, true, true);
+    let value = extractValue(
+      ctx,
+      125
+      /* } */
+    );
+    if (t && typeof (t[k] = value) === "object")
+      seen.add(value);
+    skipVoid(ctx);
+    if ((c = ctx.s.charCodeAt(ctx.p++)) === 125) {
+      return res;
+    }
+    if (c !== 44)
+      TomlError.x("expected comma or end of structure", ctx, ctx.p - 1);
+  }
+  TomlError.x("unfinished table", ctx, startPtr);
+}
+function parseArray(ctx) {
+  let startPtr = ctx.p++;
+  let res = [];
+  let c;
+  while (ctx.p < ctx.s.length) {
+    skipVoid(ctx);
+    if ((c = ctx.s.charCodeAt(ctx.p)) === 93) {
+      ctx.p++;
+      return res;
+    }
+    res.push(extractValue(
+      ctx,
+      93
+      /* ] */
+    ));
+    skipVoid(ctx);
+    if ((c = ctx.s.charCodeAt(ctx.p++)) === 93) {
+      return res;
+    }
+    if (c !== 44)
+      TomlError.x("expected comma or end of structure", ctx, ctx.p - 1);
+  }
+  TomlError.x("unfinished array", ctx, startPtr);
+}
+
+// node_modules/smol-toml/dist/parse.js
+function peekTable(ctx, key, table, meta, type) {
+  let t = table;
+  let m = meta;
+  let k;
+  let hasOwn = false;
+  let state;
+  for (let i = 0; i < key.length; i++) {
+    if (i) {
+      t = hasOwn ? t[k] : t[k] = /* @__PURE__ */ Object.create(null);
+      m = (state = m[k]).c;
+      if (type === 0 && (state.t === 1 || state.t === 2)) {
+        return null;
+      }
+      if (state.t === 2) {
+        let l = t.length - 1;
+        t = t[l];
+        m = m[l].c;
+      }
+    }
+    k = key[i];
+    if ((hasOwn = Object.hasOwn(t, k)) && m[k]?.t === 0 && m[k]?.d) {
+      return null;
+    }
+    if (!hasOwn) {
+      let unsafe = k === "__proto__";
+      if (ctx.uk && (unsafe || k === "constructor"))
+        return false;
+      if (unsafe) {
+        Object.defineProperty(t, k, { enumerable: true, configurable: true, writable: true });
+        Object.defineProperty(m, k, { enumerable: true, configurable: true, writable: true });
+      }
+      m[k] = {
+        t: i < key.length - 1 && type === 2 ? 3 : type,
+        d: false,
+        i: 0,
+        c: /* @__PURE__ */ Object.create(null)
+      };
+    }
+  }
+  state = m[k];
+  if (state.t !== type && !(type === 1 && state.t === 3)) {
+    return null;
+  }
+  if (type === 2) {
+    if (!state.d) {
+      state.d = true;
+      t[k] = [];
+    }
+    t[k].push(t = /* @__PURE__ */ Object.create(null));
+    state.c[state.i++] = state = { t: 1, d: false, i: 0, c: /* @__PURE__ */ Object.create(null) };
+  }
+  if (state.d) {
+    return null;
+  }
+  state.d = true;
+  if (type === 1) {
+    t = hasOwn ? t[k] : t[k] = /* @__PURE__ */ Object.create(null);
+  } else if (type === 0 && hasOwn) {
+    return null;
+  }
+  return [k, t, state.c];
+}
+function validateTablePeek(ctx, peek, ptr) {
+  if (peek === null || ctx.uk === 2)
+    TomlError.x(peek === null ? "trying to redefine an already defined table or value" : "document contains an unsafe property", ctx, ptr);
+}
+function parse3(toml, options = {}) {
+  let ctx = {
+    s: toml,
+    p: 0,
+    d: options.maxDepth ?? 1e3,
+    bi: options.integersAsBigInt ?? false,
+    ld: options.useLegacyDate ?? true,
+    uk: options.unsafeKeyBehaviour === "throw" ? 2 : options.unsafeKeyBehaviour === "drop" ? 1 : 0
+  };
+  let res = /* @__PURE__ */ Object.create(null);
+  let meta = /* @__PURE__ */ Object.create(null);
+  let tmp;
+  let skipping = false;
+  let tbl = res;
+  let m = meta;
+  if (toml.charCodeAt(0) === 65279)
+    ctx.p++;
+  skipVoid(ctx);
+  while (ctx.p < toml.length) {
+    if (toml.charCodeAt(ctx.p) === 91) {
+      let isTableArray = toml.charCodeAt(++ctx.p) === 91;
+      tmp = ctx.p += +isTableArray;
+      skipping = false;
+      let k = parseKey(
+        ctx,
+        93
+        /* ] */
+      );
+      if (isTableArray) {
+        if (toml.charCodeAt(ctx.p) !== 93) {
+          TomlError.x("expected end of table array declaration", ctx);
+        }
+        ctx.p++;
+      }
+      let p = peekTable(
+        ctx,
+        k,
+        res,
+        meta,
+        isTableArray ? 2 : 1
+        /* Type.EXPLICIT */
+      );
+      if (!p) {
+        validateTablePeek(ctx, p, tmp);
+        skipping = true;
+      } else {
+        m = p[2];
+        tbl = p[1];
+      }
+    } else {
+      tmp = ctx.p;
+      let k = parseKey(ctx);
+      let p = peekTable(
+        ctx,
+        k,
+        tbl,
+        m,
+        0
+        /* Type.DOTTED */
+      );
+      if (!p && !skipping)
+        validateTablePeek(ctx, p, tmp);
+      skipVoid(ctx, true, true);
+      let v = extractValue(ctx, void 0);
+      if (p && !skipping)
+        p[1][p[0]] = v;
+    }
+    skipVoid(ctx, true);
+    if (ctx.p < toml.length && (tmp = toml.charCodeAt(ctx.p)) !== 10 && (tmp !== 13 || toml.charCodeAt(ctx.p + 1) !== 10)) {
+      TomlError.x("each key-value declaration must be followed by an end-of-line", ctx);
+    }
+    skipVoid(ctx);
+  }
+  return res;
+}
+
+// node_modules/smol-toml/dist/stringify.js
+var BARE_KEY = /^[a-z0-9-_]+$/i;
+var HAS_WELLFORMED = !!"".isWellFormed;
+function extendedTypeOf(obj) {
+  let type = typeof obj;
+  if (type === "object") {
+    if (Array.isArray(obj))
+      return "array";
+    if (typeof obj.getUTCDate === "function" && obj instanceof Date)
+      return "date";
+    if (globalThis.Temporal) {
+      if (obj.until) {
+        if (obj instanceof Temporal.ZonedDateTime)
+          return "temporal/tz+uc";
+        if (obj instanceof Temporal.PlainDateTime || obj instanceof Temporal.PlainDate)
+          return "temporal/uc";
+        if (obj instanceof Temporal.PlainTime || obj instanceof Temporal.Instant)
+          return "temporal";
+        if (obj instanceof Temporal.PlainYearMonth)
+          return "temporal/x";
+      } else if (obj.toPlainDate && obj instanceof Temporal.PlainMonthDay || obj.negated && obj instanceof Temporal.Duration) {
+        return "temporal/x";
+      }
+    }
+  }
+  return type;
+}
+function isArrayOfTables(obj) {
+  for (let i = 0; i < obj.length; i++) {
+    if (extendedTypeOf(obj[i]) !== "object")
+      return false;
+  }
+  return obj.length != 0;
+}
+function formatWellFormedStringUnchecked(s) {
+  return JSON.stringify(s).replaceAll("\x7F", "\\u007f");
+}
+function formatString(s) {
+  return formatWellFormedStringUnchecked(HAS_WELLFORMED ? s.toWellFormed() : s);
+}
+function formatKey(s) {
+  if (BARE_KEY.test(s))
+    return s;
+  if (HAS_WELLFORMED && !s.isWellFormed())
+    throw new RangeError("key contains illegal lone surrogates");
+  return formatWellFormedStringUnchecked(s);
+}
+function stringifyValue(val, type, depth, numberAsFloat, strictTemporal) {
+  if (depth === 0) {
+    throw new Error("Could not stringify the object: maximum object depth exceeded");
+  }
+  switch (type) {
+    // @ts-expect-error -- intentional fallthrough case
+    case "number":
+      if (isNaN(val))
+        return "nan";
+      if (val === Infinity)
+        return "inf";
+      if (val === -Infinity)
+        return "-inf";
+      if (Number.isInteger(val) && (numberAsFloat || !Number.isSafeInteger(val)))
+        return val.toFixed(1);
+    case "bigint":
+    case "boolean":
+    case "temporal":
+      return val.toString();
+    case "string":
+      return formatString(val);
+    case "date":
+      if (isNaN(val.getTime()))
+        throw new TypeError("cannot serialize invalid date");
+      return val.toISOString();
+    case "object":
+      return stringifyInlineTable(val, depth, numberAsFloat, strictTemporal);
+    case "array":
+      return stringifyArray(val, depth, numberAsFloat, strictTemporal);
+    // @ts-expect-error -- intentional fallthrough case
+    case "temporal/tz+uc":
+      if (strictTemporal) {
+        let tz = val.timeZoneId;
+        let tzc = tz.charCodeAt(0);
+        if (
+          // Classic offset
+          tzc !== 43 && tzc !== 45 && // Fast pre-check pass; see below for the actually accepted values
+          (tzc !== 85 && tzc !== 71 && tzc !== 90 && tzc !== 69 || // UTC and its aliases; Temporal implementations don't all canonicalise unfortunately
+          tz !== "UTC" && tz !== "UCT" && tz !== "Universal" && tz !== "Zulu" && // GMT is a TZ but it's for all intents and purposes equivalent to UTC. Safe to downgrade.
+          !tz.startsWith("GMT") && tz !== "Greenwich" && // Etc/* are all safe to downgrade to offset (either UTC, GMT, or offset)
+          !tz.startsWith("Etc/"))
+        ) {
+          throw new TypeError("Temporal objects with an IANA timezone are not allowed in Temporal strict mode");
+        }
+      }
+    case "temporal/uc":
+      if (strictTemporal && val.calendarId !== "iso8601")
+        throw new TypeError("Temporal objects with a non-default calendar are not allowed in Temporal strict mode");
+      return val.toString({
+        calendarName: "never",
+        timeZoneName: "never"
+      });
+    case "temporal/x":
+      throw new TypeError("Unsupported " + val[Symbol.toStringTag]);
+  }
+}
+function stringifyInlineTable(obj, depth, numberAsFloat, strictTemporal) {
+  let keys = Object.keys(obj);
+  if (keys.length === 0)
+    return "{}";
+  let res = "{ ";
+  for (let i = 0; i < keys.length; i++) {
+    let k = keys[i];
+    if (i)
+      res += ", ";
+    res += formatKey(k) + " = " + stringifyValue(obj[k], extendedTypeOf(obj[k]), depth - 1, numberAsFloat, strictTemporal);
+  }
+  return res + " }";
+}
+function stringifyArray(array, depth, numberAsFloat, strictTemporal) {
+  if (array.length === 0)
+    return "[]";
+  let res = "[ ";
+  for (let i = 0; i < array.length; i++) {
+    if (i)
+      res += ", ";
+    if (array[i] === null || array[i] === void 0) {
+      throw new TypeError("arrays cannot contain null or undefined values");
+    }
+    res += stringifyValue(array[i], extendedTypeOf(array[i]), depth - 1, numberAsFloat, strictTemporal);
+  }
+  return res + " ]";
+}
+function stringifyArrayTable(array, key, depth, numberAsFloat, strictTemporal) {
+  if (depth === 0) {
+    throw new Error("Could not stringify the object: maximum object depth exceeded");
+  }
+  let res = "";
+  for (let i = 0; i < array.length; i++) {
+    res += `${res && "\n"}[[${key}]]
+`;
+    res += stringifyTable(0, array[i], key, depth, numberAsFloat, strictTemporal);
+  }
+  return res;
+}
+function stringifyTable(tableKey, obj, prefix, depth, numberAsFloat, strictTemporal) {
+  if (depth === 0) {
+    throw new Error("Could not stringify the object: maximum object depth exceeded");
+  }
+  let preamble = "";
+  let tables = "";
+  let keys = Object.keys(obj);
+  for (let i = 0; i < keys.length; i++) {
+    let k = keys[i];
+    if (obj[k] !== null && obj[k] !== void 0) {
+      let type = extendedTypeOf(obj[k]);
+      if (type === "symbol" || type === "function") {
+        throw new TypeError(`cannot serialize values of type '${type}'`);
+      }
+      let key = formatKey(k);
+      if (type === "array" && isArrayOfTables(obj[k])) {
+        tables += (tables && "\n") + stringifyArrayTable(obj[k], prefix ? `${prefix}.${key}` : key, depth - 1, numberAsFloat, strictTemporal);
+      } else if (type === "object") {
+        let tblKey = prefix ? `${prefix}.${key}` : key;
+        tables += (tables && "\n") + stringifyTable(tblKey, obj[k], tblKey, depth - 1, numberAsFloat, strictTemporal);
+      } else {
+        preamble += key;
+        preamble += " = ";
+        preamble += stringifyValue(obj[k], type, depth, numberAsFloat, strictTemporal);
+        preamble += "\n";
+      }
+    }
+  }
+  if (tableKey && (preamble || !tables))
+    preamble = preamble ? `[${tableKey}]
+${preamble}` : `[${tableKey}]`;
+  return preamble && tables ? `${preamble}
+${tables}` : preamble || tables;
+}
+function stringify(obj, { maxDepth = 1e3, numbersAsFloat = false, strictTemporal = false } = {}) {
+  if (extendedTypeOf(obj) !== "object") {
+    throw new TypeError("stringify can only be called with an object");
+  }
+  let str = stringifyTable(0, obj, "", maxDepth, numbersAsFloat, strictTemporal);
+  if (str[str.length - 1] !== "\n")
+    return str + "\n";
+  return str;
+}
+
+// src/gitleaksConfig/gitleaksConfig.ts
+function mergeGitleaksConfig(globalToml, repoToml) {
+  if (repoToml === void 0) return globalToml;
+  const config = parse3(globalToml);
+  const allowlist = config.allowlist;
+  const repoAllowlist = parse3(repoToml).allowlist;
+  if (!repoAllowlist) {
+    throw new Error(".gitleaks.toml has no [allowlist] table");
+  }
+  for (const [key, values] of Object.entries(repoAllowlist)) {
+    if (key === "description") continue;
+    if (!Array.isArray(values)) {
+      throw new Error(`.gitleaks.toml: allowlist.${key} must be an array`);
+    }
+    for (const value of values) {
+      const merged = allowlist[key] ??= [];
+      if (!merged.some((existing) => (0, import_util3.isDeepStrictEqual)(existing, value))) {
+        merged.push(value);
+      }
+    }
+  }
+  return stringify(config);
+}
+async function gitleaksConfigEnv() {
+  const workspace = process.env.GITHUB_WORKSPACE || process.cwd();
+  const globalToml = import_fs4.default.readFileSync(
+    import_path2.default.join(getScriptsDir(), "secrets-scan", "global_config.toml"),
+    "utf-8"
+  );
+  const repoPath = import_path2.default.join(workspace, ".gitleaks.toml");
+  const repoToml = import_fs4.default.existsSync(repoPath) ? import_fs4.default.readFileSync(repoPath, "utf-8") : void 0;
+  const file = import_path2.default.join(
+    import_fs4.default.mkdtempSync(import_path2.default.join(workspace, "tmp.")),
+    "gitleaks_config.toml"
+  );
+  import_fs4.default.writeFileSync(file, mergeGitleaksConfig(globalToml, repoToml));
+  return { GITLEAKS_CONFIG_FILE: file };
+}
+
 // src/conditions/checkSkipped.ts
 function checkSkipped(check) {
   const skippedChecks = getInput("skipChecks").split(",").map((s) => s.trim());
@@ -36282,7 +37269,8 @@ function checkEnabled(check) {
 var mandatoryChecks = [
   bashCheck({
     name: "secrets-scan",
-    inputs: ["githubToken"]
+    inputs: ["githubToken"],
+    extraEnv: gitleaksConfigEnv
   }),
   piiDetection_default
 ];

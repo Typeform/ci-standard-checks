@@ -1,0 +1,5 @@
+[allowlist]
+  stopwords = [
+    "block.autoAdvance.instruction.notified",
+    "block.autoAdvance.instruction.confirm",
+  ]

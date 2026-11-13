@@ -1,0 +1,43 @@
+[allowlist]
+  regexes = [
+    'key',
+    'kms_key_id',
+    'secret_arn',
+    'zh:',
+    'image_pull_secret',
+    'tools/secrets/github-runner/GITHUB_PAT',
+    '/dr/config/frontend/invalidation_secret',
+    '/dr/config/frontend/optimizely_webhook_secret',
+    'ENC\[AES256',
+    '/tools/secrets/docker-mirror',
+    'token_endpoint',
+    'secrets_path',
+    'seo_useragent_secret',
+    'AIDA',
+    'mask-passwords',
+    'google_client_id',
+    'microsoft_client_id',
+    'jamfpro_client_id',
+    'client_id',
+    'AROA.+:\*',
+    'secretKey\s*=\s*"[a-z0-9-]+-password"',
+    'arn:aws:secretsmanager:[a-z0-9-]+:\d{12}:secret:'
+  ]
+  paths = [
+      '''\.terraform\.lock\.hcl''',
+      '''terraform\.tfstate''',
+      '''update-center\.json''',
+      '''plugins\.tf''',
+      '''pod-templates\.yaml''',
+
+  ]
+  stopwords = [
+    "\"AKIAJNKXD4DZTE3H4A6A\"",
+    "\"AKIA6NBOFJBDY7RXJL5X\"",
+    "AKIAJNKXD4DZTE3H4A6A",
+    "AKIA6NBOFJBDY7RXJL5K",
+    "0oap1m5nay6C71kwE1t7",
+    "AROAJ3CQFDYMIC4GEL3S",
+    "AROAJXOM5SJ33CCHA6JL",
+    "qualitative_insights_v3",
+  ]

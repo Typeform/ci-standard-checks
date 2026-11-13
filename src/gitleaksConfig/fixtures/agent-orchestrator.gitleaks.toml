@@ -1,0 +1,49 @@
+# Merged with Typeform's global gitleaks config by ci-standard-checks' secrets scan.
+[allowlist]
+  description = "Names of Kubernetes Secrets, localStorage keys, React keys and environment variables, not secret values"
+  # deploy/k8s/base/app/sandbox-profiles.yaml names the Secret a profile's step pods get
+  # ("credentialsSecret"). That line is JSON inside a ConfigMap, so it can't carry an inline
+  # #gitleaks:allow comment.
+  # "dragonfly.theme" is the localStorage key in web/src/lib/theme.ts, and "dragonfly.layout." the
+  # prefix of the pane layout keys in web/src/lib/panes.ts. "dragonfly.you" and
+  # "dragonfly.feedback.author" are the keys of web/src/lib/identity.ts, "dragonfly.starred" of
+  # stars.ts and "dragonfly.share.base" of share.ts (rule credentials-javascript).
+  # "${kind}-${l.seq}" is a transcript entry's React key in web/src/lib/transcript.ts.
+  # internal/config/github.go names the variables the GitHub credentials come from (rule
+  # credentials-go), DF_GITHUB_APP_CLIENT_SECRET (the GitHub App's OAuth client) among them, and internal/config/chat.go the variables the chat provider's key comes from
+  # (the same rule). internal/config/auth.go names the variables of the sign-in's secrets the same
+  # way (DF_AUTH_OKTA_CLIENT_SECRET, DF_AUTH_SESSION_KEY, DF_AUTH_SESSION_KEY_PREVIOUS,
+  # DF_AUTH_MCP_TOKENS), and so do the docs and tests that name them. The scan reads every commit of
+  # a PR, so an inline #gitleaks:allow comment added later can't cover the commit that introduced them.
+  # DF_LOOPBACK_SECRET is the variable that turns on the desktop app's loopback secret
+  # (internal/config/auth.go, the same rule): its name, not a value.
+  # "ao.signin.fragment" is the sessionStorage key of web/src/lib/signin.ts (rule credentials-javascript).
+  # "${DRAGONFLY_MCP_TOKEN}" is the placeholder in the `claude mcp add` example of docs/mcp.md, and
+  # realm="agent-orchestrator" the WWW-Authenticate challenge of internal/auth/gate.go (rule authorization-bearer-token):
+  # a header written down, not a token.
+  # workflows/ticket-to-change.yaml has a shell check that says "a key or a token is in: $leaks": a
+  # variable in a sentence, not a value (rule credentials-yaml-quoted; the JSON form of the file was
+  # not matched by the YAML rule).
+  # "dl-9f3c1a7d2b6e4a10" is the example decision key in openspec/changes/decision-log/design.md and
+  # openspec/changes/records-nodes/design.md, and "a1b2c3d4e5f60718" a placeholder key in an example
+  # changeset of openspec/changes/mcp-feedback-digest/design.md (rule generic-api-key): made-up hex in
+  # spec examples, not keys. The scan reads every commit of a PR, so editing the examples later can't
+  # cover the commits that introduced them.
+  # "agent_orchestrator.schedules.builtin" names the Postgres advisory lock the routine-file sync
+  # holds (internal/store/postgres/schedules.go, rule credentials-go: its constant was called a
+  # "lock key"). A lock name, not a secret; the scan reads every commit of a PR.
+  # "dragonfly.loopback" is the localStorage key under which the desktop console keeps its per-launch
+  # session (web/src/lib/loopback.ts, rule credentials-javascript: its constant is called STORAGE_KEY).
+  # A key name, not a secret.
+  # internal/config/vault.go names the variables personal connections' vault key comes from,
+  # DF_CONNECTIONS_VAULT_KEY and DF_CONNECTIONS_VAULT_KEY_PREVIOUS (rule credentials-go), and so do
+  # the docs and tests that name them: names, not values.
+  # "dragonfly.drafts" prefixes the localStorage keys of the canvas editor's drafts and their index,
+  # and "dragonfly.draft." the per-workflow key they replace (web/src/lib/drafts.ts, rule
+  # credentials-javascript: the constants are called INDEX_KEY, recordKey and legacyKey). Key names.
+  stopwords = [ "agent-orchestrator-agent-credentials", "dragonfly.theme", "dragonfly.layout.", "dragonfly.you", "dragonfly.feedback.author", "dragonfly.starred", "dragonfly.share.base", "dragonfly.loopback", "${kind}-${l.seq}", "DF_GITHUB_APP_PRIVATE_KEY", "DF_GITHUB_APP_CLIENT_SECRET", "DF_GITHUB_TOKEN", "DF_AUTH_OKTA_CLIENT_SECRET", "DF_AUTH_SESSION_KEY", "DF_AUTH_SESSION_KEY_PREVIOUS", "DF_AUTH_MCP_TOKENS", "DF_LOOPBACK_SECRET", "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "LITELLM_API_KEY", "AWS_BEARER_TOKEN_BEDROCK", "BEDROCK_API_KEY", "\"$leaks\"", "ao.signin.fragment", "${DRAGONFLY_MCP_TOKEN}", "realm=\"agent-orchestrator\"", "realm=\"dragonfly-connectors\"", "connector_grant_by_token", "dl-9f3c1a7d2b6e4a10", "a1b2c3d4e5f60718", "agent_orchestrator.schedules.builtin", "DF_CONNECTIONS_VAULT_KEY", "DF_CONNECTIONS_VAULT_KEY_PREVIOUS", "dragonfly.drafts", "dragonfly.draft." ]
+  # The signature of workflows/monitor-review/monitor_review/datadog.py's Client defaults the Datadog site
+  # to "datadoghq.com" after the key parameters (rule credentials-python): a host name, not a key. The
+  # global allowlist matches regexes against the whole line, so only that line is let through; a
+  # stopword would let through any secret that contains the host name.
+  regexes = [ '''site: str = "datadoghq\.com"''' ]
